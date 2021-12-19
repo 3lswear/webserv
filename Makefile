@@ -11,7 +11,7 @@ SRC = $(wildcard ./src/*.cpp)
 
 HEADERS = $(wildcard ./includes/*.hpp)
 
-INCLUDES = .
+INCLUDES = ./includes/
 
 OBJ = $(SRC:.cpp=.o)
 
