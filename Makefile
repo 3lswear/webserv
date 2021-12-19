@@ -5,7 +5,7 @@ CXX = clang++
 SANFLAGS = -fsanitize=address
 # SANFLAGS = -fsanitize=leak
 
-CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98 $(SANFLAGS)
+CXXFLAGS = -Wall -Wextra  -Werror -g -std=c++98 $(SANFLAGS)
 
 SRC = $(wildcard ./src/*.cpp)
 
