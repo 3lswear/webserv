@@ -8,8 +8,10 @@ SANFLAGS = -fsanitize=address
 CXXFLAGS = -Wall -Wextra  -Werror -g -std=c++98 $(SANFLAGS)
 
 SRC = $(wildcard ./src/*.cpp)
+SRC += $(wildcard ./src/*/*.cpp)
 
 HEADERS = $(wildcard ./includes/*.hpp)
+HEADERS += $(wildcard src/config/*.hpp)
 
 INCLUDES = ./includes/
 
