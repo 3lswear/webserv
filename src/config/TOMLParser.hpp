@@ -1,5 +1,9 @@
+#ifndef TOMLPARSER_HPP
+#define TOMLPARSER_HPP
+
 #include "TOMLNode.hpp"
 #include "Tokenizer.hpp"
+#include <string>
 
 namespace config
 {
@@ -8,22 +12,184 @@ namespace config
 		private:
 			std::fstream file;
 			toml_node *root; //root of TOML tree
-			toml_node *current; //node currently being parsed
+			/* toml_node *current; //node currently being parsed */
 			Tokenizer tokenizer;
 
 		public:
 			TOMLParser(const std::string filename) : tokenizer(filename) {}
-			void parse(void);
+			toml_node *parse(void);
 
-			toml_node *parseObject(void);
-			toml_node *parseString(void);
-			toml_node *parseNumber(void);
-			toml_node *parseArray(void);
-			toml_node *parseBool(void);
-			toml_node *parseNil(void);
+			toml_node *parseObject(void)
+			{
+				std::cout << "Parsing object" << std::endl;
+				toml_node *node = new toml_node;
+				TOMLMap *mapObject = new TOMLMap;
+				bool completed = false;
+				while (!completed)
+				{
+					if (tokenizer.hasMoreTokens())
+					{
+						s_token nextToken = tokenizer.getToken();
+						std::string key = nextToken.value;
+						std::cout << key << std::endl;
+						tokenizer.getToken();
+						nextToken = tokenizer.getToken();
+						switch (nextToken.type)
+						{
+							case STRING:
+							{
+								tokenizer.rollBackToken();
+								(*mapObject)[key] = parseString();
+								break;
+							}
+							case ARR_OPEN:
+							{
+								(*mapObject)[key] = parseArray();
+								break;
+							}
+							case NUMBER:
+							{
+								(*mapObject)[key] = parseNumber();
+								break;
+							}
+							case BOOL:
+							{
+								(*mapObject)[key] = parseBool();
+								break;
+							}
+							default:
+							{
+								/* throw std::logic_error("jopa in parseObject"); */
+								std::cerr << "Unknown token, marking as complete" << std::endl;
+								completed = true;
+								break;
+							}
+						}
+					}
+					else
+					{
+						throw std::logic_error("parseObject: no more tokens");
+					}
+				}
+				node->setObject(mapObject);
+				return (node);
+			}
+
+			toml_node *parseString(void)
+			{
+				/* toml_node *node; */
+				toml_node *node = new toml_node;
+				std::string *sValue;
+
+				std::cout << "Parsing string" << std::endl;
+				s_token token = tokenizer.getToken();
+				sValue = new std::string(token.value);
+				node->setString(sValue);
+
+				return (node);
+			}
+
+			toml_node *parseNumber(void)
+			{
+				toml_node *node = new toml_node;
+				int value;
+
+				std::cout << "Parsing number" << std::endl;
+				s_token token = tokenizer.getToken();
+				value = std::atoi(token.value.c_str());
+				node->setNumber(value);
+
+				return (node);
+			}
+
+			toml_node *parseArray(void)
+			{
+				std::cout << "Parsing array" << std::endl;
+				toml_node *node = new toml_node;
+				TOMLArray *array = new TOMLArray;
+				bool completed = false;
+
+				while (!completed)
+				{
+					if (tokenizer.hasMoreTokens())
+					{
+						throw std::logic_error("No more tokens");
+					}
+					else
+					{
+						s_token nextToken = tokenizer.getToken();
+						switch (nextToken.type)
+						{
+							case ARR_OPEN:
+							{
+								node = parseArray();
+								break;
+							}
+							case STRING:
+							{
+								tokenizer.rollBackToken();
+								node = parseString();
+								break;
+							}
+							case NUMBER:
+							{
+								tokenizer.rollBackToken();
+								node = parseNumber();
+								break;
+							}
+							case BOOL:
+							{
+								tokenizer.rollBackToken();
+								node = parseBool();
+								break;
+							}
+							case NIL:
+							{
+								node = parseNil();
+								break;
+							}
+							default:
+							{
+								throw std::logic_error("unkown token in parseList");
+							}
+
+						}
+						array->push_back(node);
+						nextToken = tokenizer.getToken();
+						if (nextToken.type == ARR_CLOSE)
+							completed = true;
+					}
+				}
+				node->setArr(array);
+				return (node);
+			}
+
+			toml_node *parseBool(void)
+			{
+				toml_node *node = new toml_node;
+				bool value;
+
+				std::cerr << "Parsing bool" << std::endl;
+				s_token token = tokenizer.getToken();
+				if (token.value == "true")
+					value = true;
+				else
+					value = false;
+				node->setBool(value);
+
+				return (node);
+			}
+
+			toml_node *parseNil(void)
+			{
+				toml_node *node = new toml_node;
+				std::cerr << "Parsing NIL" << std::endl;
+				node->setNil();
+				return (node);
+			}
 	};
 
-	void TOMLParser::parse(void)
+	toml_node *TOMLParser::parse(void)
 	{
 		std::string key;
 		key = "";
@@ -34,7 +200,7 @@ namespace config
 			try
 			{
 				token = tokenizer.getToken();
-				std::cout << token.to_string() << std::endl;
+				/* std::cout << token.to_string() << std::endl; */
 				switch (token.type)
 				{
 					case ARR_OPEN:
@@ -52,6 +218,7 @@ namespace config
 							if (!root)
 								root = parsedNumber;
 						}
+						break;
 					case STRING:
 						{
 							tokenizer.rollBackToken();
@@ -59,6 +226,7 @@ namespace config
 							if (!root)
 								root = parsedString;
 						}
+						break;
 					case BOOL:
 						{
 							tokenizer.rollBackToken();
@@ -66,6 +234,7 @@ namespace config
 							if (!root)
 								root = parsedBool;
 						}
+						break;
 					default:
 						{
 							throw std::logic_error("JOPA :(");
@@ -77,17 +246,7 @@ namespace config
 				break;
 			}
 		}
-	}
-
-	toml_node *TOMLParser::parseString(void)
-	{
-		toml_node *node;
-		std::string *sValue;
-
-		std::cout << "Parsing string" << std::endl;
-		s_token token = tokenizer.getToken();
-		sValue = new std::string(token.value);
-		node->setString(sValue);
-
+		return (root);
 	}
 }
+#endif

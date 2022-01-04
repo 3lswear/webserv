@@ -1,3 +1,6 @@
+#ifndef TOKENIZER_HPP
+#define TOKENIZER_HPP
+
 #include "webserv.hpp"
 #include <map>
 #include <vector>
@@ -5,7 +8,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <exception>
-
 
 namespace config
 {
@@ -29,7 +31,7 @@ namespace config
 	{
 		std::string value;
 		e_token type;
-		std::string to_string(void);
+		/* std::string to_string(void); */
 	};
 
 	class Tokenizer
@@ -38,10 +40,17 @@ namespace config
 			std::fstream file;
 			size_t prev_pos;
 		public:
-			Tokenizer(std::string filename);
+			Tokenizer(std::string filename)
+			{
+				file.open(filename.c_str(), std::ios::in);
+				if (!file.good())
+				{
+					std::cerr << "file didn't open" << std::endl;
+				}
+			}
 			char getWithoutWhiteSpace();
 			struct s_token getToken();
-			void *hasMoreTokens();
+			bool hasMoreTokens();
 			void rollBackToken();
 	};
 
@@ -59,6 +68,11 @@ namespace config
 				return (c);
 		}
 		return (c);
+	}
+
+	bool Tokenizer::hasMoreTokens(void)
+	{
+		return (!file.eof());
 	}
 
 	void Tokenizer::rollBackToken(void)
@@ -143,3 +157,5 @@ namespace config
 		return (token);
 	}
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef TOMLNODE_HPP
+#define TOMLNODE_HPP
+
 #include "webserv.hpp"
 #include <map>
 #include <vector>
@@ -7,13 +10,6 @@
 #include <exception>
 
 
-class toml_node;
-
-/* typedef std::vector<TOMLMap *>	TOMLArray; */
-/* typedef std::vector<TOMLArray *> TOMLArrayOfMap; */
-typedef std::map<std::string, toml_node *> TOMLMap; // = JSONObject
-typedef std::vector<std::string, TOMLMap *> TOMLMapArray;
-typedef std::vector<toml_node *> TOMLArray;
 
 
 class toml_node
@@ -21,7 +17,7 @@ class toml_node
 	enum e_type
 	{
 		STRING, NUM, BOOL, ARRAY, MAP, MAPARRAY, NIL
-	} type;
+	}	type;
 
 	union u_value
 	{
@@ -34,9 +30,13 @@ class toml_node
 		TOMLMap *map;
 		/* std::vector<std::map<std::string, toml_node> > *map_array; */
 		TOMLMapArray *map_array;
-	} value;
+	}	value;
 
 	public:
+		TOMLMap *getMap(void)
+		{
+			return (value.map);
+		}
 		void setString(std::string *str)
 		{
 			value.str = str;
@@ -63,4 +63,11 @@ class toml_node
 		{
 			type = NIL;
 		}
+		void setObject(TOMLMap *obj)
+		{
+			value.map = obj;
+			type = MAP;
+		}
 };
+
+#endif
