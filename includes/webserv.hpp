@@ -26,7 +26,7 @@ class toml_node;
 /* typedef std::vector<TOMLMap *>	TOMLArray; */
 /* typedef std::vector<TOMLArray *> TOMLArrayOfMap; */
 typedef std::map<std::string, toml_node *> TOMLMap; // = JSONObject
-typedef std::vector<std::string, TOMLMap *> TOMLMapArray;
+typedef std::vector<TOMLMap *> TOMLMapArray;
 typedef std::vector<toml_node *> TOMLArray;
 
 void display(TOMLMap *config);
