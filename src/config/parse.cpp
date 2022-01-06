@@ -26,8 +26,16 @@ namespace config
 	void display(TOMLMap *config)
 	{
 		std::cout << "printing config:" << std::endl;
-		std::cout << "name: " << *(*config)["name"]->toString() << std::endl;
-		std::cout << "port: " << *(*config)["port"]->toString() << std::endl;
+
+		TOMLMap::iterator it;
+		for (it = config->begin(); it != config->end(); ++it)
+		{
+			std::cout << it->first
+				<< ": "
+				<< *(it->second->toString())
+				<< std::endl;
+		}
+
 	}
 }
 
