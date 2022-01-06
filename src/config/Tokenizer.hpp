@@ -13,6 +13,8 @@ namespace config
 {
 	enum e_token
 	{
+		KEY,
+		NEWLINE,
 		ASSIGN,
 		STRING,
 		NUMBER,
@@ -34,11 +36,20 @@ namespace config
 		/* std::string to_string(void); */
 	};
 
+	bool istomlkey(char c)
+	{
+		if (isalnum(c) || c == '-' || c == '_')
+			return (true);
+		else
+			return (false);
+	}
+
 	class Tokenizer
 	{
 		private:
 			std::fstream file;
 			size_t prev_pos;
+			e_token last_token;
 		public:
 			Tokenizer(std::string filename)
 			{
@@ -51,16 +62,24 @@ namespace config
 			char getWithoutWhiteSpace();
 			struct s_token getToken();
 			bool hasMoreTokens();
+			bool firstToken()
+			{
+				// doesn't account for indent!
+				if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE))
+					return (true);
+				else
+					return (false);
+			}
 			void rollBackToken();
 	};
 
 	char Tokenizer::getWithoutWhiteSpace(void)
 	{
 		char c = ' ';
-		while ((c == ' ' || c == '\n'))
+		while (c == ' ')
 		{
 			file.get(c);
-			if ((c == ' ' || c == '\n') && !file.good())
+			if ((c == ' ') && !file.good())
 			{
 				throw std::logic_error("No more tokens!");
 			}
@@ -82,6 +101,16 @@ namespace config
 		file.seekg(prev_pos);
 	}
 
+	/* struct s_token Tokenizer::getKey(void) */
+	/* { */
+	/* 	char c; */
+	/* 	struct s_token token; */
+	/* 	if (file.eof()) */
+	/* 	{ */
+	/* 		std::cout << "Tokens exhausted" << std::endl; */
+	/* 	} */
+	/* } */
+
 	struct s_token Tokenizer::getToken(void)
 	{
 		char c;
@@ -94,7 +123,16 @@ namespace config
 		prev_pos = file.tellg();
 		c = getWithoutWhiteSpace();
 
-		if (c == '"')
+		if (firstToken() && config::istomlkey(c))
+		{
+			token.type = KEY;
+			while (config::istomlkey(c))
+			{
+				token.value += c;
+				file.get(c);
+			}
+		}
+		else if (c == '"')
 		{
 			token.type = STRING;
 			token.value = "";
@@ -112,6 +150,8 @@ namespace config
 			token.type = ARR_CLOSE;
 		else if (c == '=')
 			token.type = ASSIGN;
+		else if (c == '\n')
+			token.type = NEWLINE;
 		else if (c == '-' || isdigit(c))
 		{
 			std::streampos prevCharPos;
@@ -154,6 +194,7 @@ namespace config
 		}
 		else if (c == ',')
 			token.type = COMMA;
+		last_token = token.type;
 		return (token);
 	}
 }

@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <exception>
+#include <iostream>
+#include <sstream>
 
 
 
@@ -33,6 +35,12 @@ class toml_node
 	}	value;
 
 	public:
+		
+		enum e_type get_type(void)
+		{
+			return (type);
+		}
+
 		TOMLMap *getMap(void)
 		{
 			return (value.map);
@@ -67,6 +75,26 @@ class toml_node
 		{
 			value.map = obj;
 			type = MAP;
+		}
+		std::string *toString(void) const
+		{
+			switch (type)
+			{
+				case STRING:
+				{
+					return (value.str);
+				}
+				case NUM:
+				{
+					std::stringstream ss;
+					ss << value.integer;
+					std::string *result = new std::string();
+					ss >> *result;
+					return (result);
+				}
+				default:
+					return ( new std::string("Not implemented :)"));
+			}
 		}
 };
 
