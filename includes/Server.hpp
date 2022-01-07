@@ -5,6 +5,8 @@
 
 #define BUFFSIZE 1024
 
+class Header;
+
 class Server
 {
 private:
@@ -18,13 +20,8 @@ private:
 private:
 	void checkError(int fd, std::string str);
 	void sendFile(std::string str);
-	void sendHeader(void);
-	void printRed(std::string str);
-	void printYellow(std::string str);
-	void printBlue(std::string str);
-	void printPink(std::string str);
-	void printGreen(std::string str);
-	void printTurguoise(std::string str);
+	void sendHeader(Header head);
+	void sendRespons(Header head);
 
 public:
 	Server();

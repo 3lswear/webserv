@@ -9,70 +9,37 @@ Server::Server(std::string path)
 {
 	(void)path;
 }
-//---------------------------------------------Color printing----------------------------------------------------------------------------------
-
-void	Server::printRed(std::string str)
-{
-	std::cout << "\033[31m" << str << "\033[0m";
-}
-
-void	Server::printGreen(std::string str)
-{
-	std::cout << "\033[32m" << str << "\033[0m";
-}
-
-void	Server::printYellow(std::string str)
-{
-	std::cout << "\033[33m" << str << "\033[0m";
-}
-
-void	Server::printBlue(std::string str)
-{
-	std::cout << "\033[34m" << str << "\033[0m";
-}
-
-void	Server::printPink(std::string str)
-{
-	std::cout << "\033[35m" << str << "\033[0m";
-}
-
-void	Server::printTurguoise(std::string str)
-{
-	std::cout << "\033[36m" << str << "\033[0m";
-}
 
 //---------------------------------------------Send--------------------------------------------------------------------------------------------
 
-void	Server::sendHeader(void)
+void	Server::sendHeader(Header head)
 {
 	std::string	tmp;
-	const char	*header;
-
-	tmp = "HTTP/1.1 200 OK\r\nDate: Mon, 27 Jul 2009 12:28:53 GMT\r\nServer: Apache/2.2.14 (Win32)\r\nLast-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\nContent-Length: 6196\r\nContent-Type: text/html\r\nConnection: Closed\r\n\r\n";
+	const char *header;
+	tmp = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 	header = tmp.c_str();
-	printTurguoise("Send Header\n");
-	printYellow(tmp);
+	std::cout << TURGUOISE << "Send Header\n" << YELLOW << tmp << ZERO_C;
 	send(_clientSocket, header, tmp.length(), 0);
+	(void)head;
 }
 
-void	Server::sendFile(std::string str)
+void	Server::sendRespons(Header head)
 {
-	char const *path = str.c_str();
-	std::ifstream file(path);
-	char	buff[BUFFSIZE + 1] = {0};
+	std::string str = head.getFileName();
+	const char *path = str.c_str();
+	std::ifstream	file(path);
+	char			buff[BUFFSIZE + 1] = {0};
 
 	if (!file.good())
 	{
-		printRed("Send ERROR: bad file: ");
-		printRed(str);
-		std::cout << std::endl;
+		file.open("www/index2.html");
 	}
-	sendHeader();
+	sendHeader(head);
 	while (!file.eof())
 	{
 		file.read(buff, BUFFSIZE);
 		send(_clientSocket, buff, file.gcount(), 0);
-	}	
+	}
 }
 
 //---------------------------------------------Configuration-----------------------------------------------------------------------------------
@@ -91,17 +58,11 @@ void	Server::checkError(int fd, std::string str)
 {
 	if (fd < 0)
 	{
-		printRed("Server ERROR: ");
-		printRed(str);
-		std::cout << std::endl;
+		std::cout << RED << "Server ERROR: " << str << ZERO_C << std::endl;
 		exit(1);
 	}
 	else
-	{
-		printGreen("Server SUCCESS: ");
-		printGreen(str);
-		std::cout << std::endl;
-	}
+		std::cout << GREEN << "Server SUCCESS: " << str << ZERO_C << std::endl;
 }
 
 void	Server::start(void)
@@ -109,6 +70,7 @@ void	Server::start(void)
 	char	buff[BUFFSIZE + 1] = {0};
 	int		opt	= 1;
 	socklen_t	addrlen;
+	Header		header;
 
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	checkError(_serverSocket, "Initialize Server socket");
@@ -123,9 +85,11 @@ void	Server::start(void)
 	_clientSocket = accept(_serverSocket, (struct sockaddr *)&_addres, (socklen_t *)&addrlen);
 	checkError(_clientSocket, "Initialize Client socket");
 	checkError(recv(_clientSocket, buff, BUFFSIZE, 0), "Receive msg from client");
-	printTurguoise("Receive Header\n");
-	printYellow(buff);
-	sendFile("www/index.html");
+	std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl;
+	header.setRequest(buff);
+	header.parseBuff();
+	header.printHeaderInfo();
+	sendRespons(header);
 	close(_clientSocket);
 	close(_serverSocket);
 }
