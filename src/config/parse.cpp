@@ -25,7 +25,7 @@ namespace config
 {
 	void display(TOMLMap *config)
 	{
-		std::cout << "printing config:" << std::endl;
+		std::cout << ">>> printing config: <<<" << std::endl;
 
 		TOMLMap::iterator it;
 		for (it = config->begin(); it != config->end(); ++it)
