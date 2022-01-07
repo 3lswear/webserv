@@ -21,7 +21,7 @@ namespace config
 
 			toml_node *parseMap(void)
 			{
-				std::cout << "Parsing object" << std::endl;
+				std::cerr << "Parsing object" << std::endl;
 				toml_node *node = new toml_node;
 				TOMLMap *mapObject = new TOMLMap;
 				bool completed = false;
@@ -30,17 +30,14 @@ namespace config
 					if (tokenizer.hasMoreTokens())
 					{
 						s_token nextToken;
-						try
-						{
-							nextToken = tokenizer.getToken();
-						}
+						try { nextToken = tokenizer.getToken(); }
 						catch (std::logic_error e)
 						{
 							std::cerr << e.what() << std::endl;
 							break;
 						}
 						std::string key = nextToken.value;
-						std::cout << key << std::endl;
+						std::cerr << key << std::endl;
 						if (tokenizer.getToken().type != ASSIGN)
 							throw std::logic_error("EXPECTED assign!");
 						nextToken = tokenizer.getToken();
@@ -104,7 +101,7 @@ namespace config
 				toml_node *node = new toml_node;
 				std::string *sValue;
 
-				std::cout << "Parsing string" << std::endl;
+				std::cerr << "Parsing string" << std::endl;
 				s_token token = tokenizer.getToken();
 				sValue = new std::string(token.value);
 				node->setString(sValue);
@@ -117,7 +114,7 @@ namespace config
 				toml_node *node = new toml_node;
 				int value;
 
-				std::cout << "Parsing number" << std::endl;
+				std::cerr << "Parsing number" << std::endl;
 				s_token token = tokenizer.getToken();
 				value = std::atoi(token.value.c_str());
 				node->setNumber(value);
@@ -127,21 +124,21 @@ namespace config
 
 			toml_node *parseArray(void)
 			{
-				std::cout << "Parsing array" << std::endl;
-				toml_node *node = new toml_node;
+				std::cerr << "Parsing array" << std::endl;
+				toml_node *node;
+				toml_node *result = new toml_node;
 				TOMLArray *array = new TOMLArray;
 				bool completed = false;
+				s_token current;
 
 				while (!completed)
 				{
-					if (tokenizer.hasMoreTokens())
-					{
+					if (!tokenizer.hasMoreTokens())
 						throw std::logic_error("No more tokens");
-					}
 					else
 					{
-						s_token nextToken = tokenizer.getToken();
-						switch (nextToken.type)
+						current = tokenizer.getToken();
+						switch (current.type)
 						{
 							case ARR_OPEN:
 							{
@@ -173,18 +170,22 @@ namespace config
 							}
 							default:
 							{
-								throw std::logic_error("unkown token in parseList");
+								throw std::logic_error("unkown token in parseArray");
 							}
 
 						}
 						array->push_back(node);
-						nextToken = tokenizer.getToken();
-						if (nextToken.type == ARR_CLOSE)
+						current = tokenizer.getToken();
+						if (current.type == COMMA)
+							continue;
+						else if (current.type == ARR_CLOSE)
 							completed = true;
+						else
+							throw std::invalid_argument("Unexpected token in array!");
 					}
 				}
-				node->setArr(array);
-				return (node);
+				result->setArr(array);
+				return (result);
 			}
 
 			toml_node *parseBool(void)
