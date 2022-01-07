@@ -92,6 +92,18 @@ class toml_node
 					ss >> *result;
 					return (result);
 				}
+				case ARRAY:
+				{
+					TOMLArray::iterator it;
+					std::string *result = new std::string("[ ");
+					for (it = value.array->begin(); it != value.array->end(); ++it)
+					{
+						*result += *((*it)->toString());
+						*result += ", ";
+					}
+					*result += " ]";
+					return (result);
+				}
 				default:
 					return ( new std::string("Not implemented :)"));
 			}
