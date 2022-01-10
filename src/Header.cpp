@@ -9,16 +9,14 @@ Header::Header(char *str)
 {
 	this->_row = 0;
 	this->_buff = str;
+	parseRequest();
 }
 //-------------------------------------------------GET/SET---------------------------------------
-std::vector<std::string>	Header::getRequest(void)
+std::map<std::string, std::string>	Header::getRequest(void)
 {
 	return (this->_request);
 }
-// std::string	Header::getRespons(void)
-// {
-// 	return (this->_respons);
-// }
+
 int	Header::getType(void)
 {
 	return (this->_type);
@@ -43,7 +41,10 @@ void	Header::setFile(std::string str)
 	pos = str.find(del);
 	str.erase(0, pos + del.length());
 	_fileName = str.substr(0, str.find(del));
-	_fileName.insert(0, HOME);
+	if (_fileName == "/")
+		_fileName = "www/index2.html";
+	else
+		_fileName.insert(0, HOME);
 }
 
 void	Header::identifyType(std::string str)
@@ -56,12 +57,15 @@ void	Header::identifyType(std::string str)
 		_type = DELETE;
 }
 
-void	Header::parseBuff(void)
+void	Header::parseRequest(void)
 {
 	std::string			line;
+	std::string			key;
+	int					distance;
 	std::stringstream	buffStream;
 	
 	buffStream << _buff;
+	distance = 0;
 	while (std::getline(buffStream, line, '\n'))
 	{
 		if (_row == 0)
@@ -69,17 +73,41 @@ void	Header::parseBuff(void)
 			identifyType(line);
 			setFile(line);
 		}
-		_request.push_back(line);
+		else
+		{
+			distance = line.find(":");
+			key = line.substr(0, distance);
+			line = line.erase(0, distance + 1);
+			if (_request.find(key) != _request.end())
+			{
+				std::cout << RED << "ERROR: double header-field" << ZERO_C << std::endl;
+			}
+			else
+				_request[key] = line;
+		}
 		_row++;
 	}
 }
 
 void	Header::printHeaderInfo(void)
 {
+	std::map<std::string, std::string>::iterator it;
+
 	std::cout << YELLOW << "request type = " << _type << ZERO_C << std::endl;
 	std::cout << YELLOW << "request rows = " << _row << ZERO_C << std::endl;
 	std::cout << YELLOW << "request fileName = " << _fileName << ZERO_C << std::endl;
 	std::cout << YELLOW << "request header:\n" << _buff << ZERO_C << std::endl;
+	
+	// std::cout << TURGUOISE << "HEADER MAP" << ZERO_C << std::endl;
+	// for ( it = _request.begin(); it != _request.end(); it++)
+	// {
+	// 	std::cout << PINK << it->first << ZERO_C << std::endl;
+	// }
+	// for ( it = _request.begin(); it != _request.end(); it++)
+	// {
+	// 	std::cout << PINK << it->second << ZERO_C << std::endl;
+	// }
+	
 }
 
 Header::~Header()

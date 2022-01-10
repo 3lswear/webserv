@@ -10,7 +10,7 @@ Server::Server(std::string path)
 	(void)path;
 }
 
-//---------------------------------------------Send--------------------------------------------------------------------------------------------
+//----------------------------------------------Send--------------------------------------------------------------------------------------------
 
 void	Server::sendHeader(Header head)
 {
@@ -40,9 +40,10 @@ void	Server::sendRespons(Header head)
 		file.read(buff, BUFFSIZE);
 		send(_clientSocket, buff, file.gcount(), 0);
 	}
+	(void)path;
 }
 
-//---------------------------------------------Configuration-----------------------------------------------------------------------------------
+//----------------------------------------------Configuration-----------------------------------------------------------------------------------
 void	Server::readConfig(void)
 {
 
@@ -54,6 +55,33 @@ void	Server::setupConfig(void)
 	this->_port = 8080;
 }
 
+
+void	Server::start(void)
+{
+	Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port);
+ 	char		buff[BUFFSIZE + 1] = {0};
+	Header		header;
+
+	checkError(serverSocket.init(3), "Socket init");
+	_clientSocket = accept(serverSocket.getSocketFd(),
+		serverSocket.getSockaddr(), serverSocket.getSocklen());
+	checkError(_clientSocket, "Initialize client socket");
+	checkError(recv(_clientSocket, buff, BUFFSIZE, 0), "Receive msg from client");
+	std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl;
+	header.setRequest(buff);
+	header.parseRequest();
+	header.printHeaderInfo();
+	sendRespons(header);
+	close(_clientSocket);
+	close(serverSocket.getSocketFd());
+
+}
+
+void	Server::end(void)
+{
+
+}
+//----------------------------------------------Other------------------------------------------------------------------------------------------------
 void	Server::checkError(int fd, std::string str)
 {
 	if (fd < 0)
@@ -63,40 +91,6 @@ void	Server::checkError(int fd, std::string str)
 	}
 	else
 		std::cout << GREEN << "Server SUCCESS: " << str << ZERO_C << std::endl;
-}
-
-void	Server::start(void)
-{
-	char	buff[BUFFSIZE + 1] = {0};
-	int		opt	= 1;
-	socklen_t	addrlen;
-	Header		header;
-
-	_serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-	checkError(_serverSocket, "Initialize Server socket");
-	checkError(setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR
-		| SO_REUSEPORT, &opt, sizeof(opt)), "Set socket options");
-	_addres.sin_family = AF_INET;
-	_addres.sin_addr.s_addr = INADDR_ANY;
-	_addres.sin_port = htons(_port);
-	checkError(bind(_serverSocket, (struct sockaddr *)&_addres, sizeof(_addres)), "Bind socket");
-	checkError(listen(_serverSocket, 3), "Listen socket");
-	addrlen = sizeof(_addres);
-	_clientSocket = accept(_serverSocket, (struct sockaddr *)&_addres, (socklen_t *)&addrlen);
-	checkError(_clientSocket, "Initialize Client socket");
-	checkError(recv(_clientSocket, buff, BUFFSIZE, 0), "Receive msg from client");
-	std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl;
-	header.setRequest(buff);
-	header.parseBuff();
-	header.printHeaderInfo();
-	sendRespons(header);
-	close(_clientSocket);
-	close(_serverSocket);
-}
-
-void	Server::end(void)
-{
-
 }
 
 Server::~Server()

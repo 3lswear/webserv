@@ -9,10 +9,8 @@ private:
 	int		_type;
 	int		_row;
 	char	*_buff;
-	// std::string	_respons;
 	std::string _fileName;
-	std::vector<std::string> _request;
-
+	std::map<std::string, std::string> _request;
 
 public:
 	enum REQ
@@ -23,17 +21,14 @@ public:
 	};
 
 public:
-	std::vector<std::string>	getRequest(void);
-	// std::string				getRespons(void);
+	std::map<std::string, std::string>	getRequest(void);
 	int							getType(void);
 	std::string					getFileName(void);
-	void				setFile(std::string);
-	void				setRequest(char *);
-	// void	generateRespons(void);
-
-	void	parseBuff(void);
-	void	identifyType(std::string);
-	void	printHeaderInfo(void);
+	void						setFile(std::string);
+	void						setRequest(char *);
+	void						identifyType(std::string);
+	void						printHeaderInfo(void);
+	void						parseRequest(void);
 	Header();
 	Header(char *);
 	~Header();
