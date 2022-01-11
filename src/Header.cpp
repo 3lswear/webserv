@@ -81,6 +81,7 @@ void	Header::parseRequest(void)
 			if (_request.find(key) != _request.end())
 			{
 				std::cout << RED << "ERROR: double header-field" << ZERO_C << std::endl;
+				std::cout << RED << (_request.find(key))->first << (_request.find(key))->second << std::endl;
 			}
 			else
 				_request[key] = line;
@@ -98,16 +99,25 @@ void	Header::printHeaderInfo(void)
 	std::cout << YELLOW << "request fileName = " << _fileName << ZERO_C << std::endl;
 	std::cout << YELLOW << "request header:\n" << _buff << ZERO_C << std::endl;
 	
-	// std::cout << TURGUOISE << "HEADER MAP" << ZERO_C << std::endl;
-	// for ( it = _request.begin(); it != _request.end(); it++)
-	// {
-	// 	std::cout << PINK << it->first << ZERO_C << std::endl;
-	// }
-	// for ( it = _request.begin(); it != _request.end(); it++)
-	// {
-	// 	std::cout << PINK << it->second << ZERO_C << std::endl;
-	// }
+	std::cout << TURGUOISE << "HEADER MAP" << ZERO_C << std::endl;
+	for ( it = _request.begin(); it != _request.end(); it++)
+	{
+		std::cout << PINK << it->first << ZERO_C << std::endl;
+	}
+	for ( it = _request.begin(); it != _request.end(); it++)
+	{
+		std::cout << PINK << it->second << ZERO_C << std::endl;
+	}
 	
+}
+
+void	Header::clearHeader(void)
+{
+	_type = -1;
+	_row = 0;
+	_buff = NULL;
+	_fileName = "www/index2.html";
+	_request.clear();
 }
 
 Header::~Header()

@@ -29,6 +29,7 @@ public:
 	void						identifyType(std::string);
 	void						printHeaderInfo(void);
 	void						parseRequest(void);
+	void						clearHeader(void);
 	Header();
 	Header(char *);
 	~Header();
