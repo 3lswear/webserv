@@ -62,6 +62,7 @@ namespace config
 							}
 							case BOOL:
 							{
+								tokenizer.rollBackToken();
 								(*mapObject)[key] = parseBool();
 								break;
 							}
@@ -197,8 +198,10 @@ namespace config
 				s_token token = tokenizer.getToken();
 				if (token.value == "true")
 					value = true;
-				else
+				else if (token.value == "false")
 					value = false;
+				else
+					throw std::invalid_argument("Unexpected bool value");
 				node->setBool(value);
 
 				return (node);

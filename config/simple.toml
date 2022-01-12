@@ -1,2 +1,4 @@
 name = "jopa"
 port = 6969
+ip = "127.0.0.1"
+methods = ["GET", "POST", 1, "piska", false, false]

@@ -104,6 +104,15 @@ class toml_node
 					*result += " ]";
 					return (result);
 				}
+				case BOOL:
+				{
+					std::string *result;
+					if (value.boolean)
+						result = new std::string("true");
+					else
+						result = new std::string("false");
+					return (result);
+				}
 				default:
 					return ( new std::string("Not implemented :)"));
 			}

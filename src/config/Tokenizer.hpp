@@ -209,12 +209,25 @@ namespace config
 			token.type = BOOL;
 			token.value = "false";
 			file.seekg(4, std::ios_base::cur);
+
+			/* token.value = ""; */
+			/* while (std::isalpha(c)) */
+			/* { */
+			/* 	token.value += c; */
+			/* 	file.get(c); */
+			/* } */
+			std::cerr << "value is: " << token.value << std::endl;
+			std::cerr << "c is: " << c << std::endl;
 		}
 		else if (c == 't')
 		{
 			token.type = BOOL;
-			token.value = "true";
-			file.seekg(3, std::ios_base::cur);
+			while (std::isalpha(c))
+			{
+				token.value += c;
+				file.get(c);
+			}
+			/* file.seekg(3, std::ios_base::cur); */
 		}
 		else if (c == 'n')
 		{
