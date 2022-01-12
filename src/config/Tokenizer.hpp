@@ -25,8 +25,7 @@ namespace config
 		ARR_CLOSE,
 		MAP_OPEN,
 		MAP_CLOSE,
-		MAPARRAY_OPEN,
-		MAPARRAY_CLOSE
+		MAPARRAY_DECL
 	};
 
 	struct s_token
@@ -144,27 +143,23 @@ namespace config
 				file.get(c);
 			}
 		}
-		else if (c == ']')
-		{
-			std::streampos prev_pos = file.tellg();
-			file.get(c);
-			if (c == ']')
-			{
-				token.type = MAPARRAY_CLOSE;
-			}
-			else
-			{
-				token.type = ARR_CLOSE;
-				file.seekg(prev_pos);
-			}
-		}
 		else if (c == '[')
 		{
 			std::streampos prev_pos = file.tellg();
 			file.get(c);
 			if (c == '[')
 			{
-				token.type = MAPARRAY_OPEN;
+				token.type = MAPARRAY_DECL;
+				file.get(c);
+				while (c != ']')
+				{
+					token.value += c;
+					file.get(c);
+				}
+				if (c == ']')
+					file.get(c);
+				if (c != ']')
+					throw std::logic_error("error in MAPARRAY_DECL");
 			}
 			else
 			{
@@ -173,10 +168,8 @@ namespace config
 			}
 
 		}
-		/* else if (c == '[') */
-		/* 	token.type = ARR_OPEN; */
-		/* else if (c == ']') */
-		/* 	token.type = ARR_CLOSE; */
+		else if (c == ']')
+			token.type = ARR_CLOSE;
 		else if (c == '=')
 			token.type = ASSIGN;
 		else if (c == '\n')

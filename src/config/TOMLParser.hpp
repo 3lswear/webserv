@@ -96,6 +96,30 @@ namespace config
 				return (node);
 			}
 
+			toml_node *parseMapArray(void)
+			{
+				std::cerr << "Parsing MapArray" << std::endl;
+				toml_node *node = new toml_node;
+				TOMLMapArray *servers = new TOMLMapArray;
+
+				while (tokenizer.hasMoreTokens())
+				{
+					s_token current;
+					try { current = tokenizer.getToken(); }
+					catch (std::logic_error e)
+					{
+						std::cerr << e.what() << std::endl;
+						break;
+					}
+					if (current.type == MAPARRAY_DECL)
+						servers->push_back(parseMap()->getMap());
+					else
+						throw std::logic_error("unexpected token in parseMapArray");
+				}
+				node->setMapArray(servers);
+				return (node);
+			}
+
 			toml_node *parseString(void)
 			{
 				/* toml_node *node; */
@@ -272,6 +296,10 @@ namespace config
 							root = parsedBool;
 					}
 					break;
+					case MAPARRAY_DECL:
+					{
+
+					}
 					default:
 					{
 						throw std::logic_error("JOPA :(");

@@ -76,6 +76,11 @@ class toml_node
 			value.map = obj;
 			type = MAP;
 		}
+		void setMapArray(TOMLMapArray *map_array)
+		{
+			value.map_array = map_array;
+			type = MAPARRAY;
+		}
 		std::string *toString(void) const
 		{
 			switch (type)
