@@ -4,7 +4,7 @@
 	port = 8080
 	error_page = "error.html"
 	body_size_limit = 10
-	[[location]]
+	[[server.location]]
 		location = "/"
 		# redirection ???
 		root = "/var/www/html/jopa.html"
@@ -14,7 +14,7 @@
 		upload_accept = true
 		upload_dir = "/var/www/html/upload"
 
-	[[location]]
+	[[server.location]]
 		location = "/secret/"
 		root = "/var/www/html/secret.html"
 		methods = ["GET"]
