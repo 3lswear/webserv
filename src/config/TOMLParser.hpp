@@ -101,10 +101,10 @@ namespace config
 				std::cerr << "Parsing MapArray" << std::endl;
 				toml_node *node = new toml_node;
 				TOMLMapArray *servers = new TOMLMapArray;
+				s_token current;
 
 				while (tokenizer.hasMoreTokens())
 				{
-					s_token current;
 					try { current = tokenizer.getToken(); }
 					catch (std::logic_error e)
 					{
@@ -112,9 +112,21 @@ namespace config
 						break;
 					}
 					if (current.type == MAPARRAY_DECL)
-						servers->push_back(parseMap()->getMap());
+					{
+						if (tokenizer.getToken().type != NEWLINE)
+							throw std::logic_error("no newline after map_array declaration");
+						servers->second->push_back(parseMap()->getMap());
+					}
 					else
 						throw std::logic_error("unexpected token in parseMapArray");
+					if (tokenizer.hasMoreTokens())
+						current = tokenizer.getToken();
+					else
+						break;
+					if (current.type != NEWLINE)
+					{
+						throw std::logic_error("EXPECTED newline");
+					}
 				}
 				node->setMapArray(servers);
 				return (node);
@@ -245,72 +257,73 @@ namespace config
 		std::string key;
 		key = "";
 
-		root = parseMap();
+		/* root = parseMap(); */
+		root = parseMapArray();
 		return (root);
 
-		while (tokenizer.hasMoreTokens())
-		{
-			s_token token;
-			try
-			{
-				token = tokenizer.getToken();
-				/* std::cout << token.to_string() << std::endl; */
-				switch (token.type)
-				{
-					case KEY:
-					{
-						toml_node *parsedObject = parseString();
-						if (!root)
-							root = parsedObject;
-					}
+		/* while (tokenizer.hasMoreTokens()) */
+		/* { */
+		/* 	s_token token; */
+		/* 	try */
+		/* 	{ */
+		/* 		token = tokenizer.getToken(); */
+		/* 		/1* std::cout << token.to_string() << std::endl; *1/ */
+		/* 		switch (token.type) */
+		/* 		{ */
+		/* 			case KEY: */
+		/* 			{ */
+		/* 				toml_node *parsedObject = parseString(); */
+		/* 				if (!root) */
+		/* 					root = parsedObject; */
+		/* 			} */
 
-					case ARR_OPEN:
-					{
-						toml_node *parsedObject = parseMap();
-						/* parsedObject->printNode(0); */
-						if (!root)
-							root = parsedObject;
-					}
-					break;
-					case NUMBER:
-					{
-						tokenizer.rollBackToken();
-						toml_node *parsedNumber = parseNumber();
-						if (!root)
-							root = parsedNumber;
-					}
-					break;
-					case STRING:
-					{
-						tokenizer.rollBackToken();
-						toml_node *parsedString = parseString();
-						if (!root)
-							root = parsedString;
-					}
-					break;
-					case BOOL:
-					{
-						tokenizer.rollBackToken();
-						toml_node *parsedBool = parseBool();
-						if (!root)
-							root = parsedBool;
-					}
-					break;
-					case MAPARRAY_DECL:
-					{
+		/* 			case ARR_OPEN: */
+		/* 			{ */
+		/* 				toml_node *parsedObject = parseMap(); */
+		/* 				/1* parsedObject->printNode(0); *1/ */
+		/* 				if (!root) */
+		/* 					root = parsedObject; */
+		/* 			} */
+		/* 			break; */
+		/* 			case NUMBER: */
+		/* 			{ */
+		/* 				tokenizer.rollBackToken(); */
+		/* 				toml_node *parsedNumber = parseNumber(); */
+		/* 				if (!root) */
+		/* 					root = parsedNumber; */
+		/* 			} */
+		/* 			break; */
+		/* 			case STRING: */
+		/* 			{ */
+		/* 				tokenizer.rollBackToken(); */
+		/* 				toml_node *parsedString = parseString(); */
+		/* 				if (!root) */
+		/* 					root = parsedString; */
+		/* 			} */
+		/* 			break; */
+		/* 			case BOOL: */
+		/* 			{ */
+		/* 				tokenizer.rollBackToken(); */
+		/* 				toml_node *parsedBool = parseBool(); */
+		/* 				if (!root) */
+		/* 					root = parsedBool; */
+		/* 			} */
+		/* 			break; */
+		/* 			case MAPARRAY_DECL: */
+		/* 			{ */
 
-					}
-					default:
-					{
-						throw std::logic_error("JOPA :(");
-					}
-				}
-			}
-			catch (std::logic_error err)
-			{
-				break;
-			}
-		}
+		/* 			} */
+		/* 			default: */
+		/* 			{ */
+		/* 				throw std::logic_error("JOPA :("); */
+		/* 			} */
+		/* 		} */
+		/* 	} */
+		/* 	catch (std::logic_error err) */
+		/* 	{ */
+		/* 		break; */
+		/* 	} */
+		/* } */
 		return (root);
 	}
 }

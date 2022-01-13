@@ -35,6 +35,14 @@ namespace config
 		/* std::string to_string(void); */
 	};
 
+	bool isspace(char c)
+	{
+		if (c == ' ' || c == '\t')
+			return (true);
+		else
+			return (false);
+	}
+
 	bool istomlkey(char c)
 	{
 		if (isalnum(c) || c == '-' || c == '_')
@@ -75,7 +83,7 @@ namespace config
 	char Tokenizer::getWithoutWhiteSpace(void)
 	{
 		char c = ' ';
-		while (c == ' ')
+		while (config::isspace(c))
 		{
 			file.get(c);
 			if ((c == ' ') && !file.good())

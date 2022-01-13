@@ -16,10 +16,6 @@
 
 class toml_node
 {
-	enum e_type
-	{
-		STRING, NUM, BOOL, ARRAY, MAP, MAPARRAY, NIL
-	}	type;
 
 	union u_value
 	{
@@ -35,6 +31,11 @@ class toml_node
 	}	value;
 
 	public:
+
+		enum e_type
+		{
+			STRING, NUM, BOOL, ARRAY, MAP, MAPARRAY, NIL
+		}	type;
 		
 		enum e_type get_type(void)
 		{
@@ -45,6 +46,12 @@ class toml_node
 		{
 			return (value.map);
 		}
+
+		TOMLMapArray *getMapArray(void)
+		{
+			return (value.map_array);
+		}
+
 		void setString(std::string *str)
 		{
 			value.str = str;
