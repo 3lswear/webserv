@@ -6,11 +6,15 @@
 class Header
 {
 private:
-	int		_type;
 	int		_row;
 	char	*_buff;
 	std::string _fileName;
-	std::map<std::string, std::string> _request;
+
+	std::string _method;
+	std::string	_version;
+	std::string	_URI;
+	std::map<std::string, std::string> _headerField;
+	
 
 public:
 	enum REQ
@@ -22,14 +26,13 @@ public:
 
 public:
 	std::map<std::string, std::string>	getRequest(void);
-	int							getType(void);
-	std::string					getFileName(void);
-	void						setFile(std::string);
-	void						setRequest(char *);
-	void						identifyType(std::string);
+	std::string							getMethod(void);
+	std::string					getURI(void);
+	void						setRawData(char *);
+	void						parseStartLine(std::string);
 	void						printHeaderInfo(void);
-	void						parseRequest(void);
-	void						clearHeader(void);
+	int							parseRequest(void);
+	void						clear(void);
 	Header();
 	Header(char *);
 	~Header();

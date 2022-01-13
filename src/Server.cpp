@@ -27,7 +27,7 @@ void	Server::sendHeader(Header head, int fd)
 
 void	Server::sendRespons(Header head, int fd)
 {
-	std::string str = head.getFileName();
+	std::string str = head.getURI();
 	const char *path = str.c_str();
 	std::ifstream	file(path);
 	char			buff[BUFFSIZE + 1] = {0};
@@ -86,7 +86,7 @@ void	Server::start(void)
 	checkError(fd_accept, "Initialize client socket");
 	checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client");
 	std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl;
-	header.setRequest(buff);
+	header.setRawData(buff);
 	header.parseRequest();
 	header.printHeaderInfo();
 	sendRespons(header, fd_accept);
