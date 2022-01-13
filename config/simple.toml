@@ -1,4 +1,10 @@
-name = "jopa"
-port = 6969
-ip = "127.0.0.1"
-methods = ["GET", "POST", 1, "piska", false, false]
+[[server]]
+	name = "jopa"
+	port = 6969
+	ip = "127.0.0.1"
+	methods = ["GET", "POST", "HEAD"]
+[[server]]
+	name = "jopaserv 2"
+	port = 1337
+	ip = "127.0.0.1"
+	methods = ["GET", "POST" ]
