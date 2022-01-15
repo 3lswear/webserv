@@ -26,6 +26,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <string>
 #include <map>
 #include "Socket.hpp"
 #include "Server.hpp"

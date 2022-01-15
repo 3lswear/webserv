@@ -8,7 +8,7 @@ class Header
 private:
 	int		_row;
 	char	*_buff;
-	std::string _fileName;
+
 
 	std::string _method;
 	std::string	_version;
@@ -29,7 +29,8 @@ public:
 	std::string							getMethod(void);
 	std::string					getURI(void);
 	void						setRawData(char *);
-	void						parseStartLine(std::string);
+	int							parseStartLine(std::string);
+	int							parseHeaderfield(std::string);
 	void						printHeaderInfo(void);
 	int							parseRequest(void);
 	void						clear(void);
