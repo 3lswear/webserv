@@ -36,6 +36,15 @@ namespace config
 							std::cerr << e.what() << std::endl;
 							break;
 						}
+						if (nextToken.type == MAPARRAY_DECL)
+						{
+							parseMapArray();
+							continue;
+						}
+						else
+						{
+							/* take key make decision */
+						}
 						std::string key = nextToken.value;
 						std::cerr << key << std::endl;
 						if (tokenizer.getToken().type != ASSIGN)
@@ -257,8 +266,8 @@ namespace config
 		std::string key;
 		key = "";
 
-		/* root = parseMap(); */
-		root = parseMapArray();
+		root = parseMap();
+		/* root = parseMapArray(); */
 		return (root);
 
 		/* while (tokenizer.hasMoreTokens()) */

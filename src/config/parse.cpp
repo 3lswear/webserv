@@ -23,7 +23,8 @@
 /* } */
 namespace config
 {
-	void display(toml_node *config)
+
+	void display(toml_node *root_node)
 	{
 		std::cout << ">>> printing config: <<<" << std::endl;
 		if (config->get_type() != toml_node::MAPARRAY)

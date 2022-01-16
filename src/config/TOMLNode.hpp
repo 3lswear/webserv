@@ -88,6 +88,25 @@ class toml_node
 			value.map_array = map_array;
 			type = MAPARRAY;
 		}
+
+		static std::string *TOMLMap_to_string(TOMLMap *map)
+		{
+			std::stringstream ss;
+			std::string *result = new std::string();
+			TOMLMap::iterator it;
+
+			for (it = map->begin(); it != map->end(); ++it)
+			{
+				ss << it->first
+					<< ": "
+					<< *(it->second->toString())
+					<< std::endl;
+			}
+
+			ss >> *result;
+			return (result);
+		}
+
 		std::string *toString(void) const
 		{
 			switch (type)
@@ -114,6 +133,28 @@ class toml_node
 						*result += ", ";
 					}
 					*result += " ]";
+					return (result);
+				}
+				case MAP:
+				{
+					return (TOMLMap_to_string(value.map));
+				}
+				case MAPARRAY:
+				{
+					std::stringstream ss;
+					std::string *result = new std::string();
+					TOMLMapArray::iterator it;
+					TOMLMapArray *map_array = value.map_array;
+
+					ss << std::endl;
+					for (it = map_array->begin(); it != map_array->end(); ++it)
+					{
+						ss << (TOMLMap_to_string(*it));
+					}
+
+					ss << "-------" << std::endl;
+
+					ss >> *result;
 					return (result);
 				}
 				case BOOL:
