@@ -103,7 +103,8 @@ class toml_node
 					<< std::endl;
 			}
 
-			ss >> *result;
+			/* ss >> *result; */
+			*result = ss.str();
 			return (result);
 		}
 
@@ -149,12 +150,14 @@ class toml_node
 					ss << std::endl;
 					for (it = map_array->begin(); it != map_array->end(); ++it)
 					{
-						ss << (TOMLMap_to_string(*it));
+						ss << (*TOMLMap_to_string(*it));
+						ss << std::endl;
 					}
 
 					ss << "-------" << std::endl;
 
-					ss >> *result;
+					/* ss >> *result; */
+					*result = ss.str();
 					return (result);
 				}
 				case BOOL:
