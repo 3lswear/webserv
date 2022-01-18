@@ -19,12 +19,6 @@ namespace config
 			TOMLParser(const std::string filename) : tokenizer(filename) {}
 			TOMLMap *parse(void);
 
-			/* get a name possibly with dots and add new map to corresponding map_array*/ 
-			/* void add_to_map_array(std::string name, TOMLMap *new) */
-			/* { */
-
-			/* } */
-
 			toml_node *parseMap(void)
 			{
 				std::cerr << "Parsing object" << std::endl;
@@ -99,10 +93,6 @@ namespace config
 						{
 							throw std::logic_error("EXPECTED newline");
 						}
-						/* if (tokenizer.getToken().type == NEWLINE) */
-						/* 	completed = true; */
-						/* else */
-						/* 	throw std::logic_error("EXPECTED newline"); */
 					}
 					else
 					{
@@ -112,10 +102,6 @@ namespace config
 				node->setObject(mapObject);
 				return (node);
 			}
-
-			/* toml_node *parseMapArray(void) */
-			/* { */
-			/* } */
 
 			toml_node *parseString(void)
 			{
@@ -240,11 +226,8 @@ namespace config
 	/* parse tha root ! */
 	TOMLMap *TOMLParser::parse(void)
 	{
-		/* root = parseMap()->getMap(); */
 		std::cerr << "Parsing ROOT" << std::endl;
-		/* TOMLMap *mapObject = new TOMLMap; */
 		root = new TOMLMap;
-		/* toml_node *node = new toml_node; */
 		bool completed = false;
 		while (!completed)
 		{
@@ -280,10 +263,6 @@ namespace config
 					}
 					else
 						throw std::logic_error("unexpected token in parseMapArray");
-					/* if (current.type != NEWLINE) */
-					/* { */
-					/* 	throw std::logic_error("EXPECTED newline"); */
-					/* } */
 
 					TOMLMap::iterator it;
 					std::string name = current.value;
@@ -302,20 +281,9 @@ namespace config
 						(it->second)->getMapArray()->push_back(map_node->getMap());
 					}
 
-					/* if (tokenizer.hasMoreTokens()) */
-					/* 	nextToken = tokenizer.getToken(); */
-					/* else */
-					/* 	break; */
-					/* if (nextToken.type != NEWLINE) */
-					/* { */
-					/* 	throw std::logic_error("EXPECTED newline"); */
-					/* } */
-
-					/* continue; */
 				}
 				else
 				{
-					/* take key make decision */
 					std::string key = current.value;
 					std::cerr << key << std::endl;
 					if (tokenizer.getToken().type != ASSIGN)
@@ -362,86 +330,14 @@ namespace config
 					{
 						throw std::logic_error("EXPECTED newline");
 					}
-					/* if (tokenizer.getToken().type == NEWLINE) */
-					/* 	completed = true; */
-					/* else */
-					/* 	throw std::logic_error("EXPECTED newline"); */
 				}
 			}
 			else
 			{
-				/* throw std::logic_error("parseMap: no more tokens"); */
 				completed = true;
 				break;
 			}
-			/* node->setObject(root); */
 		}
-		/* root = parseMapArray(); */
-		return (root);
-
-		/* while (tokenizer.hasMoreTokens()) */
-		/* { */
-		/* 	s_token token; */
-		/* 	try */
-		/* 	{ */
-		/* 		token = tokenizer.getToken(); */
-		/* 		/1* std::cout << token.to_string() << std::endl; *1/ */
-		/* 		switch (token.type) */
-		/* 		{ */
-		/* 			case KEY: */
-		/* 			{ */
-		/* 				toml_node *parsedObject = parseString(); */
-		/* 				if (!root) */
-		/* 					root = parsedObject; */
-		/* 			} */
-
-		/* 			case ARR_OPEN: */
-		/* 			{ */
-		/* 				toml_node *parsedObject = parseMap(); */
-		/* 				/1* parsedObject->printNode(0); *1/ */
-		/* 				if (!root) */
-		/* 					root = parsedObject; */
-		/* 			} */
-		/* 			break; */
-		/* 			case NUMBER: */
-		/* 			{ */
-		/* 				tokenizer.rollBackToken(); */
-		/* 				toml_node *parsedNumber = parseNumber(); */
-		/* 				if (!root) */
-		/* 					root = parsedNumber; */
-		/* 			} */
-		/* 			break; */
-		/* 			case STRING: */
-		/* 			{ */
-		/* 				tokenizer.rollBackToken(); */
-		/* 				toml_node *parsedString = parseString(); */
-		/* 				if (!root) */
-		/* 					root = parsedString; */
-		/* 			} */
-		/* 			break; */
-		/* 			case BOOL: */
-		/* 			{ */
-		/* 				tokenizer.rollBackToken(); */
-		/* 				toml_node *parsedBool = parseBool(); */
-		/* 				if (!root) */
-		/* 					root = parsedBool; */
-		/* 			} */
-		/* 			break; */
-		/* 			case MAPARRAY_DECL: */
-		/* 			{ */
-
-		/* 			} */
-		/* 			default: */
-		/* 			{ */
-		/* 				throw std::logic_error("JOPA :("); */
-		/* 			} */
-		/* 		} */
-		/* 	} */
-		/* 	catch (std::logic_error err) */
-		/* 	{ */
-		/* 		break; */
-		/* 	} */
-		/* } */
 		return (root);
 	}
 }

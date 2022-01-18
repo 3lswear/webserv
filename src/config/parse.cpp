@@ -34,10 +34,10 @@ namespace config
 		{
 			std::cout << it->first
 				<< ": "
-				<< *(it->second->toString())
-				<< std::endl;
+				<< *(it->second->toString());
+			std::cout << ", " << std::endl;
+				/* << std::endl << "-------" << std::endl; */
 		}
-		std::cout << "-------" << std::endl;
 	}
 }
 
