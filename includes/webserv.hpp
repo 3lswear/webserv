@@ -27,7 +27,10 @@
 #include <vector>
 #include <sstream>
 #include <string>
+#include <string.h>
+#include <sys/stat.h>
 #include <map>
+#include <fstream>
 #include "Socket.hpp"
 #include "Server.hpp"
 #include "Header.hpp"

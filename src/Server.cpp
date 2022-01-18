@@ -14,37 +14,6 @@ Server::Server(std::string path)
 
 //----------------------------------------------Send--------------------------------------------------------------------------------------------
 
-void	Server::sendHeader(Header head, int fd)
-{
-	std::string	tmp;
-	const char *header;
-	tmp = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
-	header = tmp.c_str();
-	std::cout << TURGUOISE << "Send Header\n" << YELLOW << tmp << ZERO_C;
-	send(fd, header, tmp.length(), 0);
-	(void)head;
-}
-
-void	Server::sendRespons(Header head, int fd)
-{
-	std::string str = head.getURI();
-	const char *path = str.c_str();
-	std::ifstream	file(path);
-	char			buff[BUFFSIZE + 1] = {0};
-
-	if (!file.good())
-	{
-		file.open("www/index2.html");
-	}
-	sendHeader(head, fd);
-	while (!file.eof())
-	{
-		file.read(buff, BUFFSIZE);
-		send(fd, buff, file.gcount(), 0);
-	}
-	(void)path;
-}
-
 //----------------------------------------------Configuration-----------------------------------------------------------------------------------
 void	Server::readConfig(void)
 {
@@ -79,6 +48,7 @@ void	Server::start(void)
  	char		buff[BUFFSIZE + 1] = {0};
 	Header		header;
 	int			fd_accept;
+	int			code;
 
 	checkError(serverSocket.init(MAX_CLIENT), "Socket init");
 	fd_accept = accept(serverSocket.getSocketFd(),
@@ -87,9 +57,10 @@ void	Server::start(void)
 	checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client");
 	std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl;
 	header.setRawData(buff);
-	header.parseRequest();
+	code = header.parseRequest();
 	header.printHeaderInfo();
-	sendRespons(header, fd_accept);
+	header.sendRespons(fd_accept);
+	std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl;
 	close(fd_accept);
 	close(serverSocket.getSocketFd());
 //-----------------------------------------------попытка добавить epoll------------------
