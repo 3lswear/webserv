@@ -3,6 +3,7 @@
 	port = 6969
 	ip = "127.0.0.1"
 	methods = ["GET", "POST", "HEAD"]
+	body_size_limit = 10
 [[server]]
 	name = "jopaserv 2"
 	port = 1337
