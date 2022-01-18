@@ -147,14 +147,14 @@ class toml_node
 					TOMLMapArray::iterator it;
 					TOMLMapArray *map_array = value.map_array;
 
-					ss << std::endl;
+					ss << "[\n";
 					for (it = map_array->begin(); it != map_array->end(); ++it)
 					{
 						ss << (*TOMLMap_to_string(*it));
-						ss << std::endl;
+						ss << ", " << std::endl;
 					}
+					ss << "]\n";
 
-					ss << "-------" << std::endl;
 
 					/* ss >> *result; */
 					*result = ss.str();
