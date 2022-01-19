@@ -31,7 +31,11 @@
 #include <sys/stat.h>
 #include <map>
 #include <fstream>
+#include <dirent.h>
+#include <algorithm>
+#include <cctype>
 #include "Socket.hpp"
+#include "Autoindex.hpp"
 #include "Server.hpp"
 #include "Header.hpp"
 

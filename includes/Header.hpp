@@ -15,6 +15,7 @@ private:
 	std::string _method;
 	std::string	_version;
 	std::string	_URI;
+	std::string _host;
 	std::string _query;
 	std::string	_fileToSend;
 	std::map<std::string, std::string> _headerField;
@@ -36,6 +37,10 @@ public:
 	int							isFile(std::string);
 	int							isDir(std::string);
 	void						OpenResponsFile(const char *path);
+
+	std::string					ltrim(std::string);
+	std::string					rtrim(std::string);
+	std::string					trim(std::string);
 
 	int							parseStartLine(std::string);
 	int							parseHeaderfield(std::string);

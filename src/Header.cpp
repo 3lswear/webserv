@@ -1,5 +1,7 @@
 #include "Header.hpp"
 
+#define WHITESPACE " \n\r\t\f\v"
+
 Header::Header()
 {
 	this->_row = 0;
@@ -81,8 +83,8 @@ int	Header::parseStartLine(std::string str)
 		return (405);
 	else if (checkURI() < 0)
 	{
-		if (isDir(_URI) == 0)
-			return (403);
+		if (isDir(HOME + _URI) == 0)
+			return (200);
 		else
 			return (404);
 	}
@@ -99,6 +101,7 @@ int	Header::parseHeaderfield(std::string str)
 	if (distance < 0 && str != "\r")
 		return 400;
 	key = str.substr(0, distance);
+	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 	value = str.erase(0, distance + 1);
 	if (_headerField.find(key) != _headerField.end())
 	{
@@ -106,8 +109,12 @@ int	Header::parseHeaderfield(std::string str)
 	}
 	else
 	{
-		_headerField[key] = value.erase(value.find_last_not_of(" \n\r\t") + 1);
+		value = value.erase(0, value.find_first_not_of(WHITESPACE));
+		value = value.substr(0, value.find_last_not_of(WHITESPACE) + 1);
+		_headerField[key] = value;
 	}
+	if (key == "host")
+		_host = value;
 	return 200;
 }
 
@@ -135,6 +142,7 @@ int	Header::checkURI(void)
 {
 	const char	*path;
 	std::string	tmp;
+	std::string str;
 	int			pos;
 
 	tmp = _URI;
@@ -144,9 +152,9 @@ int	Header::checkURI(void)
 		_URI = tmp.substr(0, pos);
 		_query = tmp.erase(0, pos + 1);
 	}
-	_URI = HOME + _URI;
-	path = _URI.c_str();
-	if (isFile(_URI) < 0)
+	str = HOME + _URI;
+	path = str.c_str();
+	if (isFile(str) < 0)
 		return (-1);
 	return (0);
 }
@@ -222,9 +230,14 @@ int	Header::sendHeader(int fd)
 
 int	Header::sendRespons(int fd)
 {
+	std::string path;
+
+	path = HOME + _URI;
 	sendHeader(fd);
-	if (_ret == 200)
-		OpenResponsFile(_URI.c_str());
+	if (_ret == 200 && isDir(path) == 0)
+		_fileToSend = Autoindex::getPage(_URI, _host);
+	else if (_ret == 200)
+		OpenResponsFile(path.c_str());
 	else
 		_fileToSend = getErrorPage(_ret);
 	send(fd, _fileToSend.c_str(), _fileToSend.length(), 0);
@@ -301,12 +314,29 @@ std::string	Header::getReasonPhrase(int code)
 
 //-------------------------------------------------Other---------------------------------------
 
+std::string ltrim(std::string s)
+{
+    size_t start = s.find_first_not_of(WHITESPACE);
+    return (start == std::string::npos) ? "" : s.substr(start);
+}
+ 
+std::string rtrim(std::string s)
+{
+    size_t end = s.find_last_not_of(WHITESPACE);
+    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+}
+ 
+std::string trim(std::string s) {
+    return rtrim(ltrim(s));
+}
+
 void	Header::printHeaderInfo(void)
 {
 	std::map<std::string, std::string>::iterator it;
 
 	std::cout << PINK << "request method = " << _method << ZERO_C << std::endl;
 	std::cout << PINK << "request URI = " << _URI << ZERO_C << std::endl;
+	std::cout << PINK << "host  = " << _host << ZERO_C << std::endl;
 	std::cout << PINK << "request query = " << _query << ZERO_C << std::endl;
 	std::cout << PINK << "request http versioin = " << _version << ZERO_C << std::endl;
 	std::cout << PINK << "request rows = " << _row << ZERO_C << std::endl;
