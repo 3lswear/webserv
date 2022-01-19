@@ -265,20 +265,55 @@ namespace config
 						throw std::logic_error("unexpected token in parseMapArray");
 
 					TOMLMap::iterator it;
+					std::cout << current.value << std::endl;
 					std::string name = current.value;
+					std::vector<std::string> full_name;
+					size_t dot;
 
-					it = root->find(name);
-					if (it == root->end())
+					while (1)
 					{
-						maparr_node = new toml_node;
-						TOMLMapArray *map_array = new TOMLMapArray;
-						map_array->push_back(map_node->getMap());
-						maparr_node->setMapArray(map_array);
-						(*root)[name] = maparr_node;
+						dot = name.find('.');
+						if (dot == std::string::npos)
+							break;
+						/* std::cout << dot << std::endl; */
+						full_name.push_back(name.substr(0, dot));
+						name.erase(0, dot + 1);
 					}
-					else
+					full_name.push_back(name);
+
+					/* for (size_t i = 0; i < full_name.size(); i++) */
+					/* 	std::cout << full_name[i] << std::endl; */
+					
+					/* throw std::logic_error("tha end"); */
+					TOMLMap *local_root;
+
+					std::vector<std::string>::iterator subname = full_name.begin();
+					local_root = root;
+					while (1)
 					{
-						(it->second)->getMapArray()->push_back(map_node->getMap());
+						if (subname + 1 == full_name.end())
+						{
+							it = local_root->find(*subname);
+							if (it == local_root->end())
+							{
+								maparr_node = new toml_node;
+								TOMLMapArray *map_array = new TOMLMapArray;
+								map_array->push_back(map_node->getMap());
+								maparr_node->setMapArray(map_array);
+								(*local_root)[name] = maparr_node;
+							}
+							else
+								(it->second)->getMapArray()->push_back(map_node->getMap());
+							break;
+						}
+						else
+						{
+							map
+							TOMLMap *new_map = new TOMLMap;
+
+
+						}
+						++subname;
 					}
 
 				}
