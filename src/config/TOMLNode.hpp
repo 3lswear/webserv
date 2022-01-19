@@ -95,6 +95,7 @@ class toml_node
 			std::string *result = new std::string();
 			TOMLMap::iterator it;
 
+			ss << "{\n";
 			for (it = map->begin(); it != map->end(); ++it)
 			{
 				ss << it->first
@@ -102,6 +103,8 @@ class toml_node
 					<< *(it->second->toString())
 					<< std::endl;
 			}
+
+			ss << "}" << std::endl;
 
 			/* ss >> *result; */
 			*result = ss.str();
