@@ -281,8 +281,9 @@ namespace config
 					}
 					full_name.push_back(name);
 
-					/* for (size_t i = 0; i < full_name.size(); i++) */
-					/* 	std::cout << full_name[i] << std::endl; */
+					for (size_t i = 0; i < full_name.size(); i++)
+						std::cout << full_name[i] << ", ";
+					std::cout << std::endl;
 					
 					/* throw std::logic_error("tha end"); */
 					TOMLMap *local_root;
@@ -300,7 +301,7 @@ namespace config
 								TOMLMapArray *map_array = new TOMLMapArray;
 								map_array->push_back(map_node->getMap());
 								maparr_node->setMapArray(map_array);
-								(*local_root)[name] = maparr_node;
+								(*local_root)[*subname] = maparr_node;
 							}
 							else
 								(it->second)->getMapArray()->push_back(map_node->getMap());
@@ -308,9 +309,23 @@ namespace config
 						}
 						else
 						{
-							map
-							TOMLMap *new_map = new TOMLMap;
+							it = local_root->find(*subname);
 
+							toml_node *map_node2;
+							map_node2 = new toml_node;
+							TOMLMap *map = new TOMLMap;
+							map_node2->setObject(map);
+							/* subname not found in local_root */
+							if (it == local_root->end())
+							{
+								(*local_root)[*subname] = map_node2;
+								local_root = map;
+							}
+							/* subname found in local_root */
+							else
+							{
+								local_root = *((it->second)->getMapArray()->end() - 1);
+							}
 
 						}
 						++subname;
