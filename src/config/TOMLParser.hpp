@@ -103,6 +103,98 @@ namespace config
 				return (node);
 			}
 
+			void parseMapArray(void)
+			{
+
+				std::cerr << "Parsing MapArray" << std::endl;
+				toml_node *map_node;
+				toml_node *maparr_node;
+				s_token current;
+
+				try { current = tokenizer.getToken(); }
+				catch (std::logic_error e)
+				{
+					std::cerr << e.what() << std::endl;
+					return;
+				}
+				if (current.type == MAPARRAY_DECL)
+				{
+					if (tokenizer.getToken().type != NEWLINE)
+						throw std::logic_error("no newline after map_array declaration");
+					map_node = parseMap();
+				}
+				else
+					throw std::logic_error("unexpected token in parseMapArray");
+
+				TOMLMap::iterator it;
+				std::cout << current.value << std::endl;
+				std::string name = current.value;
+				std::vector<std::string> full_name;
+				size_t dot;
+
+				while (1)
+				{
+					dot = name.find('.');
+					if (dot == std::string::npos)
+						break;
+					/* std::cout << dot << std::endl; */
+					full_name.push_back(name.substr(0, dot));
+					name.erase(0, dot + 1);
+				}
+				full_name.push_back(name);
+
+				for (size_t i = 0; i < full_name.size(); i++)
+					std::cout << full_name[i] << ", ";
+				std::cout << std::endl;
+
+				/* throw std::logic_error("tha end"); */
+				TOMLMap *local_root;
+
+				std::vector<std::string>::iterator subname = full_name.begin();
+				local_root = root;
+				while (1)
+				{
+					if (subname + 1 == full_name.end())
+					{
+						it = local_root->find(*subname);
+						if (it == local_root->end())
+						{
+							maparr_node = new toml_node;
+							TOMLMapArray *map_array = new TOMLMapArray;
+							map_array->push_back(map_node->getMap());
+							maparr_node->setMapArray(map_array);
+							(*local_root)[*subname] = maparr_node;
+						}
+						else
+							(it->second)->getMapArray()->push_back(map_node->getMap());
+						break;
+					}
+					else
+					{
+						it = local_root->find(*subname);
+
+						toml_node *map_node2;
+						map_node2 = new toml_node;
+						TOMLMap *map = new TOMLMap;
+						map_node2->setObject(map);
+						/* subname not found in local_root */
+						if (it == local_root->end())
+						{
+							(*local_root)[*subname] = map_node2;
+							local_root = map;
+						}
+						/* subname found in local_root */
+						else
+						{
+							local_root = *((it->second)->getMapArray()->end() - 1);
+						}
+
+					}
+					++subname;
+				}
+
+			}
+
 			toml_node *parseString(void)
 			{
 				/* toml_node *node; */
@@ -244,93 +336,7 @@ namespace config
 				{
 					/* parseMapArray(); */
 					tokenizer.rollBackToken();
-					std::cerr << "Parsing MapArray" << std::endl;
-					toml_node *map_node;
-					toml_node *maparr_node;
-					s_token current;
-
-					try { current = tokenizer.getToken(); }
-					catch (std::logic_error e)
-					{
-						std::cerr << e.what() << std::endl;
-						break;
-					}
-					if (current.type == MAPARRAY_DECL)
-					{
-						if (tokenizer.getToken().type != NEWLINE)
-							throw std::logic_error("no newline after map_array declaration");
-						map_node = parseMap();
-					}
-					else
-						throw std::logic_error("unexpected token in parseMapArray");
-
-					TOMLMap::iterator it;
-					std::cout << current.value << std::endl;
-					std::string name = current.value;
-					std::vector<std::string> full_name;
-					size_t dot;
-
-					while (1)
-					{
-						dot = name.find('.');
-						if (dot == std::string::npos)
-							break;
-						/* std::cout << dot << std::endl; */
-						full_name.push_back(name.substr(0, dot));
-						name.erase(0, dot + 1);
-					}
-					full_name.push_back(name);
-
-					for (size_t i = 0; i < full_name.size(); i++)
-						std::cout << full_name[i] << ", ";
-					std::cout << std::endl;
-					
-					/* throw std::logic_error("tha end"); */
-					TOMLMap *local_root;
-
-					std::vector<std::string>::iterator subname = full_name.begin();
-					local_root = root;
-					while (1)
-					{
-						if (subname + 1 == full_name.end())
-						{
-							it = local_root->find(*subname);
-							if (it == local_root->end())
-							{
-								maparr_node = new toml_node;
-								TOMLMapArray *map_array = new TOMLMapArray;
-								map_array->push_back(map_node->getMap());
-								maparr_node->setMapArray(map_array);
-								(*local_root)[*subname] = maparr_node;
-							}
-							else
-								(it->second)->getMapArray()->push_back(map_node->getMap());
-							break;
-						}
-						else
-						{
-							it = local_root->find(*subname);
-
-							toml_node *map_node2;
-							map_node2 = new toml_node;
-							TOMLMap *map = new TOMLMap;
-							map_node2->setObject(map);
-							/* subname not found in local_root */
-							if (it == local_root->end())
-							{
-								(*local_root)[*subname] = map_node2;
-								local_root = map;
-							}
-							/* subname found in local_root */
-							else
-							{
-								local_root = *((it->second)->getMapArray()->end() - 1);
-							}
-
-						}
-						++subname;
-					}
-
+					parseMapArray();
 				}
 				else
 				{
