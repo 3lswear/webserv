@@ -1,39 +1,40 @@
 [[server]]
-	name = "serv1"
+	name = ["jopa.com", "popa.org"]
 	host = "127.0.0.1"
 	port = 8080
-	error_page = "error.html"
+	[server.error_page]
+		404 = "/var/www/html/error_404.html"
+		405 = "/var/www/html/error_405.html"
 	body_size_limit = 10
 	[[server.location]]
+		redirect = [301, "http://localhost/secret"]
 		location = "/"
-		# redirection ???
-		root = "/var/www/html/jopa.html"
+		root = "/var/www/html/"
 		methods = ["GET", "POST"]
-		directory_list = true
-		directory_fallback = "its_a_directory.html"
+		autoindex = true
+		directory_file = "its_a_directory.html"
 		upload_accept = true
 		upload_dir = "/var/www/html/upload"
 
 	[[server.location]]
-		location = "/secret/"
+		location = "/secret"
 		root = "/var/www/html/secret.html"
 		methods = ["GET"]
-		directory_list = false
-		directory_fallback = "oops.html"
+		autoindex = false
+		directory_file = "oops.html"
 
 [[server]]
 	name = "2222"
 	host = "10.0.0.1"
 	port = 8081
-	error_page = "error2.html"
 	body_size_limit = 10
 	[[server.location]]
 		location = "/root2/"
 		# redirection ???
 		root = "/var/www/html/jopa.html"
 		methods = ["GET", "POST"]
-		directory_list = true
-		directory_fallback = "its_a_directory.html"
+		autoindex = true
+		directory_file = "its_a_directory.html"
 		upload_accept = false
 		upload_dir = "/var/www/html/upload"
 
@@ -41,5 +42,5 @@
 		location = "/secret2/"
 		root = "/var/www/html/secret.html"
 		methods = ["GET"]
-		directory_list = false
-		directory_fallback = "oops.html"
+		autoindex = false
+		directory_file = "oops.html"
