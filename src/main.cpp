@@ -7,10 +7,10 @@ int	main(int argc, char **argv)
 
 	Server	server;
 	
-	/* server.readConfig(); */
-	/* server.setupConfig(); */
-	/* server.start(); */
-	parse();
+	 server.readConfig(); 
+	 server.setupConfig();
+	 server.start();
+	// parse();
 	
 
 
