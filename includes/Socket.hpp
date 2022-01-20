@@ -12,7 +12,7 @@ private:
     
 public:
     Socket();
-    Socket(int domain, int type, int protocol, int port);
+    Socket(int domain, int type, int protocol, int port, std::string ip);
     int getSocketFd(void);
     struct sockaddr_in getAddres(void);
     socklen_t getAddlen(void);

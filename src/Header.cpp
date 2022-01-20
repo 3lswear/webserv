@@ -6,7 +6,7 @@ Header::Header()
 {
 	this->_row = 0;
 	this->_fd = -1;
-	this->_autoIndex = 0;
+	this->_autoIndex = 1;
 	initErrorCode();
 
 }

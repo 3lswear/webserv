@@ -4,7 +4,7 @@ Socket::Socket()
 {
 
 }
-Socket::Socket(int domain, int type, int protocol, int port)
+Socket::Socket(int domain, int type, int protocol, int port, std::string ip)
 {
     int opt = 1;
     _socketFd = socket(domain, type, protocol);
@@ -13,7 +13,7 @@ Socket::Socket(int domain, int type, int protocol, int port)
         | SO_REUSEPORT, &opt, sizeof(opt)), "Set socket options");
     _addres.sin_family = domain;
     _addres.sin_port = htons(port);
-    _addres.sin_addr.s_addr = INADDR_ANY;
+    _addres.sin_addr.s_addr = inet_addr(ip.c_str());
     _addrlen = sizeof(_addres);
 }
 

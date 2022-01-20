@@ -44,7 +44,7 @@ void	Server::newConnection(int fd)
 
 void	Server::start(void)
 {
-	Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port);
+	Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
  	char		buff[BUFFSIZE + 1] = {0};
 	Header		header;
 	int			fd_accept;
