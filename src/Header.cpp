@@ -6,6 +6,7 @@ Header::Header()
 {
 	this->_row = 0;
 	this->_fd = -1;
+	this->_autoIndex = 0;
 	initErrorCode();
 
 }
@@ -15,6 +16,7 @@ Header::Header(char *str)
 	this->_row = 0;
 	this->_fd = -1;
 	this->_buff = str;
+	this->_autoIndex = 1;
 
 	initErrorCode();
 	parseRequest();
@@ -35,19 +37,19 @@ std::string Header::getErrorPage(int code)
 	return (Page);
 }
 
-std::map<std::string, std::string>	Header::getRequest(void)
+std::map<std::string, std::string>	Header::getHeaderField(void)
 {
 	return (this->_headerField);
 }
 
-std::string	Header::getMethod(void)
+HeaderHandl Header::getRequest(void)
 {
-	return (this->_method);
+	return (_request);
 }
 
-std::string	Header::getURI(void)
+HeaderHandl	Header::getRespons(void)
 {
-	return _URI;
+	return (_respons);
 }
 
 int	Header::getFd(void)
@@ -67,28 +69,52 @@ void	Header::setFd(int fd)
 
 //-------------------------------------------------Parsing---------------------------------------
 
+void	Header::parseURI(std::string str)
+{
+	std::string	tmp;
+	int			pos;
+	
+	tmp = str;
+	pos = str.find("?");
+	if (pos > 0)
+	{
+		_request._URI = tmp.substr(0, pos);
+		_request._query = tmp.erase(0, pos + 1);
+	}
+	else
+		_request._URI = str;
+	_request._fullURI = HOME + _request._URI;
+}
+
 int	Header::parseStartLine(std::string str)
 {
 	std::string	tmp[3];
 
-	_method = str.substr(0, str.find(" "));
+	tmp[0] = str.substr(0, str.find(" "));
 	str = str.erase(0 , str.find(" ") + 1);
-	_URI = str.substr(0, str.find(" "));
+	tmp[1] = str.substr(0, str.find(" "));
 	str = str.erase(0 , str.find(" ") + 1);
-	_version = str;
-	_version.erase(_version.find_last_not_of(" \n\r\t") + 1);
-	if (_version != "HTTP/1.1")
-		return (505);
-	else if (_method != "GET" && _method != "POST" && _method != "DELETE")
-		return (405);
-	else if (checkURI() < 0)
+	tmp[2] = str;
+	tmp[2].erase(tmp[2].find_last_not_of(" \n\r\t") + 1);
+	_request._method = tmp[0];
+	parseURI(tmp[1]);
+	_request._version = tmp[2];
+
+	if (_request._version != "HTTP/1.1")
+		_ret =  505;
+	else if (_request._method != "GET" && _request._method != "POST"
+			&& _request._method != "DELETE")
+		_ret =  405;
+	else if (isFile(_request._fullURI) != 0)
 	{
-		if (isDir(HOME + _URI) == 0)
-			return (200);
+		if (isDir(_request._fullURI) == 0 && _autoIndex)
+			_ret = 200;
+		else if (_autoIndex)
+			_ret = 404;
 		else
-			return (404);
+			_ret = 403;
 	}
-	return 200;
+	return (_ret);
 }
 
 int	Header::parseHeaderfield(std::string str)
@@ -113,8 +139,6 @@ int	Header::parseHeaderfield(std::string str)
 		value = value.substr(0, value.find_last_not_of(WHITESPACE) + 1);
 		_headerField[key] = value;
 	}
-	if (key == "host")
-		_host = value;
 	return 200;
 }
 
@@ -133,31 +157,12 @@ int	Header::parseRequest(void)
 			_ret = parseHeaderfield(line);
 		_row++;
 	}
+	if (_ret == 200)
+		_request.copyData(_headerField);
 	return (_ret);
 }
 
 //-------------------------------------------------FILE---------------------------------------
-
-int	Header::checkURI(void)
-{
-	const char	*path;
-	std::string	tmp;
-	std::string str;
-	int			pos;
-
-	tmp = _URI;
-	pos = _URI.find("?");
-	if (pos > 0)
-	{
-		_URI = tmp.substr(0, pos);
-		_query = tmp.erase(0, pos + 1);
-	}
-	str = HOME + _URI;
-	path = str.c_str();
-	if (isFile(str) < 0)
-		return (-1);
-	return (0);
-}
 
 int	Header::isFile(std::string path)
 {
@@ -220,7 +225,7 @@ int	Header::sendHeader(int fd)
 	std::string tmp;
 	const char *header;
 
-	ss << _version << " " << _ret << " " << getReasonPhrase(_ret) << "\r\nContent-Type: text/html\r\n\r\n";
+	ss << _request._version << " " << _ret << " " << getReasonPhrase(_ret) << "\r\nContent-Type: text/html\r\n\r\n";
 	tmp = ss.str();
 	header = tmp.c_str();
 	std::cout << TURGUOISE << "Send Header\n" << YELLOW << tmp << ZERO_C;
@@ -232,10 +237,10 @@ int	Header::sendRespons(int fd)
 {
 	std::string path;
 
-	path = HOME + _URI;
+	path = _request._fullURI;
 	sendHeader(fd);
 	if (_ret == 200 && isDir(path) == 0)
-		_fileToSend = Autoindex::getPage(_URI, _host);
+		_fileToSend = Autoindex::getPage(_request._URI, _request._host);
 	else if (_ret == 200)
 		OpenResponsFile(path.c_str());
 	else
@@ -314,31 +319,15 @@ std::string	Header::getReasonPhrase(int code)
 
 //-------------------------------------------------Other---------------------------------------
 
-std::string ltrim(std::string s)
-{
-    size_t start = s.find_first_not_of(WHITESPACE);
-    return (start == std::string::npos) ? "" : s.substr(start);
-}
- 
-std::string rtrim(std::string s)
-{
-    size_t end = s.find_last_not_of(WHITESPACE);
-    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
-}
- 
-std::string trim(std::string s) {
-    return rtrim(ltrim(s));
-}
-
 void	Header::printHeaderInfo(void)
 {
 	std::map<std::string, std::string>::iterator it;
 
-	std::cout << PINK << "request method = " << _method << ZERO_C << std::endl;
-	std::cout << PINK << "request URI = " << _URI << ZERO_C << std::endl;
-	std::cout << PINK << "host  = " << _host << ZERO_C << std::endl;
-	std::cout << PINK << "request query = " << _query << ZERO_C << std::endl;
-	std::cout << PINK << "request http versioin = " << _version << ZERO_C << std::endl;
+	std::cout << PINK << "request method = " << _request._method << ZERO_C << std::endl;
+	std::cout << PINK << "request URI = " << _request._URI << ZERO_C << std::endl;
+	std::cout << PINK << "host  = " << _request._host << ZERO_C << std::endl;
+	std::cout << PINK << "request query = " << _request._query << ZERO_C << std::endl;
+	std::cout << PINK << "request http versioin = " << _request._version << ZERO_C << std::endl;
 	std::cout << PINK << "request rows = " << _row << ZERO_C << std::endl;
 	std::cout << YELLOW << "request header:\n" << _buff << ZERO_C << std::endl;
 	
@@ -353,11 +342,11 @@ void	Header::printHeaderInfo(void)
 void	Header::clear(void)
 {
 	_fd = -1;
-	_method = "";
+	_request._method = "";
 	_row = 0;
 	_buff = NULL;
-	_URI = "";
-	_version = "";
+	_request._URI = "";
+	_request._URI = "";
 	_headerField.clear();
 }
 

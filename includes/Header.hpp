@@ -1,30 +1,30 @@
-#ifndef HEADER
-# define HEADER
+#ifndef HEADER_HPP
+# define HEADER_HPP
 
 #include "webserv.hpp"
 
 class Header
 {
 private:
+	HeaderHandl	_request;
+	HeaderHandl	_respons;
+
+private:
 	int		_row;
 	int		_ret;
+	int		_autoIndex;
 	int		_fd;
 	char	*_buff;
 
 
-	std::string _method;
-	std::string	_version;
-	std::string	_URI;
-	std::string _host;
-	std::string _query;
 	std::string	_fileToSend;
 	std::map<std::string, std::string> _headerField;
 	std::map<std::string, std::string> _errorCode;
 	
 public:
-	std::map<std::string , std::string>	getRequest(void);
-	std::string							getMethod(void);
-	std::string					getURI(void);
+	std::map<std::string , std::string>	getHeaderField(void);
+	HeaderHandl					getRequest(void);
+	HeaderHandl					getRespons(void);
 	std::string					getReasonPhrase(std::string);
 	std::string					getReasonPhrase(int);
 	std::string					getErrorPage(int code);
@@ -33,16 +33,12 @@ public:
 	int							getFd(void);
 
 	void						initErrorCode(void);
-	int							checkURI(void);
 	int							isFile(std::string);
 	int							isDir(std::string);
 	void						OpenResponsFile(const char *path);
 
-	std::string					ltrim(std::string);
-	std::string					rtrim(std::string);
-	std::string					trim(std::string);
-
 	int							parseStartLine(std::string);
+	void						parseURI(std::string);
 	int							parseHeaderfield(std::string);
 	void						printHeaderInfo(void);
 	int							parseRequest(void);

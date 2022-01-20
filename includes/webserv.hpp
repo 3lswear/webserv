@@ -34,7 +34,9 @@
 #include <dirent.h>
 #include <algorithm>
 #include <cctype>
+
 #include "Socket.hpp"
+#include "HeaderHandl.hpp"
 #include "Autoindex.hpp"
 #include "Server.hpp"
 #include "Header.hpp"
