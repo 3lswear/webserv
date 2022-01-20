@@ -1,0 +1,8 @@
+clang++
+-Iincludes
+%cpp
+%hpp --include=./includes/webserv.hpp
+-Wall
+-Wextra
+-Werror
+-std=c++98

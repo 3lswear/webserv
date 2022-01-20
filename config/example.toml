@@ -1,0 +1,45 @@
+[[server]]
+	name = "serv1"
+	host = "127.0.0.1"
+	port = 8080
+	error_page = "error.html"
+	body_size_limit = 10
+	[[server.location]]
+		location = "/"
+		# redirection ???
+		root = "/var/www/html/jopa.html"
+		methods = ["GET", "POST"]
+		directory_list = true
+		directory_fallback = "its_a_directory.html"
+		upload_accept = true
+		upload_dir = "/var/www/html/upload"
+
+	[[server.location]]
+		location = "/secret/"
+		root = "/var/www/html/secret.html"
+		methods = ["GET"]
+		directory_list = false
+		directory_fallback = "oops.html"
+
+[[server]]
+	name = "2222"
+	host = "10.0.0.1"
+	port = 8081
+	error_page = "error2.html"
+	body_size_limit = 10
+	[[server.location]]
+		location = "/root2/"
+		# redirection ???
+		root = "/var/www/html/jopa.html"
+		methods = ["GET", "POST"]
+		directory_list = true
+		directory_fallback = "its_a_directory.html"
+		upload_accept = false
+		upload_dir = "/var/www/html/upload"
+
+	[[server.location]]
+		location = "/secret2/"
+		root = "/var/www/html/secret.html"
+		methods = ["GET"]
+		directory_list = false
+		directory_fallback = "oops.html"

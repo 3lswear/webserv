@@ -8,8 +8,10 @@ SANFLAGS = -fsanitize=address
 CXXFLAGS = -Wall -Wextra  -Werror -g -std=c++98 $(SANFLAGS)
 
 SRC = $(wildcard ./src/*.cpp)
+SRC += $(wildcard ./src/*/*.cpp)
 
 HEADERS = $(wildcard ./includes/*.hpp)
+HEADERS += $(wildcard src/config/*.hpp)
 
 INCLUDES = ./includes/
 
@@ -34,6 +36,6 @@ re:
 	$(MAKE) all
 
 run: $(NAME)
-	./$(NAME)
+	ASAN_OPTIONS=detect_leaks=0 ./$(NAME)
 	
 .PHONY: all clean fclean re
