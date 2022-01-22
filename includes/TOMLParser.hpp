@@ -1,0 +1,43 @@
+#ifndef TOMLPARSER_HPP
+#define TOMLPARSER_HPP
+
+#include "webserv.hpp"
+#include "tomlstuff.hpp"
+#include "Tokenizer.hpp"
+#include "TOMLNode.hpp"
+#include <string>
+
+namespace config
+{
+	class TOMLParser
+	{
+		private:
+			std::fstream file;
+			TOMLMap *root; //root of TOML tree
+			/* toml_node *current; //node currently being parsed */
+			Tokenizer tokenizer;
+
+		public:
+			TOMLParser(const std::string filename);
+			TOMLMap *parse(void);
+
+			toml_node *parseMap(void);
+
+			void parseMapArray(void);
+
+			toml_node *parseString(void);
+
+			toml_node *parseNumber(void);
+
+			toml_node *parseArray(void);
+
+			toml_node *parseBool(void);
+
+			toml_node *parseNil(void);
+
+	};
+
+	/* parse tha root ! */
+	/* TOMLMap *TOMLParser::parse(void); */
+}
+#endif

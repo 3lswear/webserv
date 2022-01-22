@@ -1,40 +1,28 @@
-#ifndef TOKENIZER_HPP
-#define TOKENIZER_HPP
+#include "Tokenizer.hpp"
 
-#include "webserv.hpp"
-#include <map>
-#include <vector>
-#include <fstream>
-#include <cstdlib>
-#include <iostream>
-#include <exception>
+/* -Template::-Template(void) */
+/* { */
+/* 	return; */
+/* } */
 
+/* -Template::-Template(const -Template &src) */
+/* { */
+/* 	*this = src; */
+/* 	return; */
+/* } */
+
+/* -Template::~-Template(void) */
+/* { */
+/* 	return; */
+/* } */
+
+/* -Template &-Template::operator=(const -Template &rhs) */
+/* { */
+/* 	//code */
+/* 	return (*this); */
+/* } */
 namespace config
 {
-	enum e_token
-	{
-		KEY,
-		NEWLINE,
-		ASSIGN,
-		STRING,
-		NUMBER,
-		COMMA,
-		BOOL,
-		NIL,
-		ARR_OPEN,
-		ARR_CLOSE,
-		MAP_OPEN,
-		MAP_CLOSE,
-		MAPARRAY_DECL
-	};
-
-	struct s_token
-	{
-		std::string value;
-		e_token type;
-		/* std::string to_string(void); */
-	};
-
 	bool isspace(char c)
 	{
 		if (c == ' ' || c == '\t')
@@ -50,73 +38,22 @@ namespace config
 		else
 			return (false);
 	}
-
-	class Tokenizer
+	Tokenizer::Tokenizer(std::string filename)
 	{
-		private:
-			std::fstream file;
-			size_t prev_pos;
-			e_token last_token;
-		public:
-			Tokenizer(std::string filename)
-			{
-				file.open(filename.c_str(), std::ios::in);
-				if (!file.good())
-				{
-					std::cerr << "file didn't open" << std::endl;
-				}
-			}
-			char getWithoutWhiteSpace();
-			struct s_token getToken();
-			bool hasMoreTokens();
-			bool firstToken()
-			{
-				// doesn't account for indent!
-				if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE))
-					return (true);
-				else
-					return (false);
-			}
-			void rollBackToken();
-	};
-
-	char Tokenizer::getWithoutWhiteSpace(void)
-	{
-		char c = ' ';
-		while (config::isspace(c))
+		file.open(filename.c_str(), std::ios::in);
+		if (!file.good())
 		{
-			file.get(c);
-			if ((c == ' ') && !file.good())
-			{
-				throw std::logic_error("No more tokens!");
-			}
-			else if (!file.good())
-				return (c);
+			std::cerr << "file didn't open" << std::endl;
 		}
-		return (c);
 	}
-
-	bool Tokenizer::hasMoreTokens(void)
+	bool Tokenizer::firstToken()
 	{
-		return (!file.eof());
+		// doesn't account for indent!
+		if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE))
+			return (true);
+		else
+			return (false);
 	}
-
-	void Tokenizer::rollBackToken(void)
-	{
-		if (file.eof())
-			file.clear();
-		file.seekg(prev_pos);
-	}
-
-	/* struct s_token Tokenizer::getKey(void) */
-	/* { */
-	/* 	char c; */
-	/* 	struct s_token token; */
-	/* 	if (file.eof()) */
-	/* 	{ */
-	/* 		std::cout << "Tokens exhausted" << std::endl; */
-	/* 	} */
-	/* } */
 
 	struct s_token Tokenizer::getToken(void)
 	{
@@ -240,6 +177,31 @@ namespace config
 		last_token = token.type;
 		return (token);
 	}
-}
+	char Tokenizer::getWithoutWhiteSpace(void)
+	{
+		char c = ' ';
+		while (config::isspace(c))
+		{
+			file.get(c);
+			if ((c == ' ') && !file.good())
+			{
+				throw std::logic_error("No more tokens!");
+			}
+			else if (!file.good())
+				return (c);
+		}
+		return (c);
+	}
 
-#endif
+	bool Tokenizer::hasMoreTokens(void)
+	{
+		return (!file.eof());
+	}
+
+	void Tokenizer::rollBackToken(void)
+	{
+		if (file.eof())
+			file.clear();
+		file.seekg(prev_pos);
+	}
+}

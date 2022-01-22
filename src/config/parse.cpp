@@ -6,10 +6,7 @@
 #include <iostream>
 #include <exception>
 
-#include "TOMLNode.hpp"
-#include "TOMLParser.hpp"
-#include "Tokenizer.hpp"
-
+#include "parse.hpp"
 /* struct location */
 /* { */
 /* 	std::string location; */

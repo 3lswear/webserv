@@ -1,4 +1,3 @@
-#include "webserv.hpp"
 #include "TOMLNode.hpp"
 
 /* toml_node::toml_node(void) */
@@ -143,7 +142,7 @@ std::string *toml_node::toString(void) const
 	}
 }
 
-std::string *TOMLMap_to_string(TOMLMap *map)
+std::string *toml_node::TOMLMap_to_string(TOMLMap *map)
 {
 	std::stringstream ss;
 	std::string *result = new std::string();

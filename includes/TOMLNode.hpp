@@ -2,6 +2,8 @@
 #define TOMLNODE_HPP
 
 #include "webserv.hpp"
+#include "tomlstuff.hpp"
+
 #include <map>
 #include <vector>
 #include <fstream>
@@ -48,8 +50,9 @@ class toml_node
 		void setObject(TOMLMap *obj);
 		void setMapArray(TOMLMapArray *map_array);
 
-		std::string *TOMLMap_to_string(TOMLMap *map) const;
 		std::string *toString(void) const;
+		static std::string *TOMLMap_to_string(TOMLMap *map);
 };
+
 
 #endif
