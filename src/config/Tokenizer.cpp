@@ -108,13 +108,13 @@ namespace config
 			}
 			else
 			{
-				token.type = ARR_OPEN;
+				token.type = OPEN_BRACKET;
 				file.seekg(prev_pos);
 			}
 
 		}
 		else if (c == ']')
-			token.type = ARR_CLOSE;
+			token.type = CLOSE_BRACKET;
 		else if (c == '=')
 			token.type = ASSIGN;
 		else if (c == '\n')

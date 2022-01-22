@@ -24,8 +24,8 @@ namespace config
 		COMMA,
 		BOOL,
 		NIL,
-		ARR_OPEN,
-		ARR_CLOSE,
+		OPEN_BRACKET,
+		CLOSE_BRACKET,
 		MAP_OPEN,
 		MAP_CLOSE,
 		MAPARRAY_DECL
