@@ -204,4 +204,9 @@ namespace config
 			file.clear();
 		file.seekg(prev_pos);
 	}
+
+	void Tokenizer::set_last(e_token type)
+	{
+		last_token = type;
+	}
 }

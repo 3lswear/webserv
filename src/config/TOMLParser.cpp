@@ -48,6 +48,7 @@ namespace config
 				if (nextToken.type == MAPARRAY_DECL)
 				{
 					tokenizer.rollBackToken();
+					tokenizer.set_last(NEWLINE);
 					break;
 				}
 				else if (nextToken.type == OPEN_BRACKET)
@@ -289,6 +290,7 @@ namespace config
 				if (current.type == MAPARRAY_DECL)
 				{
 					/* parseMapArray(); */
+					tokenizer.set_last(NEWLINE);
 					tokenizer.rollBackToken();
 					parseMapArray();
 				}

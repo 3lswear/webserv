@@ -56,6 +56,7 @@ namespace config
 			bool hasMoreTokens();
 			bool firstToken();
 			void rollBackToken();
+			void set_last(e_token type);
 
 	};
 
