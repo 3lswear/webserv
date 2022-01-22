@@ -16,6 +16,10 @@ namespace config
 			TOMLMap *root; //root of TOML tree
 			/* toml_node *current; //node currently being parsed */
 			Tokenizer tokenizer;
+			static std::vector<std::string> split_name(std::string name);
+			static void put_to_subtable(TOMLMap *root,
+					std::vector<std::string> full_name,
+					toml_node *map_node);
 
 		public:
 			TOMLParser(const std::string filename);
