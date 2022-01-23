@@ -29,7 +29,7 @@ namespace config
 			toml_node *parseMap(void);
 			void processMap(void);
 
-			void parseMapArray(void);
+			void processMapArray(void);
 
 			toml_node *parseString(void);
 

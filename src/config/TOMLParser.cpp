@@ -150,7 +150,7 @@ namespace config
 		return (node);
 	}
 
-	void TOMLParser::parseMapArray(void)
+	void TOMLParser::processMapArray(void)
 	{
 
 		std::cerr << "Parsing MapArray" << std::endl;
@@ -170,7 +170,7 @@ namespace config
 			map_node = parseMap();
 		}
 		else
-			throw std::logic_error("unexpected token in parseMapArray");
+			throw std::logic_error("unexpected token in processMapArray");
 
 		std::cout << current.value << std::endl;
 
@@ -320,10 +320,10 @@ namespace config
 				}
 				if (current.type == MAPARRAY_DECL)
 				{
-					/* parseMapArray(); */
+					/* processMapArray(); */
 					tokenizer.set_last(NEWLINE);
 					tokenizer.rollBackToken();
-					parseMapArray();
+					processMapArray();
 				}
 				else if (current.type == MAP_DECL)
 				{
