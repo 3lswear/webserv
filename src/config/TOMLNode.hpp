@@ -38,6 +38,10 @@ class toml_node
 		
 		enum e_type get_type(void);
 
+		std::string *getString(void) const;
+		int getNum(void) const;
+		bool getBool(void) const;
+		TOMLArray *getArray(void) const;
 		TOMLMap *getMap(void);
 		TOMLMapArray *getMapArray(void);
 

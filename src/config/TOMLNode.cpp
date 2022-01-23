@@ -27,6 +27,26 @@ toml_node::e_type toml_node::get_type(void)
 	return (type);
 }
 
+std::string *toml_node::getString(void) const
+{
+	return (value.str);
+}
+
+int toml_node::getNum(void) const
+{
+	return (value.integer);
+}
+
+bool toml_node::getBool(void) const
+{
+	return (value.boolean);
+}
+
+TOMLArray *toml_node::getArray(void) const
+{
+	return (value.array);
+}
+
 TOMLMap *toml_node::getMap(void)
 {
 	return (value.map);
@@ -75,6 +95,7 @@ void toml_node::setMapArray(TOMLMapArray *map_array)
 	value.map_array = map_array;
 	type = MAPARRAY;
 }
+
 
 std::string *toml_node::toString(void) const
 {
