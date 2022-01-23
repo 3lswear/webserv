@@ -21,7 +21,7 @@ void	Server::readConfig(void)
 	TOMLMap *root = parse();
 
 
-	TOMLMap *map;
+	// TOMLMap *map;
 	TOMLMap::iterator it1;
 	TOMLMapArray	*arr;
 	TOMLMapArray::iterator	it;
@@ -32,17 +32,8 @@ void	Server::readConfig(void)
 
 	while (it != arr->end())
 	{
-		std::cout << BLUE << *it << std::endl;
-		map = *it;
-
-		it1 = map->begin();
-		while (it1 != map->end())
-		{
-			std::cout << TURGUOISE << it1->first << it1->second << ZERO_C << std::endl;
-			++it1;
-		}
-		
-
+		_configs.push_back(new ServerConfig(*it));
+		std::cout << "biba\n";
 		++it;
 	}
 	

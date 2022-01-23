@@ -2,12 +2,15 @@
 
 ServerConfig::ServerConfig()
 {
+	ret = 0;
 }
 
-// ServerConfig::ServerConfig(TOMLMap *map)
-// {
-// 	_root = map;
-// }
+ServerConfig::ServerConfig(TOMLMap *map)
+{
+	ret = 0;
+	server = map;
+	fillFields();
+}
 
 //--------------------------------------------------GET/SET---------------------------------------
 std::string					ServerConfig::getServerName(void)
@@ -40,10 +43,10 @@ std::map<int, std::string>	ServerConfig::getErrorPages(void)
 	return (_errorPages);
 }
 
-// TOMLMap						ServerConfig::*getRoot(void)
-// {
-//     return (this->_root);
-// }
+TOMLMap						*ServerConfig::getRoot(void)
+{
+    return (server);
+}
 
 void	ServerConfig::setServerName(std::string name)
 {
@@ -75,24 +78,75 @@ void	ServerConfig::setLocations(std::vector<location> locations)
 	_locations = locations;
 }
 
-// void	ServerConfig::setRoot(TOMLMap * data)
-// {
-// 	_root = data;	
-// }
+void	ServerConfig::setRoot(TOMLMap * data)
+{
+	server = data;	
+}
 
+
+//--------------------------------------------------Parse-Config---------------------------------------
+
+int	ServerConfig::putBodySizeLimit(toml_node *node)
+{
+	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	return (0);
+}
+int	ServerConfig::putErrorPage(toml_node *node)
+{
+	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	return (0);
+}
+int	ServerConfig::putHost(toml_node *node)
+{
+	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	return (0);
+}
+int	ServerConfig::putName(toml_node *node)
+{
+	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	return (0);
+}
+int	ServerConfig::putPort(toml_node *node)
+{
+	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	return (0);
+}
+int	ServerConfig::putLocation(toml_node *node)
+{
+	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	return (0);
+}
+
+int		ServerConfig::identify(TOMLMap::iterator it)
+{
+	if (it->first == "body_size_limit")
+		putBodySizeLimit(it->second);
+	else if (it->first == "error_page")
+		putErrorPage(it->second);
+	else if (it->first == "host")
+		putHost(it->second);
+	else if (it->first == "loacation")
+		putLocation(it->second);
+	else if (it->first == "name")
+		putName(it->second);
+	else if (it->first == "port")
+		putPort(it->second);
+	else
+		return (1);
+	return (0);
+}
 
 void	ServerConfig::fillFields(void)
 {
-	// TOMLMap	*tmp = _root;
-	// TOMLMap::iterator	it;
 
-	// it = tmp->begin();
+	TOMLMap::iterator	block;
 
-	// while (it != tmp->end())
-	// {
-	// 	std::cout << it->first << std::endl;
-	// }
-	
+	block = server->begin();
+	while (block != server->end() && ret == 0)
+	{
+		ret = identify(block);
+		++block;
+	}
 }
 
 ServerConfig::~ServerConfig()
