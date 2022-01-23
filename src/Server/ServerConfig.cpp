@@ -88,32 +88,34 @@ void	ServerConfig::setRoot(TOMLMap * data)
 
 int	ServerConfig::putBodySizeLimit(toml_node *node)
 {
-	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	if (node->get_type() != toml_node::e_type::NUM)
+		return (1);
+	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
 	return (0);
 }
 int	ServerConfig::putErrorPage(toml_node *node)
 {
-	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
 	return (0);
 }
 int	ServerConfig::putHost(toml_node *node)
 {
-	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
 	return (0);
 }
 int	ServerConfig::putName(toml_node *node)
 {
-	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
 	return (0);
 }
 int	ServerConfig::putPort(toml_node *node)
 {
-	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
 	return (0);
 }
 int	ServerConfig::putLocation(toml_node *node)
 {
-	std::cout << TURGUOISE << node << ZERO_C << std::endl;
+	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
 	return (0);
 }
 
@@ -125,7 +127,7 @@ int		ServerConfig::identify(TOMLMap::iterator it)
 		putErrorPage(it->second);
 	else if (it->first == "host")
 		putHost(it->second);
-	else if (it->first == "loacation")
+	else if (it->first == "location")
 		putLocation(it->second);
 	else if (it->first == "name")
 		putName(it->second);
@@ -144,6 +146,7 @@ void	ServerConfig::fillFields(void)
 	block = server->begin();
 	while (block != server->end() && ret == 0)
 	{
+		std::cout << GREEN << block->first << ZERO_C << std::endl;
 		ret = identify(block);
 		++block;
 	}

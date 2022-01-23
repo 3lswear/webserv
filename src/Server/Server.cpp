@@ -33,7 +33,6 @@ void	Server::readConfig(void)
 	while (it != arr->end())
 	{
 		_configs.push_back(new ServerConfig(*it));
-		std::cout << "biba\n";
 		++it;
 	}
 	
