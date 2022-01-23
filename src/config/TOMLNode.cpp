@@ -36,6 +36,7 @@ int toml_node::getNum(void) const
 {
 	return (value.integer);
 }
+
 bool toml_node::getBool(void) const
 {
 	return (value.boolean);
