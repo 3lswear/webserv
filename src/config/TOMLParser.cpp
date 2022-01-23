@@ -28,6 +28,37 @@ namespace config
 	TOMLParser::TOMLParser(const std::string filename) : tokenizer(filename)
 	{};
 
+	void TOMLParser::processMap(void)
+	{
+		std::cerr << "Processing map" << std::endl;
+		toml_node *map_node;
+		s_token current;
+
+		try { current = tokenizer.getToken(); }
+		catch (std::logic_error e)
+		{
+			std::cerr << e.what() << std::endl;
+			return;
+		}
+		if (current.type == MAP_DECL)
+		{
+			if (tokenizer.getToken().type != NEWLINE)
+				throw std::logic_error("no newline after MAP_DECL");
+			map_node = parseMap();
+		}
+		else
+			throw std::logic_error("unexpected token in processMap");
+
+		std::cout << current.value << std::endl;
+
+		std::vector<std::string> full_name;
+
+		full_name = split_name(current.value);
+		
+		put_to_subtable(root, full_name, map_node, toml_node::MAP);
+
+	}
+
 	toml_node *TOMLParser::parseMap(void)
 	{
 		std::cerr << "Parsing map" << std::endl;
@@ -51,9 +82,11 @@ namespace config
 					tokenizer.set_last(NEWLINE);
 					break;
 				}
-				else if (nextToken.type == OPEN_BRACKET)
+				else if (nextToken.type == MAP_DECL)
 				{
-
+					tokenizer.rollBackToken();
+					tokenizer.set_last(NEWLINE);
+					break;
 				}
 				std::string key = nextToken.value;
 				std::cerr << key << std::endl;
@@ -139,15 +172,13 @@ namespace config
 		else
 			throw std::logic_error("unexpected token in parseMapArray");
 
-		TOMLMap::iterator it;
 		std::cout << current.value << std::endl;
-		std::string name = current.value;
+
 		std::vector<std::string> full_name;
 
-		full_name = split_name(name);
+		full_name = split_name(current.value);
 
-		/* throw std::logic_error("tha end"); */
-		put_to_subtable(root, full_name, map_node);
+		put_to_subtable(root, full_name, map_node, toml_node::MAPARRAY);
 
 	}
 
@@ -294,6 +325,17 @@ namespace config
 					tokenizer.rollBackToken();
 					parseMapArray();
 				}
+				else if (current.type == MAP_DECL)
+				{
+					std::cerr << "MAP_DECL value: " << current.value << std::endl;
+					tokenizer.set_last(NEWLINE);
+					tokenizer.rollBackToken();
+					/* if (tokenizer.getToken().type != NEWLINE) */
+					/* 	throw std::logic_error("no newline after MAP_DECL"); */
+					/* (*mapObject)[nextToken.value] = parseMap(); */
+					processMap();
+					continue;
+				}
 				else
 				{
 					std::string key = current.value;
@@ -378,7 +420,7 @@ namespace config
 
 	void TOMLParser::put_to_subtable(TOMLMap *root,
 			std::vector<std::string> full_name,
-			toml_node *map_node)
+			toml_node *map_node, toml_node::e_type type)
 	{
 		std::vector<std::string>::iterator subname = full_name.begin();
 		toml_node *maparr_node;
@@ -391,16 +433,28 @@ namespace config
 			if (subname + 1 == full_name.end())
 			{
 				it = local_root->find(*subname);
-				if (it == local_root->end())
+				if (type == toml_node::MAPARRAY)
 				{
-					maparr_node = new toml_node;
-					TOMLMapArray *map_array = new TOMLMapArray;
-					map_array->push_back(map_node->getMap());
-					maparr_node->setMapArray(map_array);
-					(*local_root)[*subname] = maparr_node;
+					if (it == local_root->end())
+					{
+						maparr_node = new toml_node;
+						TOMLMapArray *map_array = new TOMLMapArray;
+						map_array->push_back(map_node->getMap());
+						maparr_node->setMapArray(map_array);
+						(*local_root)[*subname] = maparr_node;
+					}
+					else
+						(it->second)->getMapArray()->push_back(map_node->getMap());
 				}
-				else
-					(it->second)->getMapArray()->push_back(map_node->getMap());
+				else if (type == toml_node::MAP)
+				{
+					if (it == local_root->end())
+					{
+						(*local_root)[*subname] = map_node;
+					}
+					else
+						throw std::logic_error("map already in subtable!");
+				}
 				break;
 			}
 			else
@@ -419,9 +473,7 @@ namespace config
 				}
 				/* subname found in local_root */
 				else
-				{
 					local_root = *((it->second)->getMapArray()->end() - 1);
-				}
 
 			}
 			++subname;

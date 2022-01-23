@@ -26,8 +26,7 @@ namespace config
 		NIL,
 		OPEN_BRACKET,
 		CLOSE_BRACKET,
-		MAP_OPEN,
-		MAP_CLOSE,
+		MAP_DECL,
 		MAPARRAY_DECL
 	};
 

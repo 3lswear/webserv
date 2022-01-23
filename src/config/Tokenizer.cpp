@@ -88,9 +88,9 @@ namespace config
 				file.get(c);
 			}
 		}
-		else if (c == '[')
+		else if (c == '[' && firstToken())
 		{
-			std::streampos prev_pos = file.tellg();
+			/* std::streampos prev_pos = file.tellg(); */
 			file.get(c);
 			if (c == '[')
 			{
@@ -108,10 +108,21 @@ namespace config
 			}
 			else
 			{
-				token.type = OPEN_BRACKET;
-				file.seekg(prev_pos);
+				token.type = MAP_DECL;
+				token.value += c;
+				file.get(c);
+				while (c != ']')
+				{
+					token.value += c;
+					file.get(c);
+				}
+				if (c != ']')
+					throw std::logic_error("malformed MAP_DECL");
 			}
-
+		}
+		else if (c == '[')
+		{
+			token.type = OPEN_BRACKET;
 		}
 		else if (c == ']')
 			token.type = CLOSE_BRACKET;
