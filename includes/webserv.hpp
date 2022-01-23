@@ -37,6 +37,7 @@
 
 #include "Socket.hpp"
 #include "HeaderHandl.hpp"
+#include "ServerConfig.hpp"
 #include "Autoindex.hpp"
 #include "Server.hpp"
 #include "Header.hpp"

@@ -1,5 +1,5 @@
-#ifndef SOCKET
-#define SOCKET
+#ifndef SOCKET_HPP
+#define SOCKET_HPP
 
 #include "webserv.hpp"
 class Socket
