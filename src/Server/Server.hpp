@@ -2,9 +2,10 @@
 #define SERVER_HPP
 
 #include "webserv.hpp"
-
-#define BUFFSIZE	1024
-#define MAX_CLIENT	1000
+#include "Header.hpp"
+#include "ServerConfig.hpp"
+#include "Socket.hpp"
+#include "parse.hpp"
 
 class Header;
 
@@ -17,6 +18,7 @@ private:
 	struct epoll_event	_events[MAX_CLIENT];
 	struct sockaddr_in _addres;
 	std::string _ip;
+	std::vector<ServerConfig>	_configs;
 
 private:
 	void checkError(int fd, std::string str);

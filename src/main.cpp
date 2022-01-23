@@ -1,4 +1,6 @@
 #include "webserv.hpp"
+#include "parse.hpp"
+#include "Server.hpp"
 
 int	main(int argc, char **argv)
 {
@@ -8,10 +10,8 @@ int	main(int argc, char **argv)
 	Server	server;
 	
 	 server.readConfig(); 
-	 server.setupConfig();
-	 server.start();
-	// parse();
-	
+	//  server.setupConfig();
+	//  server.start();
 
 
 	return (0);

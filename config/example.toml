@@ -2,12 +2,16 @@
 	name = ["jopa.com", "popa.org"]
 	host = "127.0.0.1"
 	port = 8080
+	body_size_limit = 10
 	[server.error_page]
 		404 = "/var/www/html/error_404.html"
 		405 = "/var/www/html/error_405.html"
-	body_size_limit = 10
+	# error_404 = "error_404.html"
+	[server.error_page]
+		400 = "error_400.html"
+		401 = "error_401.html"
 	[[server.location]]
-		redirect = [301, "http://localhost/secret"]
+		redirect = ["301", "http://localhost/secret"]
 		location = "/"
 		root = "/var/www/html/"
 		methods = ["GET", "POST"]
@@ -25,7 +29,7 @@
 
 [[server]]
 	name = "2222"
-	host = "10.0.0.1"
+	ip = "10.0.0.1"
 	port = 8081
 	body_size_limit = 10
 	[[server.location]]

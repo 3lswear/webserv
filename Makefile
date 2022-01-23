@@ -11,19 +11,22 @@ SRC = $(wildcard ./src/*.cpp)
 SRC += $(wildcard ./src/*/*.cpp)
 
 HEADERS = $(wildcard ./includes/*.hpp)
+HEADERS += $(wildcard src/Autoindex/*.hpp)
+HEADERS += $(wildcard src/Header/*.hpp)
+HEADERS += $(wildcard src/Server/*.hpp)
 HEADERS += $(wildcard src/config/*.hpp)
 
-INCLUDES = ./includes/
+INCLUDES = ./includes/ -I src/Autoindex -I src/config -I src/Header -I src/Server
 
 OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)
 
 $(OBJ): %.o: %.cpp $(SRC) $(HEADERS) Makefile
-	$(CXX) $(CXXFLAGS) -c $< -I $(INCLUDES) -o $@
+	$(CXX) $(CXXFLAGS) -c $< -I $(INCLUDES)  -o $@
 
 $(NAME): $(OBJ) $(HEADERS)
-	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(OBJ)  -o $(NAME)
 
 clean:
 	$(RM) $(OBJ)

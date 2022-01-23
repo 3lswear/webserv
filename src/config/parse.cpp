@@ -6,10 +6,7 @@
 #include <iostream>
 #include <exception>
 
-#include "TOMLNode.hpp"
-#include "TOMLParser.hpp"
-#include "Tokenizer.hpp"
-
+#include "parse.hpp"
 /* struct location */
 /* { */
 /* 	std::string location; */
@@ -41,10 +38,11 @@ namespace config
 	}
 }
 
-void parse(void)
+TOMLMap *parse(void)
 {
 	std::string filename = "config/simple.toml";
 	config::TOMLParser parser(filename);
 	TOMLMap *root = parser.parse();
 	config::display(root);
+	return (root);
 }

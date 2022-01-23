@@ -1,4 +1,5 @@
-#include "webserv.hpp"
+#include "Server.hpp"
+
 //----------------------------------------------Constructors-----------------------------------------------------------------------------------
 Server::Server()
 {
@@ -17,6 +18,36 @@ Server::Server(std::string path)
 //----------------------------------------------Configuration-----------------------------------------------------------------------------------
 void	Server::readConfig(void)
 {
+	TOMLMap *root = parse();
+
+
+	TOMLMap *map;
+	TOMLMap::iterator it1;
+	TOMLMapArray	*arr;
+	TOMLMapArray::iterator	it;
+
+
+	arr = root->find("server")->second->getMapArray();
+	it = arr->begin();
+
+	while (it != arr->end())
+	{
+		std::cout << BLUE << *it << std::endl;
+		map = *it;
+
+		it1 = map->begin();
+		while (it1 != map->end())
+		{
+			std::cout << TURGUOISE << it1->first << it1->second << ZERO_C << std::endl;
+			++it1;
+		}
+		
+
+		++it;
+	}
+	
+
+	
 
 }
 

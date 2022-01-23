@@ -8,53 +8,39 @@
 #define PINK		"\033[35m"
 #define TURGUOISE   "\033[36m"
 #define ZERO_C		"\033[0m"
+
 #define	HOME		"www"
+#define BUFFSIZE	1024
+#define MAX_CLIENT	1000
 
 
 #include <iostream>
 #include <string>
-#include <arpa/inet.h>
-#include <sys/select.h>
-#include <poll.h>
+
 #include <sys/epoll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/select.h>
+#include <arpa/inet.h>
+
+
 #include <netinet/in.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
+#include <poll.h>
+#include <dirent.h>
+
+
 #include <fstream>
 #include <vector>
 #include <sstream>
 #include <string>
-#include <string.h>
-#include <sys/stat.h>
 #include <map>
 #include <fstream>
-#include <dirent.h>
 #include <algorithm>
 #include <cctype>
-
-#include "Socket.hpp"
-#include "HeaderHandl.hpp"
-#include "ServerConfig.hpp"
-#include "Autoindex.hpp"
-#include "Server.hpp"
-#include "Header.hpp"
-
-#include <map>
-#include <vector>
-
-void parse(void);
-
-class toml_node;
-
-/* typedef std::vector<TOMLMap *>	TOMLArray; */
-/* typedef std::vector<TOMLArray *> TOMLArrayOfMap; */
-typedef std::map<std::string, toml_node *> TOMLMap; // = JSONObject
-typedef std::vector<TOMLMap *> TOMLMapArray;
-typedef std::vector<toml_node *> TOMLArray;
-
-void display(TOMLMap *config);
 
 #endif

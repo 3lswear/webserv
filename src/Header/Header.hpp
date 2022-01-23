@@ -2,6 +2,8 @@
 # define HEADER_HPP
 
 #include "webserv.hpp"
+#include "HeaderHandl.hpp"
+#include "Autoindex.hpp"
 
 class Header
 {
