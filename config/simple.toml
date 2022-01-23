@@ -8,17 +8,18 @@
 	[[server.location]]
 		location = "/"
 		root = "/var/www/html/jopa.html"
+		redirect = ["301", "http://localhost/secret"]
 		methods = ["GET", "POST"]
-		directory_list = true
-		directory_fallback = "its_a_directory.html"
+		autoindex = true
+		directory_file = "its_a_directory.html"
 		upload_accept = true
 		upload_dir = "/var/www/html/upload"
 	[[server.location]]
 		location = "/secret/"
 		root = "/var/www/html/secret.html"
 		methods = ["GET"]
-		directory_list = false
-		directory_fallback = "oops.html"
+		autoindex = false
+		directory_file = "oops.html"
 [[server]]
 	name = "2222"
 	host = "10.0.0.1"
@@ -33,7 +34,7 @@
 		location = "/root2/"
 		root = "/var/www/html/jopa.html"
 		methods = ["GET", "POST"]
-		directory_list = true
-		directory_fallback = "its_a_directory.html"
+		autoindex = true
+		directory_file = "its_a_directory.html"
 		upload_accept = false
 		upload_dir = "/var/www/html/upload"

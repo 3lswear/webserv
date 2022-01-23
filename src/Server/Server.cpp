@@ -35,10 +35,6 @@ void	Server::readConfig(void)
 		_configs.push_back(new ServerConfig(*it));
 		++it;
 	}
-	
-
-	
-
 }
 
 void	Server::setupConfig(void)
@@ -132,7 +128,15 @@ void	Server::start(void)
 
 void	Server::end(void)
 {
+	std::vector<ServerConfig *>::iterator pri;
 
+	pri = _configs.begin();
+	while (pri != _configs.end())
+	{
+		(*pri)->printFields();
+		delete *pri;
+		pri++;
+	}
 }
 //----------------------------------------------Other------------------------------------------------------------------------------------------------
 void	Server::checkError(int fd, std::string str)

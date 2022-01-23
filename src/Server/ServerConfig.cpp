@@ -88,34 +88,140 @@ void	ServerConfig::setRoot(TOMLMap * data)
 
 int	ServerConfig::putBodySizeLimit(toml_node *node)
 {
-	if (node->get_type() != toml_node::e_type::NUM)
+	if (node->get_type() != toml_node::NUM)
 		return (1);
-	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
+	_clientBodySize = node->getNum();
 	return (0);
 }
 int	ServerConfig::putErrorPage(toml_node *node)
 {
-	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
+	if (node->get_type() != toml_node::MAP)
+		return (1);
+	TOMLMap	*map = node->getMap();
+	TOMLMap::iterator it;
+	std::string s;
+
+	it = map->begin();
+	while (it != map->end())
+	{
+		if (it->second->get_type() != toml_node::STRING)
+			return (1);
+		s = it->first;
+		_errorPages[atoi(s.c_str())] = *it->second->getString();
+		++it;
+	}
 	return (0);
 }
 int	ServerConfig::putHost(toml_node *node)
 {
-	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
+	if (node->get_type() != toml_node::STRING)
+		return (1);
+	_host = *node->getString();
 	return (0);
 }
 int	ServerConfig::putName(toml_node *node)
 {
-	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
+	if (node->get_type() != toml_node::STRING)
+		return (1);
+	_serverName = *node->getString();
 	return (0);
 }
 int	ServerConfig::putPort(toml_node *node)
 {
-	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
+	if (node->get_type() != toml_node::NUM)
+		return (1);
+	_port = node->getNum();
 	return (0);
 }
 int	ServerConfig::putLocation(toml_node *node)
 {
-	std::cout << TURGUOISE << *node->toString() << ZERO_C << std::endl;
+	if (node->get_type() != toml_node::MAPARRAY)
+		return (1);
+	
+	TOMLMapArray *arr = node->getMapArray();
+	TOMLMapArray::iterator	it = arr->begin();
+	TOMLMap		*map;
+	TOMLMap::iterator		it1;
+	location	tmp;
+	TOMLArray::iterator			it2;
+	TOMLArray	Array;
+
+	std::string	str;
+	while (it != arr->end())
+	{
+		map = *it;
+		it1 = map->begin();
+		while (it1 != map->end())
+		{
+			if (it1->first == "location")
+			{
+				if (it1->second->get_type() != toml_node::STRING)
+					return (1);
+				tmp.location = *it1->second->getString();
+			}
+			else if (it1->first == "root")
+			{
+				if (it1->second->get_type() != toml_node::STRING)
+					return (1);
+				tmp.root = *it1->second->getString();
+			}
+			else if (it1->first == "autoindex")
+			{
+				if (it1->second->get_type() != toml_node::BOOL)
+					return (1);
+				tmp.autoindex = it1->second->getBool();
+			}
+			else if (it1->first == "upload_accept")
+			{
+				if (it1->second->get_type() != toml_node::BOOL)
+					return (1);
+				tmp.uploadAccept = it1->second->getBool();
+			}
+			else if (it1->first == "upload_dir")
+			{
+				if (it1->second->get_type() != toml_node::STRING)
+					return (1);
+				tmp.uploadDir = *it1->second->getString();	
+			}
+			else if (it1->first == "directory_file")
+			{
+				if (it1->second->get_type() != toml_node::STRING)
+					return (1);
+				tmp.directoryFile = *it1->second->getString();	
+			}
+			else if (it1->first == "methods")
+			{
+				if (it1->second->get_type() != toml_node::ARRAY)
+					return (1);
+				Array = *it1->second->getArray();
+				it2 = Array.begin();
+				while (it2 != Array.end())
+				{
+					if ((*it2)->get_type() != toml_node::STRING)
+						return (1);
+					tmp.methods.push_back(*((*it2)->getString()));
+					++it2;
+				}
+
+			}
+			else if (it1->first == "redirect")
+			{
+				if (it1->second->get_type() != toml_node::ARRAY)
+					return (1);
+				Array = *it1->second->getArray();
+				it2 = Array.begin();
+				str = *(*it2)->getString();
+				++it2;
+				tmp.redirect[atoi(str.c_str())] = *(*it2)->getString();
+			}
+			else
+				std::cout << RED << it1->first << ZERO_C << std::endl;
+			it1++;
+		}
+		_locations.push_back(tmp);
+		memset(&tmp, 0, sizeof(tmp));
+		it++;
+	}
 	return (0);
 }
 
@@ -146,10 +252,56 @@ void	ServerConfig::fillFields(void)
 	block = server->begin();
 	while (block != server->end() && ret == 0)
 	{
-		std::cout << GREEN << block->first << ZERO_C << std::endl;
 		ret = identify(block);
 		++block;
 	}
+	// printFields();
+}
+
+void	ServerConfig::printFields(void)
+{
+	std::vector<location>::iterator it;
+	std::map<int, std::string>::iterator it1;
+	std::vector<std::string>::iterator	it2;
+	std::map<int, std::string>::iterator it3;
+
+	it1 = _errorPages.begin();
+	it = _locations.begin();
+	std::cout << RED << "-------------------------Server-Start----------------------------------\n" << ZERO_C;
+	std::cout << GREEN << "name" << " " << BLUE << _serverName << std::endl;
+	std::cout << GREEN << "host" << " " << BLUE << _host << std::endl;
+	std::cout << GREEN << "port" << " " << BLUE << _port << std::endl;
+	std::cout << GREEN << "client_body_size" <<  " " << BLUE << _clientBodySize << std::endl;
+	std::cout << GREEN << "location" << std::endl;
+	while (it != _locations.end())
+	{
+		std::cout << PINK << "------------------------------------------------\n";
+		std::cout << YELLOW << "location " << BLUE << (*it).location <<std::endl;
+		std::cout << YELLOW << "root " << BLUE << (*it).root <<std::endl;
+		std::cout << YELLOW << "directoryFile " << BLUE << (*it).directoryFile <<std::endl;
+		std::cout << YELLOW << "uploadDir " << BLUE << (*it).uploadDir <<std::endl;
+		std::cout << YELLOW << "autoindex " << BLUE << (*it).autoindex <<std::endl;
+		std::cout << YELLOW << "uploadAccept " << BLUE << (*it).uploadAccept <<std::endl;
+		std::cout << YELLOW << "methods " << std::endl;
+		it2 = (*it).methods.begin();
+		while (it2 != (*it).methods.end())
+		{
+			std::cout << BLUE << *it2 << " ";
+			it2++;
+		}
+		std::cout << std::endl;
+		it3 = (*it).redirect.begin();
+		std::cout << YELLOW << "redirection" << BLUE << " " << it3->first << " " << it3->second << std::endl;
+		++it;
+		std::cout << PINK << "------------------------------------------------\n";
+	}
+	std::cout << GREEN << "error pages" << std::endl;
+	while (it1 != _errorPages.end())
+	{
+		std::cout << BLUE << it1->first << " " << it1->second << std::endl;
+		++it1;
+	}
+	std::cout << RED << "-------------------------Server-End------------------------------------\n" << ZERO_C;
 }
 
 ServerConfig::~ServerConfig()

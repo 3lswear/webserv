@@ -61,6 +61,7 @@ private:
 
 public:
 	void	fillFields(void);
+	void	printFields(void);
 	
 	~ServerConfig();
 };
