@@ -1,4 +1,8 @@
 #include "Server.hpp"
+#include <exception>
+
+#define THREAD_NUM 100
+#define MAX_EVENTS
 
 //----------------------------------------------Constructors-----------------------------------------------------------------------------------
 Server::Server()
@@ -69,47 +73,77 @@ void	Server::newConnection(int fd)
 	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
 	ev.data.fd = fd;
 
-	epoll_ctl(_epolfd, EPOLL_CTL_ADD, fd, &ev);
+	epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev);
 	_client++;
+}
+
+void Server::add_to_epoll_list(int fd, unsigned int ep_events)
+{
+	struct epoll_event event;
+	event.data.fd = fd;
+	event.events = ep_events;
+	if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &event))
+			throw std::logic_error("epoll add");
+
 }
 
 void	Server::start(void)
 {
-	/* Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
- 	/* char		buff[BUFFSIZE + 1] = {0}; */
-	/* Header		header; */
-	/* int			fd_accept; */
-	/* int			code; */
-
-	/* checkError(serverSocket.init(MAX_CLIENT), "Socket init"); */
-	/* fd_accept = accept(serverSocket.getSocketFd(), */
-	/* 	serverSocket.getSockaddr(), serverSocket.getSocklen()); */
-	/* checkError(fd_accept, "Initialize client socket"); */
-	/* checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client"); */
-	/* std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl; */
-	/* header.setRawData(buff); */
-	/* code = header.parseRequest(); */
-	/* header.printHeaderInfo(); */
-	/* header.sendRespons(fd_accept); */
-	/* std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl; */
-	/* close(fd_accept); */
-	/* close(serverSocket.getSocketFd()); */
 
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE + 1] = {0};
 	Header header[MAX_CLIENT];
 	int fd;
-	int n;
-	int nfds;
+	/* int n; */
+	/* int nfds; */
 	int client_sock;
-	int epollfd;
+	int code;
+	int epoll_ret = 0;
+	/* int epollfd; */
 
-#define THREAD_NUM 100
 
-	epollfd = epoll_create1(0);
 	struct epoll_event ev;
 
 	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+	/* ev.data.fd */ 
+
+	/* unsigned int ep_events = EPOLLIN | EPOLLOUT | EPOLLET; */
+	
+	_epoll_fd = epoll_create1(0);
+	checkError(server_sock.init(MAX_CLIENT), "Socket init");
+	setNonblocking(server_sock.getSocketFd());
+	setNonblocking(_epoll_fd);
+	while (1)
+	{
+		client_sock = accept(server_sock.getSocketFd(),
+				server_sock.getSockaddr(), server_sock.getSocklen());
+		if (client_sock > 0)
+			newConnection(client_sock);
+		if (_client > 0)
+			epoll_ret = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
+		if (epoll_ret < 0)
+			throw std::logic_error("epoll_ret");
+		for (int i = 0; i < epoll_ret; i++)
+		{
+			fd = _events[i].data.fd;
+			checkError(recv(fd, buf, BUFFSIZE, 0), "Receive msg from client");
+			header[fd].setRawData(buf);
+			code = header[fd].parseRequest();
+			header[fd].printHeaderInfo();
+			header[fd].printHeaderInfo();
+			header[fd].sendRespons(fd);
+			header[fd].clear();
+			std::cout << BLUE << header[fd].getReasonPhrase(code) << ZERO_C << std::endl;
+			close(fd);
+			_client--;
+		}
+		epoll_ret = 0;
+
+	}
+	close(server_sock.getSocketFd());
+	std::cerr << "end;" << std::endl;
+	
+
 
 
 
@@ -147,6 +181,32 @@ void	Server::start(void)
 	// 	_clientSocket = 0;
 	// }
 	// close(serverSocket.getSocketFd());
+	//
+
+
+
+
+
+
+	/* Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
+ 	/* char		buff[BUFFSIZE + 1] = {0}; */
+	/* Header		header; */
+	/* int			fd_accept; */
+	/* int			code; */
+
+	/* checkError(serverSocket.init(MAX_CLIENT), "Socket init"); */
+	/* fd_accept = accept(serverSocket.getSocketFd(), */
+	/* 	serverSocket.getSockaddr(), serverSocket.getSocklen()); */
+	/* checkError(fd_accept, "Initialize client socket"); */
+	/* checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client"); */
+	/* std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl; */
+	/* header.setRawData(buff); */
+	/* code = header.parseRequest(); */
+	/* header.printHeaderInfo(); */
+	/* header.sendRespons(fd_accept); */
+	/* std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl; */
+	/* close(fd_accept); */
+	/* close(serverSocket.getSocketFd()); */
 }
 
 
