@@ -9,7 +9,7 @@ class Header
 {
 private:
 	HeaderHandl	_request;
-	HeaderHandl	_respons;
+	HeaderHandl	_response;
 
 private:
 	int		_row;
@@ -26,7 +26,7 @@ private:
 public:
 	std::map<std::string , std::string>	getHeaderField(void);
 	HeaderHandl					getRequest(void);
-	HeaderHandl					getRespons(void);
+	HeaderHandl					getResponse(void);
 	std::string					getReasonPhrase(std::string);
 	std::string					getReasonPhrase(int);
 	std::string					getErrorPage(int code);
@@ -37,15 +37,15 @@ public:
 	void						initErrorCode(void);
 	int							isFile(std::string);
 	int							isDir(std::string);
-	void						OpenResponsFile(const char *path);
+	void						OpenResponseFile(const char *path);
 
 	int							parseStartLine(std::string);
 	void						parseURI(std::string);
 	int							parseHeaderfield(std::string);
-	void						printHeaderInfo(void);
+	void						printInfo(void);
 	int							parseRequest(void);
 	
-	int							sendRespons(int fd);
+	int							sendResponse(int fd);
 	int							sendHeader(int fd);
 	void						clear(void);
 	Header();

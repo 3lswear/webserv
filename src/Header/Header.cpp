@@ -47,9 +47,9 @@ HeaderHandl Header::getRequest(void)
 	return (_request);
 }
 
-HeaderHandl	Header::getRespons(void)
+HeaderHandl	Header::getResponse(void)
 {
-	return (_respons);
+	return (_response);
 }
 
 int	Header::getFd(void)
@@ -196,7 +196,7 @@ int	Header::isDir(std::string path)
 	return (-1);
 }
 
-void Header::OpenResponsFile(const char *path)
+void Header::OpenResponseFile(const char *path)
 {
 	std::stringstream	ss;
 	char 				buf[BUFFSIZE + 1] = {0};
@@ -233,7 +233,7 @@ int	Header::sendHeader(int fd)
 	return (0);
 }
 
-int	Header::sendRespons(int fd)
+int	Header::sendResponse(int fd)
 {
 	std::string path;
 
@@ -242,7 +242,7 @@ int	Header::sendRespons(int fd)
 	if (_ret == 200 && isDir(path) == 0)
 		_fileToSend = Autoindex::getPage(_request._URI, _request._host);
 	else if (_ret == 200)
-		OpenResponsFile(path.c_str());
+		OpenResponseFile(path.c_str());
 	else
 		_fileToSend = getErrorPage(_ret);
 	send(fd, _fileToSend.c_str(), _fileToSend.length(), 0);
@@ -319,7 +319,7 @@ std::string	Header::getReasonPhrase(int code)
 
 //-------------------------------------------------Other---------------------------------------
 
-void	Header::printHeaderInfo(void)
+void	Header::printInfo(void)
 {
 	std::map<std::string, std::string>::iterator it;
 
