@@ -4,53 +4,49 @@
 #include "webserv.hpp"
 #include "HeaderHandl.hpp"
 #include "Autoindex.hpp"
+#include "ServerConfig.hpp"
+#include "Request.hpp"
+#include "Respons.hpp"
 
 class Header
 {
 private:
-	HeaderHandl	_request;
-	HeaderHandl	_respons;
+	Request			_request;
+	Respons			_respons;
+	ServerConfig	*_config;
 
 private:
-	int		_row;
 	int		_ret;
-	int		_autoIndex;
 	int		_fd;
 	char	*_buff;
 
 
-	std::string	_fileToSend;
-	std::map<std::string, std::string> _headerField;
+	std::string	_bodyToSend;
+	std::string	_headerToSend;
 	std::map<std::string, std::string> _errorCode;
 	
 public:
-	std::map<std::string , std::string>	getHeaderField(void);
-	HeaderHandl					getRequest(void);
-	HeaderHandl					getRespons(void);
-	std::string					getReasonPhrase(std::string);
-	std::string					getReasonPhrase(int);
-	std::string					getErrorPage(int code);
+	Request						getRequest(void);
+	Respons						getRespons(void);
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
 
-	void						initErrorCode(void);
-	int							isFile(std::string);
-	int							isDir(std::string);
-	void						OpenResponsFile(const char *path);
-
-	int							parseStartLine(std::string);
-	void						parseURI(std::string);
-	int							parseHeaderfield(std::string);
-	void						printHeaderInfo(void);
+public:
 	int							parseRequest(void);
+
+	void						printHeaderInfo(void);
 	
 	int							sendRespons(int fd);
-	int							sendHeader(int fd);
+	int							sendData(int , std::string data);
 	void						clear(void);
+
 	Header();
 	Header(char *);
+	Header(char *, ServerConfig *config);
 	~Header();
+
+
 };
 
 #endif

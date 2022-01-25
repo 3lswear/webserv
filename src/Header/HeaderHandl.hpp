@@ -1,12 +1,22 @@
 #ifndef HEADERHANDL_HPP
 #define HEADERHANDL_HPP
 
-#include <iostream>
-#include <map>
+#include "webserv.hpp"
 
 class HeaderHandl
 {
+
 public:
+    std::string _location;
+    std::string _root;
+    std::string _directoryFile;
+    std::string _uploadDir;
+    bool        _autoindex;
+    bool        _uploadAccept;
+    std::vector<std::string> _methods;
+    std::map<int, std::string> _redirect;
+public:
+    std::string _type;
     std::string _method;
     std::string _URI;
     std::string _fullURI;

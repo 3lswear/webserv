@@ -255,7 +255,6 @@ void	ServerConfig::fillFields(void)
 		ret = identify(block);
 		++block;
 	}
-	// printFields();
 }
 
 void	ServerConfig::printFields(void)
@@ -291,14 +290,14 @@ void	ServerConfig::printFields(void)
 		}
 		std::cout << std::endl;
 		it3 = (*it).redirect.begin();
-		std::cout << YELLOW << "redirection" << BLUE << " " << it3->first << " " << it3->second << std::endl;
+		std::cout << YELLOW << "redirection" << RED << " " << it3->first << " "  << BLUE << it3->second << std::endl;
 		++it;
 		std::cout << PINK << "------------------------------------------------\n";
 	}
 	std::cout << GREEN << "error pages" << std::endl;
 	while (it1 != _errorPages.end())
 	{
-		std::cout << BLUE << it1->first << " " << it1->second << std::endl;
+		std::cout << YELLOW << it1->first << " "  << BLUE << it1->second << std::endl;
 		++it1;
 	}
 	std::cout << RED << "-------------------------Server-End------------------------------------\n" << ZERO_C;

@@ -52,8 +52,8 @@ void	Server::setNonblocking(int fd)
 void	Server::newConnection(int fd)
 {
 	struct epoll_event	ev;
-	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
 	ev.data.fd = fd;
+	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
 
 	epoll_ctl(_epolfd, EPOLL_CTL_ADD, fd, &ev);
 	_client++;
@@ -77,7 +77,6 @@ void	Server::start(void)
 	code = header.parseRequest();
 	header.printHeaderInfo();
 	header.sendRespons(fd_accept);
-	std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl;
 	close(fd_accept);
 	close(serverSocket.getSocketFd());
 //-----------------------------------------------попытка добавить epoll------------------

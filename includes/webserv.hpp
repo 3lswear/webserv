@@ -12,6 +12,8 @@
 #define	HOME		"www"
 #define BUFFSIZE	1024
 #define MAX_CLIENT	1000
+#define WHITESPACE " \n\r\t\f\v"
+
 
 
 #include <iostream>
