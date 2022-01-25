@@ -63,6 +63,7 @@ namespace config
 		if (file.eof())
 		{
 			std::cout << "Tokens exhausted" << std::endl;
+			throw std::logic_error("Tokens exhausted");
 		}
 		prev_pos = file.tellg();
 		c = getWithoutWhiteSpace();

@@ -1,7 +1,9 @@
 clang++
 -Iincludes
-%cpp
-%hpp --include=./includes/webserv.hpp
+-Isrc/Header/
+-Isrc/Autoindex/
+-Isrc/Server/
+-Isrc/config/
 -Wall
 -Wextra
 -Werror

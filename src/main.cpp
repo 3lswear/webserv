@@ -10,8 +10,8 @@ int	main(int argc, char **argv)
 	Server	server;
 	
 	 server.readConfig(); 
-	//  server.setupConfig();
-	//  server.start();
+	 server.setupConfig();
+	 server.start();
 
 
 	return (0);

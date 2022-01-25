@@ -75,33 +75,44 @@ void	Server::newConnection(int fd)
 
 void	Server::start(void)
 {
-	Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
- 	char		buff[BUFFSIZE + 1] = {0};
-	Header		header;
-	int			fd_accept;
-	int			code;
+	/* Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
+ 	/* char		buff[BUFFSIZE + 1] = {0}; */
+	/* Header		header; */
+	/* int			fd_accept; */
+	/* int			code; */
 
-	checkError(serverSocket.init(MAX_CLIENT), "Socket init");
-	fd_accept = accept(serverSocket.getSocketFd(),
-		serverSocket.getSockaddr(), serverSocket.getSocklen());
-	checkError(fd_accept, "Initialize client socket");
-	checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client");
-	std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl;
-	header.setRawData(buff);
-	code = header.parseRequest();
-	header.printHeaderInfo();
-	header.sendRespons(fd_accept);
-	std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl;
-	close(fd_accept);
-	close(serverSocket.getSocketFd());
-//-----------------------------------------------попытка добавить epoll------------------
-	// Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port);
- 	// char		buff[BUFFSIZE + 1] = {0};
-	// Header		header[MAX_CLIENT];
-	// int			fd;
-	// int			n;
-	// int			nfds;
-	// int			_clientSocket;
+	/* checkError(serverSocket.init(MAX_CLIENT), "Socket init"); */
+	/* fd_accept = accept(serverSocket.getSocketFd(), */
+	/* 	serverSocket.getSockaddr(), serverSocket.getSocklen()); */
+	/* checkError(fd_accept, "Initialize client socket"); */
+	/* checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client"); */
+	/* std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl; */
+	/* header.setRawData(buff); */
+	/* code = header.parseRequest(); */
+	/* header.printHeaderInfo(); */
+	/* header.sendRespons(fd_accept); */
+	/* std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl; */
+	/* close(fd_accept); */
+	/* close(serverSocket.getSocketFd()); */
+
+	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
+	char buf[BUFFSIZE + 1] = {0};
+	Header header[MAX_CLIENT];
+	int fd;
+	int n;
+	int nfds;
+	int client_sock;
+	int epollfd;
+
+#define THREAD_NUM 100
+
+	epollfd = epoll_create1(0);
+	struct epoll_event ev;
+
+	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+
+
+
 
 	// nfds = 0;
 	// n = 0;
