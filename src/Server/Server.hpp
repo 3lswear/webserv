@@ -19,15 +19,15 @@ private:
 	struct sockaddr_in _addres;
 	std::string _ip;
 	std::vector<ServerConfig>	_configs;
-	void add_to_epoll_list(int fd, unsigned int ep_events);
+	/* void add_to_epoll_list(int fd, unsigned int ep_events); */
 
 private:
 	void checkError(int fd, std::string str);
 	void sendFile(std::string str);
 	void sendHeader(Header head, int);
 	void sendRespons(Header head, int);
-	void setNonblocking(int fd);
-	void newConnection(int fd);
+	void setNonBlock(int fd);
+	void add_to_epoll_list(int fd);
 public:
 	Server();
 	Server(std::string path);
