@@ -21,20 +21,21 @@ private:
 
 	std::string	_fileToSend;
 	std::map<std::string, std::string> _headerField;
-	std::map<std::string, std::string> _errorCode;
 	
 public:
+	static std::map<std::string, std::string> _errorCode;
+
 	std::map<std::string , std::string>	getHeaderField(void);
 	HeaderHandl					getRequest(void);
 	HeaderHandl					getResponse(void);
-	std::string					getReasonPhrase(std::string);
-	std::string					getReasonPhrase(int);
+	static std::string					getReasonPhrase(std::string);
+	static std::string					getReasonPhrase(int);
 	std::string					getErrorPage(int code);
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
 
-	void						initErrorCode(void);
+	static void						initErrorCode(void);
 	int							isFile(std::string);
 	int							isDir(std::string);
 	void						OpenResponseFile(const char *path);

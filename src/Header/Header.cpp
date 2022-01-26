@@ -252,6 +252,8 @@ int	Header::sendResponse(int fd)
 
 //-------------------------------------------------Error---------------------------------------
 
+std::map<std::string, std::string> Header::_errorCode;
+
 void  Header::initErrorCode(void)
 {
 	_errorCode["100"]  = "Continue";
