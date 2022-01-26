@@ -100,14 +100,14 @@ void	Server::start(void)
 
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE + 1] = {0};
-	Header header[MAX_CLIENT];
+	/* Header header[MAX_CLIENT]; */
 	std::map<int, Header> header_map;
 	int fd;
 	/* int n; */
 	/* int nfds; */
 	int client_sock;
 	int status;
-	int epoll_ret = 0;
+	int ready_num = 0;
 
 	/* struct epoll_event ev; */
 
@@ -122,19 +122,19 @@ void	Server::start(void)
 	setNonBlock(_epoll_fd);
 	while (1)
 	{
-		/* std::cout << RED << "IN MAIN LOOP" << RESET << std::endl; */
 		client_sock = accept(server_sock.getSocketFd(),
 				server_sock.getSockaddr(), server_sock.getSocklen());
 		if (client_sock > 0)
 			add_to_epoll_list(client_sock);
 		if (_client > 0)
-			epoll_ret = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
-		if (epoll_ret < 0)
+			ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
+		/* std::cout << GREEN << "after epoll_wait" << RESET << std::endl; */
+		if (ready_num < 0)
 		{
 			perror("epoll_ret");
 			throw std::logic_error("epoll_ret");
 		}
-		for (int i = 0; i < epoll_ret; i++)
+		for (int i = 0; i < ready_num; i++)
 		{
 			/* if (_events[i].events == 0) */
 			/* 	continue; */
@@ -142,17 +142,17 @@ void	Server::start(void)
 			std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 			fd = _events[i].data.fd;
 			assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
-			header[fd].setRawData(buf);
-			status = header[fd].parseRequest();
-			header[fd].printInfo();
-			header[fd].sendResponse(fd);
-			header[fd].clear();
+			header_map[fd].setRawData(buf);
+			status = header_map[fd].parseRequest();
+			header_map[fd].printInfo();
+			header_map[fd].sendResponse(fd);
+			header_map[fd].clear();
 			std::cout << BLUE << "status is " << Header::getReasonPhrase(status) << RESET << std::endl;
 			bzero(buf, BUFFSIZE);
 			close(fd);
 			_client--;
 		}
-		epoll_ret = 0;
+		ready_num = 0;
 
 	}
 	close(server_sock.getSocketFd());
