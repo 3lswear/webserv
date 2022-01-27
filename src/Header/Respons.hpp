@@ -15,23 +15,29 @@ private:
 
 private:
     std::map<std::string, std::string> _errorCode;
-    
+
+private:
+    void                        methodGet(void);
+    // void                        methodPost(void);
+    // void                        methodDelete(void);
+    void                        invalidHeader(void);
+
 public:
-    std::string getHeader(void);
-    std::string getBody(void);
+    std::string                 getHeader(void);
+    std::string                 getBody(void);
     std::string					getReasonPhrase(std::string);
 	std::string					getReasonPhrase(int);
 	std::string					getErrorPage(int code);
 
 
-    void        setData(Request, ServerConfig *);
+    void                        setData(Request, ServerConfig *);
 public:
-
 	void						OpenResponsFile(const char *path);
 	void						initErrorCode(void);
     void                        generate();
     Respons();
     ~Respons();
+
 };
 
 

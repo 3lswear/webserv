@@ -49,19 +49,48 @@ void Respons::OpenResponsFile(const char *path)
 
 void    Respons::generate()
 {
+	if (_request.badCode(_request.getCode()))
+		invalidHeader();
+	else if (_request.getMethod() == "GET")
+		methodGet();
+	// else if (_request.getMethod() == "POST")
+	// 	methodPost();
+	// else
+	// 	methodDelete();	
+}
+
+//-------------------------------------------------GET/SET---------------------------------------
+
+void	Respons::invalidHeader(void)
+{
 	std::stringstream ss;
 	std::string tmp;
-
+	//header
 	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
 	_header = ss.str();
+
+	//body
+	_body = getErrorPage(_request.getCode());
+	std::cout << RED << "Invalid Header method called\n" << ZERO_C;
+}
+
+void	Respons::methodGet(void)
+{
+	std::stringstream ss;
+	std::string tmp;
+	//header
+	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
+	_header = ss.str();
+	//body
 	if (!_request.badCode(_request.getCode()) && _request.isDir(_request.getFullUri()) == 0)
 		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
 	else if (!_request.badCode(_request.getCode()))
 		OpenResponsFile(_request.getFullUri().c_str());
 	else
-		getErrorPage(_request.getCode());
-}
+		_body = getErrorPage(_request.getCode());
+	std::cout << GREEN << "GET method called\n" << ZERO_C;
 
+}
 
 //-------------------------------------------------GET/SET---------------------------------------
 
