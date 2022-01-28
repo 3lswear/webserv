@@ -18,7 +18,7 @@ private:
 	struct epoll_event	_events[MAX_CLIENT];
 	struct sockaddr_in _addres;
 	std::string _ip;
-	std::vector<ServerConfig>	_configs;
+	std::vector<ServerConfig *>	_configs;
 	/* void add_to_epoll_list(int fd, unsigned int ep_events); */
 
 private:

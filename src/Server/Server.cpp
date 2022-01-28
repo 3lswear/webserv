@@ -83,27 +83,16 @@ void	Server::add_to_epoll_list(int fd)
 
 void	Server::start(void)
 {
-	Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
- 	char		buff[BUFFSIZE + 1] = {0};
-	Header		header;
-	int			fd_accept;
-	int			code;
-
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE + 1] = {0};
 	/* Header header[MAX_CLIENT]; */
 	std::map<int, Header> header_map;
 	int fd;
-	/* int n; */
-	/* int nfds; */
 	int client_sock;
-	int status;
+	/* int status; */
 	int ready_num = 0;
 
 	/* struct epoll_event ev; */
-
-	/* ev.events = EPOLLIN | EPOLLOUT | EPOLLET; */
-	/* ev.data.fd */ 
 
 	/* unsigned int ep_events = EPOLLIN | EPOLLOUT | EPOLLET; */
 	
@@ -134,11 +123,11 @@ void	Server::start(void)
 			fd = _events[i].data.fd;
 			assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
 			header_map[fd].setRawData(buf);
-			status = header_map[fd].parseRequest();
-			header_map[fd].printInfo();
-			header_map[fd].sendResponse(fd);
+			header_map[fd].parseRequest();
+			header_map[fd].printHeaderInfo();
+			header_map[fd].sendRespons(fd);
 			header_map[fd].clear();
-			std::cout << BLUE << "status is " << Header::getReasonPhrase(status) << RESET << std::endl;
+			/* std::cout << BLUE << "status is " << header_map[fd].getReasonPhrase(status) << RESET << std::endl; */
 			bzero(buf, BUFFSIZE);
 			close(fd);
 			_client--;
@@ -148,26 +137,6 @@ void	Server::start(void)
 	}
 	close(server_sock.getSocketFd());
 	std::cerr << "end;" << std::endl;
-	
-	/* Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
- 	/* char		buff[BUFFSIZE + 1] = {0}; */
-	/* Header		header; */
-	/* int			fd_accept; */
-	/* int			code; */
-
-	/* checkError(serverSocket.init(MAX_CLIENT), "Socket init"); */
-	/* fd_accept = accept(serverSocket.getSocketFd(), */
-	/* 	serverSocket.getSockaddr(), serverSocket.getSocklen()); */
-	/* checkError(fd_accept, "Initialize client socket"); */
-	/* checkError(recv(fd_accept, buff, BUFFSIZE, 0), "Receive msg from client"); */
-	/* std::cout << TURGUOISE << "Receive Header" << ZERO_C << std::endl; */
-	/* header.setRawData(buff); */
-	/* code = header.parseRequest(); */
-	/* header.printHeaderInfo(); */
-	/* header.sendRespons(fd_accept); */
-	/* std::cout << BLUE << header.getReasonPhrase(code) << ZERO_C << std::endl; */
-	/* close(fd_accept); */
-	/* close(serverSocket.getSocketFd()); */
 }
 
 
