@@ -3,18 +3,15 @@ NAME = webserv
 CXX = clang++
 
 SANFLAGS = -fsanitize=address
+
 # SANFLAGS = -fsanitize=leak
 
 CXXFLAGS = -Wall -Wextra  -Werror -g -std=c++98 $(SANFLAGS)
 
+CPPFLAGS += -MD -MP
+
 SRC = $(wildcard ./src/*.cpp)
 SRC += $(wildcard ./src/*/*.cpp)
-
-HEADERS = $(wildcard ./includes/*.hpp)
-HEADERS += $(wildcard src/Autoindex/*.hpp)
-HEADERS += $(wildcard src/Header/*.hpp)
-HEADERS += $(wildcard src/Server/*.hpp)
-HEADERS += $(wildcard src/config/*.hpp)
 
 INCLUDES = ./includes/ -I src/Autoindex -I src/config -I src/Header -I src/Server
 
@@ -22,14 +19,17 @@ OBJ = $(SRC:.cpp=.o)
 
 all: $(NAME)
 
-$(OBJ): %.o: %.cpp $(SRC) $(HEADERS) Makefile
-	$(CXX) $(CXXFLAGS) -c $< -I $(INCLUDES)  -o $@
+$(OBJ): %.o: %.cpp $(SRC) Makefile
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -I $(INCLUDES)  -o $@
 
-$(NAME): $(OBJ) $(HEADERS)
+-include $(SRC:%.cpp=%.d)
+
+$(NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ)  -o $(NAME)
 
 clean:
 	$(RM) $(OBJ)
+	$(RM) $(SRC:.cpp=.d)
 
 fclean: clean
 	$(RM) $(NAME)
