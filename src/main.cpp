@@ -12,6 +12,7 @@ int	main(int argc, char **argv)
 	 server.readConfig(); 
 	 server.setupConfig();
 	 server.start();
+	//  server.end();
 
 
 	return (0);

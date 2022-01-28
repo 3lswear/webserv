@@ -37,25 +37,11 @@ void	Server::readConfig(void)
 	arr = root->find("server")->second->getMapArray();
 	it = arr->begin();
 
-	/* while (it != arr->end()) */
-	/* { */
-	/* 	std::cout << BLUE << *it << std::endl; */
-	/* 	map = *it; */
-
-	/* 	it1 = map->begin(); */
-	/* 	while (it1 != map->end()) */
-	/* 	{ */
-	/* 		std::cout << TURGUOISE << it1->first << it1->second << ZERO_C << std::endl; */
-	/* 		++it1; */
-	/* 	} */
-		
-
-	/* 	++it; */
-	/* } */
-	
-
-	
-
+	while (it != arr->end())
+	{
+		_configs.push_back(new ServerConfig(*it));
+		++it;
+	}
 }
 
 void	Server::setupConfig(void)
@@ -97,6 +83,11 @@ void	Server::add_to_epoll_list(int fd)
 
 void	Server::start(void)
 {
+	Socket		serverSocket(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
+ 	char		buff[BUFFSIZE + 1] = {0};
+	Header		header;
+	int			fd_accept;
+	int			code;
 
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE + 1] = {0};
@@ -183,7 +174,15 @@ void	Server::start(void)
 
 void	Server::end(void)
 {
+	std::vector<ServerConfig *>::iterator pri;
 
+	pri = _configs.begin();
+	while (pri != _configs.end())
+	{
+		(*pri)->printFields();
+		delete *pri;
+		pri++;
+	}
 }
 //----------------------------------------------Other------------------------------------------------------------------------------------------------
 void	Server::checkError(int fd, std::string str)

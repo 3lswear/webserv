@@ -4,11 +4,11 @@ Autoindex::Autoindex()
 {
 }
 
-std::string Autoindex::getPage(std::string path, std::string host)
+std::string Autoindex::getPage(std::string path, std::string allpath, std::string host)
 {
-    std::string allpath = HOME + path;
     DIR *dir = opendir(allpath.c_str());
     struct dirent *dirEnt;
+    std::string     tmp;
     std::string page =\
     "<!DOCTYPE html>\n\
     <html>\n\
@@ -24,11 +24,11 @@ std::string Autoindex::getPage(std::string path, std::string host)
             << allpath << "\" directory." << ZERO_C << std::endl;
         return "";
     }
-    // if (allpath[0] != '/')
-    //     path = "/" + path;
     for (dirEnt = readdir(dir); dirEnt; dirEnt = readdir(dir))
     {
-        page = page + getReference(dirEnt->d_name, path, host);
+        tmp = dirEnt->d_name;
+        if (tmp != ".." && tmp != ".")
+            page = page + getReference(tmp, path, host);
     }
     page += "</p>\n</body>\n</html>\n";
     closedir(dir);
