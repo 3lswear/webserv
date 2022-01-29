@@ -21,7 +21,7 @@ private:
     std::string _fullURI;
     std::string _version;
 	std::string	_location;
-	std::map<std::string, std::string> _headerField;
+	std::map<std::string, std::string> _ClientField;
 
 	ServerConfig	*_config;
 
@@ -36,7 +36,7 @@ public:
 	std::string					getLocation(void);
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
-	std::map<std::string, std::string>	getHeaderFields(void);
+	std::map<std::string, std::string>	getClientFields(void);
 
 	void						setConfig(ServerConfig *config);
 	void						setData(char *);
@@ -47,10 +47,10 @@ public:
 	Request();
 	Request(char *str);
 	int							parseStartLine(std::string);
-	int							parseHeaderfield(std::string);
+	int							parseClientfield(std::string);
 	int							parseRequest(void);
 	void						parseURI(std::string);
-	void						printHeaderInfo(void);
+	void						printClientInfo(void);
 
 	bool						badCode(int);
 	int							isDir(std::string path);

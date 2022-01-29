@@ -2,12 +2,12 @@
 #define SERVER_HPP
 
 #include "webserv.hpp"
-#include "Header.hpp"
+#include "Client.hpp"
 #include "ServerConfig.hpp"
 #include "Socket.hpp"
 #include "parse.hpp"
 
-class Header;
+class Client;
 
 class Server
 {
@@ -24,8 +24,8 @@ private:
 private:
 	void checkError(int fd, std::string str);
 	void sendFile(std::string str);
-	void sendHeader(Header head, int);
-	void sendRespons(Header head, int);
+	void sendClient(Client head, int);
+	void sendResponse(Client head, int);
 	void setNonBlock(int fd);
 	void add_to_epoll_list(int fd);
 public:

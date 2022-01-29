@@ -1,24 +1,24 @@
-#include "Respons.hpp"
+#include "Response.hpp"
 
 //-------------------------------------------------Constructor---------------------------------------
 
-Respons::Respons()
+Response::Response()
 {
 	initErrorCode();
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
 
-std::string     Respons::getHeader(void)
+std::string     Response::getClient(void)
 {
-	return (_header);
+	return (_Client);
 }
-std::string     Respons::getBody(void)
+std::string     Response::getBody(void)
 {
 	return (_body);
 }
 
-void            Respons::setData(Request request, ServerConfig *config)
+void            Response::setData(Request request, ServerConfig *config)
 {
 	_request = request;
 	_config = config;
@@ -26,7 +26,7 @@ void            Respons::setData(Request request, ServerConfig *config)
 
 //-------------------------------------------------File---------------------------------------
 
-void Respons::OpenResponsFile(const char *path)
+void Response::OpenResponseFile(const char *path)
 {
 	std::stringstream	ss;
 	char 				buf[BUFFSIZE + 1] = {0};
@@ -47,10 +47,10 @@ void Respons::OpenResponsFile(const char *path)
 		_body = getErrorPage(403); 	
 }
 
-void    Respons::generate()
+void    Response::generate()
 {
 	if (_request.badCode(_request.getCode()))
-		invalidHeader();
+		invalidClient();
 	else if (_request.getMethod() == "GET")
 		methodGet();
 	// else if (_request.getMethod() == "POST")
@@ -61,31 +61,31 @@ void    Respons::generate()
 
 //-------------------------------------------------GET/SET---------------------------------------
 
-void	Respons::invalidHeader(void)
+void	Response::invalidClient(void)
 {
 	std::stringstream ss;
 	std::string tmp;
-	//header
+	//Client
 	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_header = ss.str();
+	_Client = ss.str();
 
 	//body
 	_body = getErrorPage(_request.getCode());
-	std::cout << RED << "Invalid Header method called\n" << ZERO_C;
+	std::cout << RED << "Invalid Client method called\nCODE: " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << ZERO_C << std::endl;
 }
 
-void	Respons::methodGet(void)
+void	Response::methodGet(void)
 {
 	std::stringstream ss;
 	std::string tmp;
-	//header
+	//Client
 	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_header = ss.str();
+	_Client = ss.str();
 	//body
 	if (!_request.badCode(_request.getCode()) && _request.isDir(_request.getFullUri()) == 0)
 		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
 	else if (!_request.badCode(_request.getCode()))
-		OpenResponsFile(_request.getFullUri().c_str());
+		OpenResponseFile(_request.getFullUri().c_str());
 	else
 		_body = getErrorPage(_request.getCode());
 	std::cout << GREEN << "GET method called\n" << ZERO_C;
@@ -94,7 +94,7 @@ void	Respons::methodGet(void)
 
 //-------------------------------------------------GET/SET---------------------------------------
 
-void  Respons::initErrorCode(void)
+void  Response::initErrorCode(void)
 {
 	_errorCode["100"]  = "Continue";
 	_errorCode["101"]  = "Switching Protocols";
@@ -139,19 +139,20 @@ void  Respons::initErrorCode(void)
 	_errorCode["505"]  = "HTTP Version Not Supported";
 }
 
-std::string	Respons::getReasonPhrase(std::string code)
+std::string	Response::getReasonPhrase(std::string code)
 {
-	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator  it;
+
 
 	it = _errorCode.find(code);
 	return (it->second);
 }
 
-std::string	Respons::getReasonPhrase(int code)
+std::string	Response::getReasonPhrase(int code)
 {
 	std::stringstream ss;
 	std::string nbr;
-	std::map<std::string, std::string>::iterator it;
+	std::map<std::string, std::string>::iterator  it;
 
 	ss << code;
 	nbr = ss.str();
@@ -159,7 +160,7 @@ std::string	Respons::getReasonPhrase(int code)
 	return (it->second);
 }
 
-std::string	Respons::getErrorPage(int code)
+std::string	Response::getErrorPage(int code)
 {
        std::stringstream       ss;
        std::string             Page;
@@ -172,6 +173,6 @@ std::string	Respons::getErrorPage(int code)
  }
 
 
-Respons::~Respons()
+Response::~Response()
 {
 }

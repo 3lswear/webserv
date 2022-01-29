@@ -1,17 +1,17 @@
-#ifndef HEADER_HPP
-# define HEADER_HPP
+#ifndef CLIENT_HPP
+# define CLIENT_HPP
 
 #include "webserv.hpp"
 #include "Autoindex.hpp"
 #include "ServerConfig.hpp"
 #include "Request.hpp"
-#include "Respons.hpp"
+#include "Response.hpp"
 
-class Header
+class Client
 {
 private:
 	Request			_request;
-	Respons			_respons;
+	Response			_Response;
 	ServerConfig	*_config;
 
 private:
@@ -21,12 +21,12 @@ private:
 
 
 	std::string	_bodyToSend;
-	std::string	_headerToSend;
+	std::string	_ClientToSend;
 	std::map<std::string, std::string> _errorCode;
 	
 public:
 	Request						getRequest(void);
-	Respons						getRespons(void);
+	Response						getResponse(void);
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
@@ -34,16 +34,16 @@ public:
 public:
 	int							parseRequest(void);
 
-	void						printHeaderInfo(void);
+	void						printClientInfo(void);
 	
-	int							sendRespons(int fd);
+	int							sendResponse(int fd);
 	int							sendData(int , std::string data);
 	void						clear(void);
 
-	Header();
-	Header(char *);
-	Header(char *, ServerConfig *config);
-	~Header();
+	Client();
+	Client(char *);
+	Client(char *, ServerConfig *config);
+	~Client();
 
 
 };

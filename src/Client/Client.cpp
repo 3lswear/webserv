@@ -1,20 +1,20 @@
-#include "Header.hpp"
+#include "Client.hpp"
 
 //-------------------------------------------------Constructors---------------------------------------
 
-Header::Header()
+Client::Client()
 {
 	this->_fd = -1;
 }
 
-Header::Header(char *str)
+Client::Client(char *str)
 {
 	this->_fd = -1;
 	this->_buff = str;
 
 }
 
-Header::Header(char *str, ServerConfig *config)
+Client::Client(char *str, ServerConfig *config)
 {
 	this->_fd = -1;
 	this->_config = config;
@@ -24,34 +24,34 @@ Header::Header(char *str, ServerConfig *config)
 
 //-------------------------------------------------GET/SET---------------------------------------
 
-Request Header::getRequest(void)
+Request Client::getRequest(void)
 {
 	return (_request);
 }
 
-Respons	Header::getRespons(void)
+Response	Client::getResponse(void)
 {
-	return (_respons);
+	return (_Response);
 }
 
-int	Header::getFd(void)
+int	Client::getFd(void)
 {
 	return _fd;
 }
 
-void	Header::setRawData(char *str)
+void	Client::setRawData(char *str)
 {
 	this->_buff = str;
 }
 
-void	Header::setFd(int fd)
+void	Client::setFd(int fd)
 {
 	this->_fd = fd;
 }
 
 //-------------------------------------------------Parsing---------------------------------------
 
-int	Header::parseRequest(void)
+int	Client::parseRequest(void)
 {
 	_request.setData(_buff);
 	_ret = _request.parseRequest();
@@ -64,18 +64,18 @@ int	Header::parseRequest(void)
 
 //-------------------------------------------------SEND---------------------------------------
 
-int	Header::sendData(int fd, std::string data)
+int	Client::sendData(int fd, std::string data)
 {
 	return (send(fd, data.c_str(), data.length(), 0));
 }
 
-int	Header::sendRespons(int	fd)
+int	Client::sendResponse(int	fd)
 {
-	_respons.setData(_request, _config);
-	_respons.generate();
-	_headerToSend = _respons.getHeader();
-	_bodyToSend = _respons.getBody();
-	_ret = sendData(fd, _headerToSend);
+	_Response.setData(_request, _config);
+	_Response.generate();
+	_ClientToSend = _Response.getClient();
+	_bodyToSend = _Response.getBody();
+	_ret = sendData(fd, _ClientToSend);
 	_ret = sendData(fd, _bodyToSend);
 
 	return (_ret);
@@ -85,21 +85,21 @@ int	Header::sendRespons(int	fd)
 
 //-------------------------------------------------Other---------------------------------------
 
-void	Header::printHeaderInfo(void)
+void	Client::printClientInfo(void)
 {
 	std::map<std::string, std::string>	map;
 	std::map<std::string, std::string>::iterator it;
 	std::map<std::string, std::string>::iterator it1;
 
-	map = _request.getHeaderFields();
+	map = _request.getClientFields();
 	std::cout << PINK << "request method = " << _request.getMethod() << ZERO_C << std::endl;
 	std::cout << PINK << "request URI = " << _request.getURI() << ZERO_C << std::endl;
 	std::cout << PINK << "host  = " << _request.getHost() << ZERO_C << std::endl;
 	std::cout << PINK << "request query = " << _request.getQuery() << ZERO_C << std::endl;
 	std::cout << PINK << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
-	std::cout << YELLOW << "request header:\n" << _buff << ZERO_C << std::endl;
+	std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
 	
-	std::cout << TURGUOISE << "HEADER MAP" << ZERO_C << std::endl;
+	std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;
 	for ( it = map.begin(); it != map.end() ; it++)
 	{
 		std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
@@ -108,7 +108,7 @@ void	Header::printHeaderInfo(void)
 	
 }
 
-void	Header::clear(void)
+void	Client::clear(void)
 {
 	_fd = -1;
 	_buff = NULL;
@@ -118,6 +118,6 @@ void	Header::clear(void)
 	_config = NULL;
 }
 
-Header::~Header()
+Client::~Client()
 {
 }

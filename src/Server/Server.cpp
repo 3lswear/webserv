@@ -85,8 +85,8 @@ void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE + 1] = {0};
-	/* Header header[MAX_CLIENT]; */
-	std::map<int, Header> header_map;
+	/* Client Client[MAX_CLIENT]; */
+	std::map<int, Client> Client_map;
 	int fd;
 	int client_sock;
 	/* int status; */
@@ -122,12 +122,12 @@ void	Server::start(void)
 			std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 			fd = _events[i].data.fd;
 			assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
-			header_map[fd].setRawData(buf);
-			header_map[fd].parseRequest();
-			header_map[fd].printHeaderInfo();
-			header_map[fd].sendRespons(fd);
-			header_map[fd].clear();
-			/* std::cout << BLUE << "status is " << header_map[fd].getReasonPhrase(status) << RESET << std::endl; */
+			Client_map[fd].setRawData(buf);
+			Client_map[fd].parseRequest();
+			Client_map[fd].printClientInfo();
+			Client_map[fd].sendResponse(fd);
+			Client_map[fd].clear();
+			/* std::cout << BLUE << "status is " << Client_map[fd].getReasonPhrase(status) << RESET << std::endl; */
 			bzero(buf, BUFFSIZE);
 			close(fd);
 			_client--;

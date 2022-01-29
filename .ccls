@@ -1,6 +1,6 @@
 clang++
 -Iincludes
--Isrc/Header/
+-Isrc/Client/
 -Isrc/Autoindex/
 -Isrc/Server/
 -Isrc/config/

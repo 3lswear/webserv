@@ -57,9 +57,9 @@ int							Request::getCode(void)
 {
     return (_ret);
 }
-std::map<std::string, std::string>	Request::getHeaderFields(void)
+std::map<std::string, std::string>	Request::getClientFields(void)
 {
-    return (_headerField);
+    return (_ClientField);
 }
 
 void                        Request::setData(char *str)
@@ -118,7 +118,7 @@ int	Request::parseStartLine(std::string str)
 	return (_ret);
 }
 
-int	Request::parseHeaderfield(std::string str)
+int	Request::parseClientfield(std::string str)
 {
 	int	distance;
 	std::string key;
@@ -130,15 +130,15 @@ int	Request::parseHeaderfield(std::string str)
 	key = str.substr(0, distance);
 	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 	value = str.erase(0, distance + 1);
-	if (_headerField.find(key) != _headerField.end())
+	if (_ClientField.find(key) != _ClientField.end())
 	{
-		std::cout << RED << "ERROR: double header-field" << ZERO_C << std::endl;
+		std::cout << RED << "ERROR: double Client-field" << ZERO_C << std::endl;
 	}
 	else
 	{
 		value = value.erase(0, value.find_first_not_of(WHITESPACE));
 		value = value.substr(0, value.find_last_not_of(WHITESPACE) + 1);
-		_headerField[key] = value;
+		_ClientField[key] = value;
 	}
 	return 200;
 }
@@ -155,7 +155,7 @@ int	Request::parseRequest(void)
 		if (_row == 0)
 			_ret = parseStartLine(line);
 		else
-			_ret = parseHeaderfield(line);
+			_ret = parseClientfield(line);
 		_row++;
 	}
 	if (!badCode(_ret))
@@ -168,7 +168,7 @@ int	Request::parseRequest(void)
 
 void    Request::copyFromMap()
 {
-    _host = _headerField.find("host")->second;
+    _host = _ClientField.find("host")->second;
 }
 
 bool    Request::badCode(int code)
@@ -222,7 +222,7 @@ void    Request::clear(void)
     _fullURI = "";
     _version = "";
     _location = "";
-    _headerField.clear();
+    _ClientField.clear();
     _data = NULL;
     _config = NULL;
 }
