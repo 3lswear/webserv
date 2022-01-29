@@ -6,6 +6,8 @@ Request::Request()
 {
     _row = 0;
     _ret = 200;
+	_contentLength = 0;
+	_chunked = false;
 }
 
 Request::Request(char *str)
@@ -13,6 +15,10 @@ Request::Request(char *str)
     _row = 0;
     _ret = 200;
     _data = str;
+	_head_ok = false;
+	_body_ok = false;
+	_chunked = false;
+	_contentLength = 0;
 }
 
 //-------------------------------------------------Get/Set---------------------------------------
@@ -59,9 +65,12 @@ int							Request::getCode(void)
 }
 std::map<std::string, std::string>	Request::getClientFields(void)
 {
-    return (_ClientField);
+    return (_headerField);
 }
-
+bool						Request::getChunked(void)
+{
+	return (_chunked);
+}
 void                        Request::setData(char *str)
 {
     this->_data = str;
@@ -118,6 +127,37 @@ int	Request::parseStartLine(std::string str)
 	return (_ret);
 }
 
+void	Request::splitData(char *data)
+{
+	int	pos;
+	std::string	str;
+
+	str = data;
+	if (!_head_ok)
+	{
+		pos = str.find("\r\n\r\n");
+		if (pos == -1)
+		{
+			_ret = 400;
+			return; 
+		}
+		_head = str.substr(0, pos) + "\n";
+		str.erase(0, pos + 4);
+		_head_ok = true;
+		parseHeader();
+		if (_contentLength == 0)
+			_body_ok = true;
+	}
+	if (badCode(_ret))
+		return ;
+	else if (!_body_ok)
+	{
+		_body += str.substr(0, str.size());
+		if (_body.size() >= _contentLength)
+			_body_ok = true;
+	}
+}
+
 int	Request::parseClientfield(std::string str)
 {
 	int	distance;
@@ -130,7 +170,7 @@ int	Request::parseClientfield(std::string str)
 	key = str.substr(0, distance);
 	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 	value = str.erase(0, distance + 1);
-	if (_ClientField.find(key) != _ClientField.end())
+	if (_headerField.find(key) != _headerField.end())
 	{
 		std::cout << RED << "ERROR: double Client-field" << ZERO_C << std::endl;
 	}
@@ -138,17 +178,17 @@ int	Request::parseClientfield(std::string str)
 	{
 		value = value.erase(0, value.find_first_not_of(WHITESPACE));
 		value = value.substr(0, value.find_last_not_of(WHITESPACE) + 1);
-		_ClientField[key] = value;
+		_headerField[key] = value;
 	}
 	return 200;
 }
 
-int	Request::parseRequest(void)
+int	Request::parseHeader(void)
 {
 	std::string			line;
 	std::stringstream	buffStream;
 	
-	buffStream << _data;
+	buffStream << _head;
 	_ret = 200;
 	while (std::getline(buffStream, line, '\n') && !badCode(_ret))
 	{
@@ -163,19 +203,49 @@ int	Request::parseRequest(void)
 	return (_ret);
 }
 
+int	Request::parseRequest(void)
+{
+	if (!_head_ok || !_body_ok)
+		splitData(_data);
+
+	return (_ret);
+}
+
 //-------------------------------------------------Utils---------------------------------------
 
 
 void    Request::copyFromMap()
 {
-    _host = _ClientField.find("host")->second;
+	std::map<std::string, std::string>::iterator it;
+	int	pos;
+	//host
+    _host = _headerField.find("host")->second;
+
+	//content-lenght
+	it = _headerField.find("content-length");
+	if (it != _headerField.end())
+		_contentLength = atoi(it->second.c_str());
+	//chunked
+	it = _headerField.find("transfer-encoding");
+	if (it != _headerField.end())
+	{
+		pos = it->second.find("chunked");
+		if ( pos != -1)
+			_chunked = true;
+	}
 }
+
 
 bool    Request::badCode(int code)
 {
     if (code == 200)
         return (false);
     return true;
+}
+
+bool	Request::ok(void)
+{
+	return (_head_ok && _body_ok);
 }
 
 int	Request::isFile(std::string path)
@@ -222,7 +292,10 @@ void    Request::clear(void)
     _fullURI = "";
     _version = "";
     _location = "";
-    _ClientField.clear();
+	_head = "";
+	_head_ok = false;
+	_body_ok = false;
+    _headerField.clear();
     _data = NULL;
     _config = NULL;
 }
