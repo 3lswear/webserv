@@ -14,7 +14,7 @@ private:
     ServerConfig    *_config;
 
 private:
-    std::map<std::string, std::string> _errorCode;
+    static std::map<std::string, std::string> _errorCode;
 
 private:
     void                        methodGet(void);
@@ -25,15 +25,15 @@ private:
 public:
     std::string                 getClient(void);
     std::string                 getBody(void);
-    std::string					getReasonPhrase(std::string);
-	std::string					getReasonPhrase(int);
+    static std::string					getReasonPhrase(std::string);
+	static std::string					getReasonPhrase(int);
 	std::string					getErrorPage(int code);
 
 
     void                        setData(Request, ServerConfig *);
 public:
 	void						OpenResponseFile(const char *path);
-	void						initErrorCode(void);
+	void					    initErrorCode(void);
     void                        generate();
     Response();
     ~Response();

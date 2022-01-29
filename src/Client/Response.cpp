@@ -94,6 +94,8 @@ void	Response::methodGet(void)
 
 //-------------------------------------------------GET/SET---------------------------------------
 
+std::map<std::string, std::string> Response::_errorCode;
+
 void  Response::initErrorCode(void)
 {
 	_errorCode["100"]  = "Continue";
