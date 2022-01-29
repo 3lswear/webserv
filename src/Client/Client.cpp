@@ -92,19 +92,19 @@ void	Client::printClientInfo(void)
 	std::map<std::string, std::string>::iterator it1;
 
 	map = _request.getClientFields();
-	std::cout << PINK << "request method = " << _request.getMethod() << ZERO_C << std::endl;
-	std::cout << PINK << "request URI = " << _request.getURI() << ZERO_C << std::endl;
-	std::cout << PINK << "host  = " << _request.getHost() << ZERO_C << std::endl;
-	std::cout << PINK << "request query = " << _request.getQuery() << ZERO_C << std::endl;
-	std::cout << PINK << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
-	std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
+	/* std::cout << PINK << "request method = " << _request.getMethod() << ZERO_C << std::endl; */
+	/* std::cout << PINK << "request URI = " << _request.getURI() << ZERO_C << std::endl; */
+	/* std::cout << PINK << "host  = " << _request.getHost() << ZERO_C << std::endl; */
+	/* std::cout << PINK << "request query = " << _request.getQuery() << ZERO_C << std::endl; */
+	/* std::cout << PINK << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl; */
+	std::cout << YELLOW << "Client request dump:\n" << _buff << ZERO_C << std::endl;
 	
-	std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;
-	for ( it = map.begin(); it != map.end() ; it++)
-	{
-		std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
-		// std::cout << "1\n";
-	}
+	/* std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl; */
+	/* for ( it = map.begin(); it != map.end() ; it++) */
+	/* { */
+	/* 	std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl; */
+	/* 	// std::cout << "1\n"; */
+	/* } */
 	
 }
 
