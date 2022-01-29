@@ -30,6 +30,7 @@ public:
 	Request						getRequest(void);
 	Response					getResponse(void);
 	std::string					getStrToSend(void);
+	unsigned int				getCounter(void) const;
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
