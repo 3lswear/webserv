@@ -44,6 +44,29 @@ void	Server::readConfig(void)
 	}
 }
 
+void Server::sendData(Client &client, int fd)
+{
+	std::string tmp = client.getStrToSend();
+	unsigned int size_diff = tmp.size() - client.getCounter();
+
+	std::cout << tmp.size() << std::endl;
+
+	if (size_diff < BUFFSIZE)
+	{
+		tmp = tmp.substr(client.getCounter(), size_diff);
+	}
+	else
+		tmp = tmp.substr(client.getCounter(), BUFFSIZE);
+
+	/* std::cout << YELLO << tmp << RESET << std::endl; */
+	std::cout << GREEN << client.getCounter() << RESET << std::endl;
+
+
+	send(fd, tmp.c_str(), tmp.size(), 0);
+	client.increaseCounter();
+
+}
+
 void	Server::setupConfig(void)
 {
 	this->_ip = "127.0.0.1";
@@ -76,6 +99,7 @@ void	Server::start(void)
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE] = {0};
 	std::map<int, Client> client_map;
+	std::map<int, Client>::iterator client_it;
 	int fd;
 	int status;
 	int ready_num = 0;
@@ -92,7 +116,40 @@ void	Server::start(void)
 	add_to_epoll_list(server_sock.getSocketFd(), server_events);
 	while (1)
 	{
-		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
+
+		// sending
+		for (client_it = client_map.begin();
+				client_it != client_map.end(); ++client_it)
+		{
+			std::cout << TURQ << "IN SEND LOOP" << RESET << std::endl;
+			Client &client = client_it->second;
+
+			if (client.readyToSend())
+			{
+				epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, client_it->first, NULL);
+				std::cout << TURQ << "readyToSend " << client_it->first << RESET << std::endl;
+				client.generateRespons();
+
+				sendData(client, client_it->first);
+			
+			}
+
+			if (client.allSended())
+			{
+				close(client_it->first);
+				std::cerr << RED <<
+					"deleting client "
+					<< client_it->first
+					<<
+					RESET
+					<< std::endl;
+				client_map.erase(client_it);
+			}
+		}
+
+		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 100);
+		std::cout << TURQ << "ready_num " << ready_num << RESET << std::endl;
+
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
 		for (int i = 0; i < ready_num; i++)
@@ -114,16 +171,12 @@ void	Server::start(void)
 			{
 				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 				assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
+				std::cout << TURQ << "setRawData" << RESET << std::endl;
 				client_map[fd].setRawData(buf);
 				status = client_map[fd].parseRequest();
-				client_map[fd].printClientInfo();
-				client_map[fd].sendResponse(fd);
-				client_map[fd].clear();
-				client_map.erase(fd);
 				std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 				bzero(buf, BUFFSIZE);
-				close(fd);
-				_client--;
+				/* _client--; */
 			}
 		}
 		ready_num = 0;
