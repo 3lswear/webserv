@@ -64,8 +64,8 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 
 	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
 	_client++;
-	std::cerr << RED
-		<< "add client_sock "
+	std::cerr << YELLO
+		<< "add socket "
 		<< fd
 		<< " to epoll_list"
 		<< RESET << std::endl;
@@ -74,49 +74,57 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
-	char buf[BUFFSIZE + 1] = {0};
-	std::map<int, Client> Client_map;
+	char buf[BUFFSIZE] = {0};
+	std::map<int, Client> client_map;
 	int fd;
-	int client_sock;
 	int status;
 	int ready_num = 0;
 
 	unsigned int client_events = EPOLLIN | EPOLLOUT | EPOLLET;
+	unsigned int server_events = EPOLLIN | EPOLLOUT | EPOLLET;
 	
-	_epoll_fd = epoll_create1(0);
+	_epoll_fd = epoll_create(1337);
 	checkError(server_sock.init(MAX_CLIENT), "Socket init");
 	setNonBlock(server_sock.getSocketFd());
 	setNonBlock(_epoll_fd);
+
+	std::cerr << YELLO << "adding server_sock..." << RESET << std::endl;
+	add_to_epoll_list(server_sock.getSocketFd(), server_events);
 	while (1)
 	{
-		client_sock = accept(server_sock.getSocketFd(),
-				server_sock.getSockaddr(), server_sock.getSocklen());
-		if (client_sock > 0)
-			add_to_epoll_list(client_sock, client_events);
-		if (_client > 0)
-			ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
-		/* std::cout << GREEN << "after epoll_wait" << RESET << std::endl; */
+		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
 		if (ready_num < 0)
-		{
-			perror("epoll_ret");
 			throw std::logic_error("epoll_ret");
-		}
 		for (int i = 0; i < ready_num; i++)
 		{
 			/* if (_events[i].events == 0) */
 			/* 	continue; */
 			fd = _events[i].data.fd;
-			std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
-			assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
-			Client_map[fd].setRawData(buf);
-			status = Client_map[fd].parseRequest();
-			Client_map[fd].printClientInfo();
-			Client_map[fd].sendResponse(fd);
-			Client_map[fd].clear();
-			std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
-			bzero(buf, BUFFSIZE);
-			close(fd);
-			_client--;
+
+			if (fd == server_sock.getSocketFd())
+			{
+				int client_sock = accept(server_sock.getSocketFd(),
+						server_sock.getSockaddr(), server_sock.getSocklen());
+				if (client_sock > 0)
+					add_to_epoll_list(client_sock, client_events);
+				else
+					throw std::logic_error("accept didnt work");
+			}
+			else
+			{
+				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
+				assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
+				client_map[fd].setRawData(buf);
+				status = client_map[fd].parseRequest();
+				client_map[fd].printClientInfo();
+				client_map[fd].sendResponse(fd);
+				client_map[fd].clear();
+				client_map.erase(fd);
+				std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
+				bzero(buf, BUFFSIZE);
+				close(fd);
+				_client--;
+			}
 		}
 		ready_num = 0;
 
