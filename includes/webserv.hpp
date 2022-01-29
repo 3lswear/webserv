@@ -13,7 +13,7 @@
 #define RESET		"\033[0m"
 
 #define	HOME		"www"
-#define BUFFSIZE	1024
+#define BUFFSIZE	65536
 #define MAX_CLIENT	1000
 #define WHITESPACE " \n\r\t\f\v"
 
