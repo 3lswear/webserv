@@ -6,7 +6,7 @@ SANFLAGS = -fsanitize=address
 
 # SANFLAGS = -fsanitize=leak
 
-CXXFLAGS = -Wall -Wextra  -Werror -g -std=c++98 $(SANFLAGS)
+CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98 $(SANFLAGS)
 
 CPPFLAGS += -MD -MP
 
