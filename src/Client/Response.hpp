@@ -25,8 +25,8 @@ private:
 public:
     std::string                 getClient(void);
     std::string                 getBody(void);
-    static std::string					getReasonPhrase(std::string);
-	static std::string					getReasonPhrase(int);
+    static std::string			getReasonPhrase(std::string);
+	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
 
 

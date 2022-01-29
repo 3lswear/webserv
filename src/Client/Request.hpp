@@ -12,8 +12,10 @@ private:
 	
 	int			_ret;
 	int			_row;
+	unsigned int			_contentLength;
 
 	std::string _URI;
+	std::string	_head;
 	std::string	_body;
 	std::string	_host;
     std::string _query;
@@ -21,10 +23,12 @@ private:
     std::string _fullURI;
     std::string _version;
 	std::string	_location;
-	std::map<std::string, std::string> _ClientField;
+	std::map<std::string, std::string> _headerField;
 
 	ServerConfig	*_config;
-
+	bool			_head_ok;
+	bool			_body_ok;
+	bool			_chunked;
 public:
 	std::string					getURI(void);
 	std::string					getBody(void);
@@ -37,6 +41,7 @@ public:
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
 	std::map<std::string, std::string>	getClientFields(void);
+	bool						getChunked(void);
 
 	void						setConfig(ServerConfig *config);
 	void						setData(char *);
@@ -49,15 +54,19 @@ public:
 	int							parseStartLine(std::string);
 	int							parseClientfield(std::string);
 	int							parseRequest(void);
+	int							parseHeader(void);
 	void						parseURI(std::string);
 	void						printClientInfo(void);
 
+
 	bool						badCode(int);
+	bool						ok(void);
 	int							isDir(std::string path);
 	int							isFile(std::string path);
 	bool						autoindexOn(void);
 	void						copyFromMap(void);
 	void						clear(void);
+	void						splitData(char *);
 
 	~Request();
 };

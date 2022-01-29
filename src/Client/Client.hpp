@@ -11,22 +11,25 @@ class Client
 {
 private:
 	Request			_request;
-	Response			_Response;
+	Response		_response;
 	ServerConfig	*_config;
 
 private:
 	int		_ret;
 	int		_fd;
+	unsigned int		_sended;
 	char	*_buff;
 
 
 	std::string	_bodyToSend;
-	std::string	_ClientToSend;
+	std::string	_headerToSend;
+	std::string	_toSend;
 	std::map<std::string, std::string> _errorCode;
 	
 public:
 	Request						getRequest(void);
-	Response						getResponse(void);
+	Response					getResponse(void);
+	std::string					getStrToSend(void);
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
@@ -35,10 +38,15 @@ public:
 	int							parseRequest(void);
 
 	void						printClientInfo(void);
-	
+
+	bool						readyToSend(void);
+	bool						allSended(void);
+	bool						isChunked(void);
 	int							sendResponse(int fd);
 	int							sendData(int , std::string data);
 	void						clear(void);
+	void						increaseCounter(void);
+	std::string					generateRespons(void);
 
 	Client();
 	Client(char *);
