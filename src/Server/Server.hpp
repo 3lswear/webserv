@@ -19,7 +19,7 @@ private:
 	struct sockaddr_in _addres;
 	std::string _ip;
 	std::vector<ServerConfig *>	_configs;
-	/* void add_to_epoll_list(int fd, unsigned int ep_events); */
+	void add_to_epoll_list(int fd, unsigned int ep_events);
 
 private:
 	void checkError(int fd, std::string str);
@@ -27,7 +27,6 @@ private:
 	void sendClient(Client head, int);
 	void sendResponse(Client head, int);
 	void setNonBlock(int fd);
-	void add_to_epoll_list(int fd);
 public:
 	Server();
 	Server(std::string path);

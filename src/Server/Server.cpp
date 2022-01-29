@@ -56,13 +56,13 @@ void	Server::setNonBlock(int fd)
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 }
 
-void	Server::add_to_epoll_list(int fd)
+void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 {
 	struct epoll_event	ev;
-	ev.events = EPOLLIN | EPOLLOUT | EPOLLET;
+	ev.events = ep_events;
 	ev.data.fd = fd;
 
-	epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev);
+	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
 	_client++;
 	std::cerr << RED
 		<< "add client_sock "
@@ -71,30 +71,17 @@ void	Server::add_to_epoll_list(int fd)
 		<< RESET << std::endl;
 }
 
-/* void Server::add_to_epoll_list(int fd, unsigned int ep_events) */
-/* { */
-/* 	struct epoll_event event; */
-/* 	event.data.fd = fd; */
-/* 	event.events = ep_events; */
-/* 	if (epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &event)) */
-/* 			throw std::logic_error("epoll add"); */
-
-/* } */
-
 void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	char buf[BUFFSIZE + 1] = {0};
-	/* Client Client[MAX_CLIENT]; */
 	std::map<int, Client> Client_map;
 	int fd;
 	int client_sock;
-	/* int status; */
+	int status;
 	int ready_num = 0;
 
-	/* struct epoll_event ev; */
-
-	/* unsigned int ep_events = EPOLLIN | EPOLLOUT | EPOLLET; */
+	unsigned int client_events = EPOLLIN | EPOLLOUT | EPOLLET;
 	
 	_epoll_fd = epoll_create1(0);
 	checkError(server_sock.init(MAX_CLIENT), "Socket init");
@@ -105,7 +92,7 @@ void	Server::start(void)
 		client_sock = accept(server_sock.getSocketFd(),
 				server_sock.getSockaddr(), server_sock.getSocklen());
 		if (client_sock > 0)
-			add_to_epoll_list(client_sock);
+			add_to_epoll_list(client_sock, client_events);
 		if (_client > 0)
 			ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
 		/* std::cout << GREEN << "after epoll_wait" << RESET << std::endl; */
@@ -118,16 +105,15 @@ void	Server::start(void)
 		{
 			/* if (_events[i].events == 0) */
 			/* 	continue; */
-
-			std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 			fd = _events[i].data.fd;
+			std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 			assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
 			Client_map[fd].setRawData(buf);
-			Client_map[fd].parseRequest();
+			status = Client_map[fd].parseRequest();
 			Client_map[fd].printClientInfo();
 			Client_map[fd].sendResponse(fd);
 			Client_map[fd].clear();
-			/* std::cout << BLUE << "status is " << Client_map[fd].getReasonPhrase(status) << RESET << std::endl; */
+			std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 			bzero(buf, BUFFSIZE);
 			close(fd);
 			_client--;
