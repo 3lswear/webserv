@@ -57,7 +57,6 @@ void	Client::setFd(int fd)
 	this->_fd = fd;
 }
 
-
 //-------------------------------------------------Parsing---------------------------------------
 
 int	Client::parseRequest(void)
