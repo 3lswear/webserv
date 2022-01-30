@@ -10,7 +10,6 @@ Request::Request()
 	_chunked = false;
 	_head_ok = false;
 	_body_ok = false;
-
 }
 
 Request::Request(char *str)
@@ -74,6 +73,16 @@ bool						Request::getChunked(void)
 {
 	return (_chunked);
 }
+
+unsigned int Request::getContentLength(void) const
+{
+	return (_contentLength);
+}
+unsigned int Request::getHeaderSize(void) const
+{
+	return (_headerSize);
+}
+
 void                        Request::setData(char *str)
 {
     this->_data = str;
@@ -145,6 +154,7 @@ void	Request::splitData(char *data)
 			return; 
 		}
 		_head = str.substr(0, pos) + "\n";
+		_headerSize = _head.size() + 3;
 		str.erase(0, pos + 4);
 		_head_ok = true;
 		parseHeader();

@@ -18,6 +18,7 @@ private:
 	int		_ret;
 	int		_fd;
 	unsigned int		_sended;
+	unsigned int		_received;
 	char	*_buff;
 
 
@@ -25,6 +26,9 @@ private:
 	std::string	_headerToSend;
 	std::string	_toSend;
 	std::map<std::string, std::string> _errorCode;
+
+public:
+	bool allRead;
 	
 public:
 	Request						getRequest(void);
@@ -34,6 +38,8 @@ public:
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
+	unsigned int getRecvCounter(void) const;
+
 
 public:
 	int							parseRequest(void);
@@ -42,11 +48,13 @@ public:
 
 	bool						readyToSend(void);
 	bool						allSended(void);
+	bool						allRecved(void);
 	bool						isChunked(void);
 	int							sendResponse(int fd);
 	int							sendData(int , std::string data);
 	void						clear(void);
 	void						increaseCounter(void);
+	void						increaseRecvCounter(unsigned int n);
 	std::string					generateRespons(void);
 
 	Client();

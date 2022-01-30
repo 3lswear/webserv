@@ -10,6 +10,7 @@
 //----------------------------------------------Constructors-----------------------------------------------------------------------------------
 Server::Server()
 {
+	bzero(_events, sizeof(_events));
 	_client = 0;
 
 }
@@ -66,6 +67,39 @@ void Server::sendData(Client &client, int fd)
 
 }
 
+void Server::readSocket(int fd, std::map<int, Client> &client_map)
+{
+
+	int status;
+	int bytes_read;
+	char buf[BUFFSIZE + 1] = {0};
+
+	std::cout << TURQ << "IN readSocket" << RESET << std::endl;
+	bytes_read = recv(fd, buf, BUFFSIZE, 0);
+	if (bytes_read == 0)
+	{
+		client_map[fd].allRead = true;
+		return;
+	}
+	client_map[fd].setRawData(buf);
+	status = client_map[fd].parseRequest();
+	client_map[fd].increaseRecvCounter(bytes_read);
+	client_map[fd].printClientInfo();
+
+	if ((bytes_read < BUFFSIZE) && client_map[fd].allRecved())
+	{
+		client_map[fd].allRead = true;
+	}
+
+	std::cerr << "bytes_read " << bytes_read << std::endl;;
+	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;;
+	std::cerr << "contentLength " << client_map[fd].getRequest().getContentLength() << std::endl;
+	std::cerr << "allRead " << client_map[fd].allRead << std::endl;;
+
+	std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
+	bzero(buf, BUFFSIZE);
+}
+
 void	Server::setupConfig(void)
 {
 	this->_ip = "127.0.0.1";
@@ -96,11 +130,9 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
-	char buf[BUFFSIZE + 1] = {0};
 	std::map<int, Client> client_map;
 	std::map<int, Client>::iterator client_it;
 	int fd;
-	int status;
 	int ready_num = 0;
 
 	unsigned int client_events = EPOLLIN | EPOLLOUT | EPOLLET;
@@ -123,6 +155,10 @@ void	Server::start(void)
 			std::cout << TURQ << "IN SEND LOOP" << RESET << std::endl;
 			Client &client = client_it->second;
 
+			if (!client.allRead)
+			{
+				readSocket(client_it->first, client_map);
+			}
 			if (client.readyToSend())
 			{
 				epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, client_it->first, NULL);
@@ -133,7 +169,7 @@ void	Server::start(void)
 			
 			}
 
-			if (client.allSended())
+			if (client.readyToSend() && client.allSended())
 			{
 				close(client_it->first);
 				std::cerr << RED <<
@@ -156,6 +192,10 @@ void	Server::start(void)
 			/* if (_events[i].events == 0) */
 			/* 	continue; */
 			fd = _events[i].data.fd;
+			/* if (_events[i].data.fd == 0) */
+			/* { */
+			/* 	continue; */
+			/* } */
 
 			if (fd == server_sock.getSocketFd())
 			{
@@ -169,12 +209,8 @@ void	Server::start(void)
 			else
 			{
 				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
-				assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
-				client_map[fd].setRawData(buf);
-				status = client_map[fd].parseRequest();
-				std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
-				bzero(buf, BUFFSIZE);
 				/* _client--; */
+				readSocket(fd, client_map);
 			}
 		}
 		ready_num = 0;

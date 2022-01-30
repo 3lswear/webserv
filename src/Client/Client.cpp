@@ -4,12 +4,16 @@
 
 Client::Client()
 {
+	allRead = false;
+	_received = 0;
 	this->_fd = -1;
 	this->_sended = 0;
 }
 
 Client::Client(char *str)
 {
+	allRead = false;
+	_received = 0;
 	this->_fd = -1;
 	this->_buff = str;
 	this->_sended = 0;
@@ -18,6 +22,8 @@ Client::Client(char *str)
 
 Client::Client(char *str, ServerConfig *config)
 {
+	allRead = false;
+	_received = 0;
 	this->_fd = -1;
 	this->_config = config;
 	this->_buff = str;
@@ -50,6 +56,11 @@ int	Client::getFd(void)
 unsigned int Client::getCounter(void) const
 {
 	return _sended;
+}
+
+unsigned int Client::getRecvCounter(void) const
+{
+	return _received;
 }
 
 void	Client::setRawData(char *str)
@@ -93,11 +104,33 @@ bool	Client::allSended(void)
 		return (true);
 	return (false);
 }
+
+bool	Client::allRecved(void)
+{
+	if (_request.getContentLength() == _received)
+	{
+		std::cout << "contentLength, _received "
+			<< _request.getContentLength()
+			<< " " <<
+			_received << std::endl;
+		return (true);
+	}
+	else
+		return (false);
+}
 // Функция увеличивает счетчик на количество BUFFERSIZE. Счетчик - количество байтов отправленных клиенту.
 void	Client::increaseCounter(void)
 {
 	_sended += BUFFSIZE;
 }
+
+void 	Client::increaseRecvCounter(unsigned int n)
+{
+	if (_received == 0)
+		_received -= _request.getHeaderSize();
+	_received += n;
+}
+
 //Генерирует response. Далее респонс можно получить через функцию getStrToSend()
 int	Client::sendResponse(int	fd)
 {
@@ -150,7 +183,8 @@ void	Client::printClientInfo(void)
 		std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
 	}
 	std::cout << TURGUOISE << "Client BODY" << ZERO_C << std::endl;
-	std::cout << BLUE << _request.getBody() << ZERO_C << std::endl;
+	std::cout << GREEN << _request.getBody().size() << ZERO_C << std::endl;
+	/* std::cout << BLUE << _request.getBody() << ZERO_C << std::endl; */
 	
 }
 
