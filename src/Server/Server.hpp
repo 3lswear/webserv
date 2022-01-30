@@ -28,6 +28,7 @@ private:
 	void sendResponse(Client head, int);
 	void setNonBlock(int fd);
 	void sendData(Client &client, int fd);
+	void readSocket(int fd, std::map<int, Client> &client_map);
 public:
 	Server();
 	Server(std::string path);
