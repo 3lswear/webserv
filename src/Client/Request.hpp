@@ -13,6 +13,7 @@ private:
 	int			_ret;
 	int			_row;
 	unsigned int			_contentLength;
+	unsigned int 			_headerSize;
 
 	std::string _URI;
 	std::string	_head;
@@ -40,6 +41,8 @@ public:
 	std::string					getLocation(void);
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
+	unsigned int				getContentLength(void) const;
+	unsigned int				getHeaderSize(void) const;
 	std::map<std::string, std::string>	getClientFields(void);
 	bool						getChunked(void);
 
