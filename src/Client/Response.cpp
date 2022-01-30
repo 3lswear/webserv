@@ -9,9 +9,9 @@ Response::Response()
 
 //-------------------------------------------------GET/SET---------------------------------------
 
-std::string     Response::getClient(void)
+std::string     Response::getHeader(void)
 {
-	return (_Client);
+	return (_header);
 }
 std::string     Response::getBody(void)
 {
@@ -65,13 +65,14 @@ void	Response::invalidClient(void)
 {
 	std::stringstream ss;
 	std::string tmp;
-	//Client
+	//Header
 	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_Client = ss.str();
+	_header = ss.str();
 
 	//body
 	_body = getErrorPage(_request.getCode());
 	std::cout << RED << "Invalid Client method called\nCODE: " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << ZERO_C << std::endl;
+	std::cout << _header << std::endl << _body << std::endl;
 }
 
 void	Response::methodGet(void)
@@ -80,7 +81,7 @@ void	Response::methodGet(void)
 	std::string tmp;
 	//Client
 	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_Client = ss.str();
+	_header = ss.str();
 	//body
 	if (!_request.badCode(_request.getCode()) && _request.isDir(_request.getFullUri()) == 0)
 		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());

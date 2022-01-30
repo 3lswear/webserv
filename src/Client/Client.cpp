@@ -99,7 +99,7 @@ int	Client::sendResponse(int	fd)
 {
 	_response.setData(_request, _config);
 	_response.generate();
-	_headerToSend = _response.getClient();
+	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_ret = sendData(fd, _headerToSend + _bodyToSend);
 
@@ -110,7 +110,7 @@ std::string	Client::generateRespons(void)
 {
 	_response.setData(_request, _config);
 	_response.generate();
-	_headerToSend = _response.getClient();
+	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_toSend = _headerToSend + _bodyToSend;
 
@@ -138,7 +138,7 @@ void	Client::printClientInfo(void)
 	std::cout << PINK << "host  = " << _request.getHost() << ZERO_C << std::endl;
 	std::cout << PINK << "request query = " << _request.getQuery() << ZERO_C << std::endl;
 	std::cout << PINK << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
-	// std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
+	std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
 	
 	std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;
 	for ( it = map.begin(); it != map.end() ; it++)

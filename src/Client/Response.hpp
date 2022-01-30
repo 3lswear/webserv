@@ -9,7 +9,7 @@ class Response
 {
 private:
     std::string     _body;
-    std::string     _Client;
+    std::string     _header;
     Request         _request;
     ServerConfig    *_config;
 
@@ -23,7 +23,7 @@ private:
     void                        invalidClient(void);
 
 public:
-    std::string                 getClient(void);
+    std::string                 getHeader(void);
     std::string                 getBody(void);
     static std::string			getReasonPhrase(std::string);
 	static std::string			getReasonPhrase(int);

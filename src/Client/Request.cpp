@@ -8,6 +8,9 @@ Request::Request()
     _ret = 200;
 	_contentLength = 0;
 	_chunked = false;
+	_head_ok = false;
+	_body_ok = false;
+
 }
 
 Request::Request(char *str)
