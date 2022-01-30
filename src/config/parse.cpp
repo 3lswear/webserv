@@ -43,6 +43,6 @@ TOMLMap *parse(void)
 	std::string filename = "config/simple.toml";
 	config::TOMLParser parser(filename);
 	TOMLMap *root = parser.parse();
-	config::display(root);
+	/* config::display(root); */
 	return (root);
 }
