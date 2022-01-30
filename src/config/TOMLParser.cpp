@@ -30,7 +30,7 @@ namespace config
 
 	void TOMLParser::processMap(void)
 	{
-		std::cerr << "Processing map" << std::endl;
+		/* std::cerr << "Processing map" << std::endl; */
 		toml_node *map_node;
 		s_token current;
 
@@ -49,7 +49,7 @@ namespace config
 		else
 			throw std::logic_error("unexpected token in processMap");
 
-		std::cout << current.value << std::endl;
+		/* std::cout << current.value << std::endl; */
 
 		std::vector<std::string> full_name;
 
@@ -61,7 +61,7 @@ namespace config
 
 	toml_node *TOMLParser::parseMap(void)
 	{
-		std::cerr << "Parsing map" << std::endl;
+		/* std::cerr << "Parsing map" << std::endl; */
 		toml_node *node = new toml_node;
 		TOMLMap *mapObject = new TOMLMap;
 		bool completed = false;
@@ -89,7 +89,7 @@ namespace config
 					break;
 				}
 				std::string key = nextToken.value;
-				std::cerr << key << std::endl;
+				/* std::cerr << key << std::endl; */
 				if (tokenizer.getToken().type != ASSIGN)
 					throw std::logic_error("EXPECTED assign!");
 				nextToken = tokenizer.getToken();
@@ -120,7 +120,7 @@ namespace config
 						}
 					case MAPARRAY_DECL:
 						{
-							std::cerr << "reached MAPARRAY_DECL in parseMap" << std::endl;
+							/* std::cerr << "reached MAPARRAY_DECL in parseMap" << std::endl; */
 							completed = true;
 							break;
 						}
@@ -153,7 +153,7 @@ namespace config
 	void TOMLParser::processMapArray(void)
 	{
 
-		std::cerr << "Parsing MapArray" << std::endl;
+		/* std::cerr << "Parsing MapArray" << std::endl; */
 		toml_node *map_node;
 		s_token current;
 
@@ -172,7 +172,7 @@ namespace config
 		else
 			throw std::logic_error("unexpected token in processMapArray");
 
-		std::cout << current.value << std::endl;
+		/* std::cout << current.value << std::endl; */
 
 		std::vector<std::string> full_name;
 
@@ -188,7 +188,7 @@ namespace config
 		toml_node *node = new toml_node;
 		std::string *sValue;
 
-		std::cerr << "Parsing string" << std::endl;
+		/* std::cerr << "Parsing string" << std::endl; */
 		s_token token = tokenizer.getToken();
 		sValue = new std::string(token.value);
 		node->setString(sValue);
@@ -201,7 +201,7 @@ namespace config
 		toml_node *node = new toml_node;
 		int value;
 
-		std::cerr << "Parsing number" << std::endl;
+		/* std::cerr << "Parsing number" << std::endl; */
 		s_token token = tokenizer.getToken();
 		value = std::atoi(token.value.c_str());
 		node->setNumber(value);
@@ -211,7 +211,7 @@ namespace config
 
 	toml_node *TOMLParser::parseArray(void)
 	{
-		std::cerr << "Parsing array" << std::endl;
+		/* std::cerr << "Parsing array" << std::endl; */
 		toml_node *node;
 		toml_node *result = new toml_node;
 		TOMLArray *array = new TOMLArray;
@@ -280,7 +280,7 @@ namespace config
 		toml_node *node = new toml_node;
 		bool value;
 
-		std::cerr << "Parsing bool" << std::endl;
+		/* std::cerr << "Parsing bool" << std::endl; */
 		s_token token = tokenizer.getToken();
 		if (token.value == "true")
 			value = true;
@@ -296,7 +296,7 @@ namespace config
 	toml_node *TOMLParser::parseNil(void)
 	{
 		toml_node *node = new toml_node;
-		std::cerr << "Parsing NIL" << std::endl;
+		/* std::cerr << "Parsing NIL" << std::endl; */
 		node->setNil();
 		return (node);
 	}
@@ -304,7 +304,7 @@ namespace config
 	/* parse tha root ! */
 	TOMLMap *TOMLParser::parse(void)
 	{
-		std::cerr << "Parsing ROOT" << std::endl;
+		/* std::cerr << "Parsing ROOT" << std::endl; */
 		root = new TOMLMap;
 		bool completed = false;
 		while (!completed)
@@ -327,7 +327,7 @@ namespace config
 				}
 				else if (current.type == MAP_DECL)
 				{
-					std::cerr << "MAP_DECL value: " << current.value << std::endl;
+					/* std::cerr << "MAP_DECL value: " << current.value << std::endl; */
 					tokenizer.set_last(NEWLINE);
 					tokenizer.rollBackToken();
 					/* if (tokenizer.getToken().type != NEWLINE) */
@@ -339,7 +339,7 @@ namespace config
 				else
 				{
 					std::string key = current.value;
-					std::cerr << key << std::endl;
+					/* std::cerr << key << std::endl; */
 					if (tokenizer.getToken().type != ASSIGN)
 						throw std::logic_error("EXPECTED assign!");
 					current = tokenizer.getToken();
@@ -405,15 +405,14 @@ namespace config
 			dot = name.find('.');
 			if (dot == std::string::npos)
 				break;
-			/* std::cout << dot << std::endl; */
 			full_name.push_back(name.substr(0, dot));
 			name.erase(0, dot + 1);
 		}
 		full_name.push_back(name);
 
-		for (size_t i = 0; i < full_name.size(); i++)
-			std::cout << full_name[i] << ", ";
-		std::cout << std::endl;
+		/* for (size_t i = 0; i < full_name.size(); i++) */
+		/* 	std::cout << full_name[i] << ", "; */
+		/* std::cout << std::endl; */
 
 		return (full_name);
 	}

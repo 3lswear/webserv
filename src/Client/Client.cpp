@@ -47,6 +47,11 @@ int	Client::getFd(void)
 	return _fd;
 }
 
+unsigned int Client::getCounter(void) const
+{
+	return _sended;
+}
+
 void	Client::setRawData(char *str)
 {
 	this->_buff = str;

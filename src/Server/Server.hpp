@@ -27,6 +27,7 @@ private:
 	void sendClient(Client head, int);
 	void sendResponse(Client head, int);
 	void setNonBlock(int fd);
+	void sendData(Client &client, int fd);
 public:
 	Server();
 	Server(std::string path);
