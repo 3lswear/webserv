@@ -49,7 +49,6 @@ void Server::sendData(Client &client, int fd)
 	std::string tmp = client.getStrToSend();
 	unsigned int size_diff = tmp.size() - client.getCounter();
 
-	std::cout << tmp.size() << std::endl;
 
 	if (size_diff < BUFFSIZE)
 	{
@@ -59,7 +58,7 @@ void Server::sendData(Client &client, int fd)
 		tmp = tmp.substr(client.getCounter(), BUFFSIZE);
 
 	/* std::cout << YELLO << tmp << RESET << std::endl; */
-	std::cout << GREEN << client.getCounter() << RESET << std::endl;
+	/* std::cout << GREEN << client.getCounter() << RESET << std::endl; */
 
 
 	send(fd, tmp.c_str(), tmp.size(), 0);
@@ -97,7 +96,7 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
-	char buf[BUFFSIZE] = {0};
+	char buf[BUFFSIZE + 1] = {0};
 	std::map<int, Client> client_map;
 	std::map<int, Client>::iterator client_it;
 	int fd;
@@ -148,7 +147,7 @@ void	Server::start(void)
 		}
 
 		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 100);
-		std::cout << TURQ << "ready_num " << ready_num << RESET << std::endl;
+		/* std::cout << TURQ << "ready_num " << ready_num << RESET << std::endl; */
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
@@ -171,7 +170,6 @@ void	Server::start(void)
 			{
 				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 				assert(recv(fd, buf, BUFFSIZE, 0) >= 0);
-				std::cout << TURQ << "setRawData" << RESET << std::endl;
 				client_map[fd].setRawData(buf);
 				status = client_map[fd].parseRequest();
 				std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
