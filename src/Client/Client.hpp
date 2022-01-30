@@ -25,6 +25,9 @@ private:
 	std::string	_headerToSend;
 	std::string	_toSend;
 	std::map<std::string, std::string> _errorCode;
+
+public:
+	bool allRead;
 	
 public:
 	Request						getRequest(void);
@@ -34,6 +37,7 @@ public:
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
+
 
 public:
 	int							parseRequest(void);

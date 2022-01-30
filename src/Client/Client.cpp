@@ -4,12 +4,14 @@
 
 Client::Client()
 {
+	allRead = false;
 	this->_fd = -1;
 	this->_sended = 0;
 }
 
 Client::Client(char *str)
 {
+	allRead = false;
 	this->_fd = -1;
 	this->_buff = str;
 	this->_sended = 0;
@@ -18,6 +20,7 @@ Client::Client(char *str)
 
 Client::Client(char *str, ServerConfig *config)
 {
+	allRead = false;
 	this->_fd = -1;
 	this->_config = config;
 	this->_buff = str;
@@ -150,7 +153,8 @@ void	Client::printClientInfo(void)
 		std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
 	}
 	std::cout << TURGUOISE << "Client BODY" << ZERO_C << std::endl;
-	std::cout << BLUE << _request.getBody() << ZERO_C << std::endl;
+	std::cout << BLUE << _request.getBody().size() << ZERO_C << std::endl;
+	/* std::cout << BLUE << _request.getBody() << ZERO_C << std::endl; */
 	
 }
 
