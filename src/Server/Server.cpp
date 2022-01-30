@@ -10,6 +10,7 @@
 //----------------------------------------------Constructors-----------------------------------------------------------------------------------
 Server::Server()
 {
+	bzero(_events, sizeof(_events));
 	_client = 0;
 
 }
@@ -73,16 +74,27 @@ void Server::readSocket(int fd, std::map<int, Client> &client_map)
 	int bytes_read;
 	char buf[BUFFSIZE + 1] = {0};
 
+	std::cout << TURQ << "IN readSocket" << RESET << std::endl;
 	bytes_read = recv(fd, buf, BUFFSIZE, 0);
-	if (bytes_read < BUFFSIZE)
+	if (bytes_read == 0)
 	{
 		client_map[fd].allRead = true;
-		if (bytes_read == 0)
-			return;
+		return;
 	}
 	client_map[fd].setRawData(buf);
 	status = client_map[fd].parseRequest();
+	client_map[fd].increaseRecvCounter(bytes_read);
 	client_map[fd].printClientInfo();
+
+	if ((bytes_read < BUFFSIZE) && client_map[fd].allRecved())
+	{
+		client_map[fd].allRead = true;
+	}
+
+	std::cerr << "bytes_read " << bytes_read << std::endl;;
+	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;;
+	std::cerr << "contentLength " << client_map[fd].getRequest().getContentLength() << std::endl;
+	std::cerr << "allRead " << client_map[fd].allRead << std::endl;;
 
 	std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 	bzero(buf, BUFFSIZE);
@@ -157,7 +169,7 @@ void	Server::start(void)
 			
 			}
 
-			if (client.allSended())
+			if (client.readyToSend() && client.allSended())
 			{
 				close(client_it->first);
 				std::cerr << RED <<
@@ -180,6 +192,10 @@ void	Server::start(void)
 			/* if (_events[i].events == 0) */
 			/* 	continue; */
 			fd = _events[i].data.fd;
+			/* if (_events[i].data.fd == 0) */
+			/* { */
+			/* 	continue; */
+			/* } */
 
 			if (fd == server_sock.getSocketFd())
 			{
