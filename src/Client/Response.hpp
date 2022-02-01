@@ -12,6 +12,7 @@ private:
     std::string     _header;
     Request         _request;
     ServerConfig    *_config;
+    int             _code;
 
 private:
     static std::map<std::string, std::string> _errorCode;
@@ -21,7 +22,8 @@ private:
     // void                        methodPost(void);
     // void                        methodDelete(void);
     void                        invalidClient(void);
-
+    void                 generateHeader(void);
+    void                 generateBody(void);
 public:
     std::string                 getHeader(void);
     std::string                 getBody(void);

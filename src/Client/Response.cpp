@@ -5,6 +5,7 @@
 Response::Response()
 {
 	initErrorCode();
+	_code = 200;
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
@@ -21,6 +22,7 @@ std::string     Response::getBody(void)
 void            Response::setData(Request request, ServerConfig *config)
 {
 	_request = request;
+	_code = request.getCode();
 	_config = config;
 }
 
@@ -65,32 +67,48 @@ void	Response::invalidClient(void)
 {
 	std::stringstream ss;
 	std::string tmp;
-	//Header
-	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_header = ss.str();
 
 	//body
-	_body = getErrorPage(_request.getCode());
-	std::cout << RED << "Invalid Client method called\nCODE: " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << ZERO_C << std::endl;
-	std::cout << _header << std::endl << _body << std::endl;
+	// _body = getErrorPage(_code);
+	// std::cout << RED << "Invalid Client method called\nCODE: " << _code << " " << getReasonPhrase(_code) << ZERO_C << std::endl;
+	generateBody();
+	//Header
+	generateHeader();
+}
+
+void	Response::generateBody(void)
+{
+	if (!_request.badCode(_code) && _request.isDir(_request.getFullUri()) == 0)
+		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
+	else if (!_request.badCode(_code) && _request.isFile(_request.getFullUri()) == 0)
+		OpenResponseFile(_request.getFullUri().c_str());
+	else
+		_body = getErrorPage(_code);
+
+}
+
+void	Response::generateHeader(void)
+{
+	std::stringstream ss;
+	std::string tmp;
+
+	ss << "HTTP/1.1" << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode())
+		<< "\r\nContent-Type: text/html"
+		<< "\r\nContent-Length: " << _body.size()
+		<< "\r\nServer: poheck"
+		<< "\r\n\r\n";
+	_header = ss.str();
 }
 
 void	Response::methodGet(void)
 {
-	std::stringstream ss;
-	std::string tmp;
-	//Client
-	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_header = ss.str();
-	//body
-	if (!_request.badCode(_request.getCode()) && _request.isDir(_request.getFullUri()) == 0)
-		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
-	else if (!_request.badCode(_request.getCode()))
-		OpenResponseFile(_request.getFullUri().c_str());
-	else
-		_body = getErrorPage(_request.getCode());
+
+	generateBody();
+	generateHeader();
 	std::cout << GREEN << "GET method called\n" << ZERO_C;
 
+	
+	
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
