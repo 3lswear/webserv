@@ -22,8 +22,10 @@ private:
     // void                        methodPost(void);
     // void                        methodDelete(void);
     void                        invalidClient(void);
-    void                 generateHeader(void);
-    void                 generateBody(void);
+    void                        generateHeader(void);
+    void                        generateBody(void);
+    std::string                 getTime(void);
+    std::string                 getContentType(void);
 public:
     std::string                 getHeader(void);
     std::string                 getBody(void);
