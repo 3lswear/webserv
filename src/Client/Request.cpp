@@ -11,6 +11,7 @@ Request::Request()
 	_head_ok = false;
 	_body_ok = false;
 	_received = 0;
+	_headerSize = 0;
 
 }
 
@@ -24,6 +25,7 @@ Request::Request(char *str)
 	_received = 0;
 	_chunked = false;
 	_contentLength = 0;
+	_headerSize = 0;
 }
 
 //-------------------------------------------------Get/Set---------------------------------------

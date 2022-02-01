@@ -149,7 +149,10 @@ std::string	Client::generateRespons(void)
 
 bool	Client::readyToSend(void)
 {
-	return(_request.ok());
+	if (_request.ok())
+		return(_request.ok());
+	else 
+		return false;
 }
 
 void	Client::printClientInfo(void)
@@ -181,6 +184,15 @@ void	Client::printClientInfo(void)
 	// std::cout << GREEN << _request.getBody().size() << ZERO_C << std::endl;
 	/* std::cout << BLUE << _request.getBody() << ZERO_C << std::endl; */
 	
+}
+
+bool	Client::isEmpty(void)
+{
+	if (!_request.ok() && _request.getHeaderSize() == 0
+		&& _request.getContentLength() == 0)
+		return (true);
+	else
+		return (false);
 }
 
 void	Client::clear(void)

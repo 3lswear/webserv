@@ -154,7 +154,7 @@ void	Server::start(void)
 			std::cout << TURQ << "IN SEND LOOP" << RESET << std::endl;
 			Client &client = client_it->second;
 
-			if (!client.allRead)
+			if (!client.allRead && !client.isEmpty())
 			{
 				readSocket(client_it->first, client_map);
 			}
@@ -168,7 +168,7 @@ void	Server::start(void)
 			
 			}
 
-			if (client.readyToSend() && client.allSended())
+			if ((client.readyToSend() && client.allSended()) || client.isEmpty())
 			{
 				client_map[fd].printClientInfo();
 				close(client_it->first);

@@ -37,8 +37,8 @@ public:
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
-	unsigned int getRecvCounter(void) const;
-
+	unsigned int 				getRecvCounter(void) const;
+	bool						isEmpty(void);
 
 public:
 	int							parseRequest(void);
