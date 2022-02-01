@@ -82,19 +82,18 @@ void Server::readSocket(int fd, std::map<int, Client> &client_map)
 		return;
 	}
 	client_map[fd].setRawData(buf);
-	status = client_map[fd].parseRequest();
 	client_map[fd].increaseRecvCounter(bytes_read);
-	client_map[fd].printClientInfo();
+	status = client_map[fd].parseRequest();
+	// client_map[fd].printClientInfo();
 
 	if ((bytes_read < BUFFSIZE) && client_map[fd].allRecved())
 	{
 		client_map[fd].allRead = true;
 	}
 
-	std::cerr << "bytes_read " << bytes_read << std::endl;;
-	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;;
+	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;
 	std::cerr << "contentLength " << client_map[fd].getRequest().getContentLength() << std::endl;
-	std::cerr << "allRead " << client_map[fd].allRead << std::endl;;
+	std::cerr << "allRead " << client_map[fd].allRead << std::endl;
 
 	std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 	bzero(buf, BUFFSIZE);
@@ -171,6 +170,7 @@ void	Server::start(void)
 
 			if (client.readyToSend() && client.allSended())
 			{
+				client_map[fd].printClientInfo();
 				close(client_it->first);
 				std::cerr << RED <<
 					"deleting client "

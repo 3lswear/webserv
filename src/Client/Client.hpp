@@ -18,7 +18,6 @@ private:
 	int		_ret;
 	int		_fd;
 	unsigned int		_sended;
-	unsigned int		_received;
 	char	*_buff;
 
 
