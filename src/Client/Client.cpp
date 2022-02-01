@@ -159,17 +159,17 @@ void	Client::printClientInfo(void)
 	std::map<std::string, std::string>::iterator it1;
 
 	map = _request.getClientFields();
-	std::cout << TURQ << "Parsed request" << ZERO_C << std::endl;
-	std::cout << PINK << "request method = " << _request.getMethod() << ZERO_C << std::endl;
-	std::cout << PINK << "request URI = " << _request.getURI() << ZERO_C << std::endl;
-	std::cout << PINK << "host  = " << _request.getHost() << ZERO_C << std::endl;
-	std::cout << PINK << "request query = " << _request.getQuery() << ZERO_C << std::endl;
-	std::cout << PINK << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
-	std::cout << PINK << "content-length = " << _request.getContentLength() << ZERO_C << std::endl;
-	std::cout << PINK << "connection type = " << _request.getConnection() << ZERO_C << std::endl;
+	std::cout << BLUE << std::endl << "PARSED REQUEST" << ZERO_C << std::endl << std::endl;
+	std::cout << GREEN << "request method = " << _request.getMethod() << ZERO_C << std::endl;
+	std::cout << GREEN << "request URI = " << _request.getURI() << ZERO_C << std::endl;
+	std::cout << GREEN << "host  = " << _request.getHost() << ZERO_C << std::endl;
+	std::cout << GREEN << "request query = " << _request.getQuery() << ZERO_C << std::endl;
+	std::cout << GREEN << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
+	std::cout << GREEN << "content-length = " << _request.getContentLength() << ZERO_C << std::endl;
+	std::cout << GREEN << "connection type = " << _request.getConnection() << ZERO_C << std::endl;
 
-	std::cout << TURQ << "Parsed response" << ZERO_C << std::endl;
-	std::cout << BLUE << _response.getHeader() << ZERO_C << std::endl;
+	std::cout << BLUE << std::endl << "RESPONSE" << ZERO_C << std::endl << std::endl;
+	std::cout << GREEN << _response.getHeader() << ZERO_C << std::endl;
 	
 	// std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
 	// std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;

@@ -179,7 +179,7 @@ void	Request::splitData(char *data)
 		return ;
 	else if (!_body_ok)
 	{
-		_body += str.substr(0, _received - _headerSize);
+		_body += str;
 		if ((_received - _headerSize) == _contentLength)
 		{
 			_body_ok = true;
