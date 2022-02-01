@@ -195,6 +195,22 @@ bool	Client::isEmpty(void)
 		return (false);
 }
 
+bool	Client::TimeToDie(void)
+{
+	struct timeval curTime;
+
+	gettimeofday(&curTime, NULL);
+	if ((curTime.tv_sec - _time.tv_sec) >= _request.getLifeTime())
+		return (true);
+	else
+		return (false);
+}
+
+void	Client::updateTimeToDie(void)
+{
+	gettimeofday(&_time, NULL);
+}
+
 void	Client::clear(void)
 {
 	_fd = -1;

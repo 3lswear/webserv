@@ -12,6 +12,7 @@ private:
 	
 	int			_ret;
 	int			_row;
+	int			_lifeTime;
 	unsigned int			_contentLength;
 	unsigned int			_received;		
 	unsigned int 			_headerSize;
@@ -44,6 +45,7 @@ public:
 	std::string					getConnection(void);
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
+	int							getLifeTime(void);
 	unsigned int				getContentLength(void) const;
 	unsigned int				getHeaderSize(void) const;
 	unsigned int				getRecved(void)const;

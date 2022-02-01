@@ -12,6 +12,7 @@ Request::Request()
 	_body_ok = false;
 	_received = 0;
 	_headerSize = 0;
+	_lifeTime = 5;
 
 }
 
@@ -26,6 +27,7 @@ Request::Request(char *str)
 	_chunked = false;
 	_contentLength = 0;
 	_headerSize = 0;
+	_lifeTime = 5;
 }
 
 //-------------------------------------------------Get/Set---------------------------------------
@@ -73,6 +75,10 @@ ServerConfig				*Request::getConfig(void)
 int							Request::getCode(void)
 {
     return (_ret);
+}
+int							Request::getLifeTime(void)
+{
+	return (_lifeTime);
 }
 std::map<std::string, std::string>	Request::getClientFields(void)
 {
