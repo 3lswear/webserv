@@ -31,6 +31,7 @@ void            Response::setData(Request request, ServerConfig *config)
 void Response::OpenResponseFile(const char *path)
 {
 	std::stringstream	ss;
+	// char 				buf[BUFFSIZE + 1] = {0};
 	std::ifstream		file(path, std::ifstream::in);
 
 	if (file.is_open())
@@ -88,7 +89,9 @@ std::string		Response::getContentType(void)
 	else if (type == "png")
 		return ("image/png");
 	else if (type == "bmp")
-		return ( "image/bmp");
+		return ("image/bmp");
+	else if (type == "pdf")
+		return ("application/pdf");
 	else
 		return ("text/plain");
 
