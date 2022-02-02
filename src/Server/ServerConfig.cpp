@@ -33,7 +33,7 @@ int							ServerConfig::getClientBodySize(void)
 	return (_clientBodySize);
 }
 
-std::vector<location>		ServerConfig::getLocations(void)
+std::vector<location *>		ServerConfig::getLocations(void)
 {
 	return (_locations);
 }
@@ -73,7 +73,7 @@ void	ServerConfig::setErrorPages(std::map<int, std::string> pages)
 	_errorPages  = pages;
 }
 
-void	ServerConfig::setLocations(std::vector<location> locations)
+void	ServerConfig::setLocations(std::vector<location *> locations)
 {
 	_locations = locations;
 }
@@ -142,7 +142,7 @@ int	ServerConfig::putLocation(toml_node *node)
 	TOMLMapArray::iterator	it = arr->begin();
 	TOMLMap		*map;
 	TOMLMap::iterator		it1;
-	location	tmp;
+	location	*tmp;
 	TOMLArray::iterator			it2;
 	TOMLArray	Array;
 
@@ -151,43 +151,44 @@ int	ServerConfig::putLocation(toml_node *node)
 	{
 		map = *it;
 		it1 = map->begin();
+		tmp = new location;
 		while (it1 != map->end())
 		{
 			if (it1->first == "location")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
 					return (1);
-				tmp.location = *it1->second->getString();
+				tmp->location = *it1->second->getString();
 			}
 			else if (it1->first == "root")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
 					return (1);
-				tmp.root = *it1->second->getString();
+				tmp->root = *it1->second->getString();
 			}
 			else if (it1->first == "autoindex")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
 					return (1);
-				tmp.autoindex = it1->second->getBool();
+				tmp->autoindex = it1->second->getBool();
 			}
 			else if (it1->first == "upload_accept")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
 					return (1);
-				tmp.uploadAccept = it1->second->getBool();
+				tmp->uploadAccept = it1->second->getBool();
 			}
 			else if (it1->first == "upload_dir")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
 					return (1);
-				tmp.uploadDir = *it1->second->getString();	
+				tmp->uploadDir = *it1->second->getString();	
 			}
 			else if (it1->first == "directory_file")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
 					return (1);
-				tmp.directoryFile = *it1->second->getString();	
+				tmp->directoryFile = *it1->second->getString();	
 			}
 			else if (it1->first == "methods")
 			{
@@ -199,7 +200,7 @@ int	ServerConfig::putLocation(toml_node *node)
 				{
 					if ((*it2)->get_type() != toml_node::STRING)
 						return (1);
-					tmp.methods.push_back(*((*it2)->getString()));
+					tmp->methods.push_back(*((*it2)->getString()));
 					++it2;
 				}
 
@@ -212,14 +213,13 @@ int	ServerConfig::putLocation(toml_node *node)
 				it2 = Array.begin();
 				str = *(*it2)->getString();
 				++it2;
-				tmp.redirect[atoi(str.c_str())] = *(*it2)->getString();
+				tmp->redirect.insert(std::make_pair(atoi(str.c_str()), *(*it2)->getString()));
 			}
 			else
 				std::cout << RED << it1->first << ZERO_C << std::endl;
 			it1++;
 		}
 		_locations.push_back(tmp);
-		memset(&tmp, 0, sizeof(tmp));
 		it++;
 	}
 	return (0);
@@ -259,7 +259,7 @@ void	ServerConfig::fillFields(void)
 
 void	ServerConfig::printFields(void)
 {
-	std::vector<location>::iterator it;
+	std::vector<location *>::iterator it;
 	std::map<int, std::string>::iterator it1;
 	std::vector<std::string>::iterator	it2;
 	std::map<int, std::string>::iterator it3;
@@ -275,21 +275,21 @@ void	ServerConfig::printFields(void)
 	while (it != _locations.end())
 	{
 		std::cout << PINK << "------------------------------------------------\n";
-		std::cout << YELLOW << "location " << BLUE << (*it).location <<std::endl;
-		std::cout << YELLOW << "root " << BLUE << (*it).root <<std::endl;
-		std::cout << YELLOW << "directoryFile " << BLUE << (*it).directoryFile <<std::endl;
-		std::cout << YELLOW << "uploadDir " << BLUE << (*it).uploadDir <<std::endl;
-		std::cout << YELLOW << "autoindex " << BLUE << (*it).autoindex <<std::endl;
-		std::cout << YELLOW << "uploadAccept " << BLUE << (*it).uploadAccept <<std::endl;
+		std::cout << YELLOW << "location " << BLUE << (*it)->location <<std::endl;
+		std::cout << YELLOW << "root " << BLUE << (*it)->root <<std::endl;
+		std::cout << YELLOW << "directoryFile " << BLUE << (*it)->directoryFile <<std::endl;
+		std::cout << YELLOW << "uploadDir " << BLUE << (*it)->uploadDir <<std::endl;
+		std::cout << YELLOW << "autoindex " << BLUE << (*it)->autoindex <<std::endl;
+		std::cout << YELLOW << "uploadAccept " << BLUE << (*it)->uploadAccept <<std::endl;
 		std::cout << YELLOW << "methods " << std::endl;
-		it2 = (*it).methods.begin();
-		while (it2 != (*it).methods.end())
+		it2 = (*it)->methods.begin();
+		while (it2 != (*it)->methods.end())
 		{
 			std::cout << BLUE << *it2 << " ";
 			it2++;
 		}
 		std::cout << std::endl;
-		it3 = (*it).redirect.begin();
+		it3 = (*it)->redirect.begin();
 		std::cout << YELLOW << "redirection" << RED << " " << it3->first << " "  << BLUE << it3->second << std::endl;
 		++it;
 		std::cout << PINK << "------------------------------------------------\n";

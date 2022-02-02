@@ -225,15 +225,25 @@ void	Server::start(void)
 void	Server::end(void)
 {
 	std::vector<ServerConfig *>::iterator pri;
+	std::vector<location *>::iterator	loc;
+	std::vector< location *> l;
 
 	pri = _configs.begin();
 	while (pri != _configs.end())
 	{
 		(*pri)->printFields();
+		l = (*pri)->getLocations();
+		loc = l.begin();
+		while (loc != l.end())
+		{
+			delete *loc;
+			loc++;
+		}
 		delete *pri;
 		pri++;
 	}
 }
+
 //----------------------------------------------Other------------------------------------------------------------------------------------------------
 void	Server::checkError(int fd, std::string str)
 {
