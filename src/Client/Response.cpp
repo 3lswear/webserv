@@ -84,6 +84,14 @@ std::string		Response::getContentType(void)
 		return ("text/css");
 	else if (type == "js")
 		return ("text/javascript");
+	else if (type == "json")
+		return ("application/json");
+	else if (type == "woff")
+		return ("application/x-font-woff");
+	else if (type == "mp4" || type == "m4v" || type == " f4v")
+		return ("video/mp4");
+	else if (type == "ico")
+		return ("image/x-icon");
 	else if (type == "jpeg" || type == "jpg")
 		return ("image/jpeg");
 	else if (type == "png")
@@ -103,8 +111,6 @@ void	Response::invalidClient(void)
 	std::string tmp;
 
 	//body
-	// _body = getErrorPage(_code);
-	// std::cout << RED << "Invalid Client method called\nCODE: " << _code << " " << getReasonPhrase(_code) << ZERO_C << std::endl;
 	generateBody();
 	//Header
 	generateHeader();
