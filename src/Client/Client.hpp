@@ -29,6 +29,16 @@ private:
 
 public:
 	bool allRead;
+	enum e_req_status
+	{
+		READING,
+		WRITING,
+		ENDED
+	} req_status; 
+
+	int serverfd;
+	size_t readn;
+	size_t left;
 	
 public:
 	Request						getRequest(void);
