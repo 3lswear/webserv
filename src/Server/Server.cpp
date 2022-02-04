@@ -21,6 +21,18 @@ Server::Server(std::string path)
 	_client = 0;
 }
 
+void Server::print_epoll_events(unsigned int events)
+{
+	DBOUT << "Epoll events: ";
+	if (events & EPOLLIN)
+		DBOUT << "EPOLLIN ";
+	if (events & EPOLLOUT)
+		DBOUT << "EPOLLOUT ";
+	if (events & EPOLLET)
+		DBOUT << "EPOLLET ";
+	DBOUT << ENDL;
+}
+
 //----------------------------------------------Send--------------------------------------------------------------------------------------------
 
 //----------------------------------------------Configuration-----------------------------------------------------------------------------------
@@ -67,7 +79,7 @@ void Server::sendData(Client &client, int fd)
 
 }
 
-void Server::readSocket(int fd, std::map<int, Client> &client_map)
+void Server::readSocket(Client &client, int fd)
 {
 
 	int status;
@@ -78,22 +90,22 @@ void Server::readSocket(int fd, std::map<int, Client> &client_map)
 	bytes_read = recv(fd, buf, BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
-		client_map[fd].allRead = true;
+		client.allRead = true;
 		return;
 	}
-	client_map[fd].setRawData(buf);
-	client_map[fd].increaseRecvCounter(bytes_read);
-	status = client_map[fd].parseRequest();
+	client.setRawData(buf);
+	client.increaseRecvCounter(bytes_read);
+	status = client.parseRequest();
 	// client_map[fd].printClientInfo();
 
-	if ((bytes_read < BUFFSIZE) && client_map[fd].allRecved())
+	if ((bytes_read < BUFFSIZE) && client.allRecved())
 	{
-		client_map[fd].allRead = true;
+		client.allRead = true;
 	}
 
-	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;
-	std::cerr << "contentLength " << client_map[fd].getRequest().getContentLength() << std::endl;
-	std::cerr << "allRead " << client_map[fd].allRead << std::endl;
+	std::cerr << "recvCounter " << client.getRecvCounter() << std::endl;
+	std::cerr << "contentLength " << client.getRequest().getContentLength() << std::endl;
+	std::cerr << "allRead " << client.allRead << std::endl;
 
 	std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 	bzero(buf, BUFFSIZE);
@@ -156,7 +168,7 @@ void	Server::start(void)
 
 			if (!client.allRead && !client.isEmpty())
 			{
-				readSocket(client_it->first, client_map);
+				readSocket(client, fd);
 			}
 			if (client.readyToSend())
 			{
@@ -170,7 +182,8 @@ void	Server::start(void)
 
 			if ((client.readyToSend() && client.allSended()) || client.isEmpty())
 			{
-				client_map[fd].printClientInfo();
+				/* SUS */
+				/* client_map[fd].printClientInfo(); */
 				close(client_it->first);
 				std::cerr << RED <<
 					"deleting client "
@@ -191,6 +204,9 @@ void	Server::start(void)
 		{
 			fd = _events[i].data.fd;
 
+			DBOUT << "FD is " << fd << ENDL;
+			print_epoll_events(_events[i].events);
+
 			if (fd == server_sock.getSocketFd())
 			{
 				int client_sock = accept(server_sock.getSocketFd(),
@@ -204,7 +220,8 @@ void	Server::start(void)
 			{
 				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 				/* _client--; */
-				readSocket(fd, client_map);
+				client_map[fd];
+				readSocket(client_map[fd], fd);
 			}
 		}
 		ready_num = 0;
