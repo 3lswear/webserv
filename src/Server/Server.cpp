@@ -189,13 +189,7 @@ void	Server::start(void)
 			throw std::logic_error("epoll_ret");
 		for (int i = 0; i < ready_num; i++)
 		{
-			/* if (_events[i].events == 0) */
-			/* 	continue; */
 			fd = _events[i].data.fd;
-			/* if (_events[i].data.fd == 0) */
-			/* { */
-			/* 	continue; */
-			/* } */
 
 			if (fd == server_sock.getSocketFd())
 			{
