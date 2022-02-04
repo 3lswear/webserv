@@ -49,4 +49,13 @@
 #include <algorithm>
 #include <cctype>
 
+
+#ifdef DEBUG
+#define DBOUT std::cerr << TURQ
+#define ENDL RESET << std::endl
+#else
+#define DBOUT 0 && std::cerr
+#define ENDL RESET << std::endl
+#endif
+
 #endif
