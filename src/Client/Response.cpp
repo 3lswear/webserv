@@ -5,13 +5,14 @@
 Response::Response()
 {
 	initErrorCode();
+	_code = 200;
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
 
-std::string     Response::getClient(void)
+std::string     Response::getHeader(void)
 {
-	return (_Client);
+	return (_header);
 }
 std::string     Response::getBody(void)
 {
@@ -21,6 +22,7 @@ std::string     Response::getBody(void)
 void            Response::setData(Request request, ServerConfig *config)
 {
 	_request = request;
+	_code = request.getCode();
 	_config = config;
 }
 
@@ -29,17 +31,12 @@ void            Response::setData(Request request, ServerConfig *config)
 void Response::OpenResponseFile(const char *path)
 {
 	std::stringstream	ss;
-	char 				buf[BUFFSIZE + 1] = {0};
-	std::ifstream		file(path);
+	// char 				buf[BUFFSIZE + 1] = {0};
+	std::ifstream		file(path, std::ifstream::in);
 
 	if (file.is_open())
 	{	
-		while (!file.eof())
-		{
-			file.read(buf, BUFFSIZE);
-			ss << buf;
-			memset(buf, 0, BUFFSIZE + 1);
-		}
+		ss << file.rdbuf();
 		_body = ss.str();
 		file.close();
 	}
@@ -59,37 +56,104 @@ void    Response::generate()
 	// 	methodDelete();	
 }
 
-//-------------------------------------------------GET/SET---------------------------------------
+//-------------------------------------------------HEADER/BODY---------------------------------------
+
+std::string		Response::getTime(void)
+{
+	char	buff[1337] = {0};
+	struct timeval	currTime;
+	struct tm		*t;
+
+	gettimeofday(&currTime, NULL);
+	t = gmtime(&currTime.tv_sec);
+	strftime(buff, 1337, "%a, %d %b %Y %H:%M:%S GTM", t);
+
+	return (buff);
+}
+
+std::string		Response::getContentType(void)
+{
+	std::string	path = _request.getFullUri();
+	std::string	type = path.substr(path.rfind(".") + 1, path.size() - path.rfind("."));
+
+	if (_request.isDir(path) == 0)
+		return ("text/html");
+	else if (type == "html")
+		return ("text/html");
+	else if (type == "css")
+		return ("text/css");
+	else if (type == "js")
+		return ("text/javascript");
+	else if (type == "json")
+		return ("application/json");
+	else if (type == "woff")
+		return ("application/x-font-woff");
+	else if (type == "mp4" || type == "m4v" || type == " f4v")
+		return ("video/mp4");
+	else if (type == "ico")
+		return ("image/x-icon");
+	else if (type == "jpeg" || type == "jpg")
+		return ("image/jpeg");
+	else if (type == "png")
+		return ("image/png");
+	else if (type == "bmp")
+		return ("image/bmp");
+	else if (type == "pdf")
+		return ("application/pdf");
+	else
+		return ("text/plain");
+
+}
 
 void	Response::invalidClient(void)
 {
 	std::stringstream ss;
 	std::string tmp;
-	//Client
-	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_Client = ss.str();
 
 	//body
-	_body = getErrorPage(_request.getCode());
-	std::cout << RED << "Invalid Client method called\nCODE: " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << ZERO_C << std::endl;
+	generateBody();
+	//Header
+	generateHeader();
+}
+
+void	Response::generateBody(void)
+{
+	if (!_request.badCode(_code) && _request.isDir(_request.getFullUri()) == 0)
+		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
+	else if (!_request.badCode(_code) && _request.isFile(_request.getFullUri()) == 0)
+		OpenResponseFile(_request.getFullUri().c_str());
+	else if (_request.isFile(_request.getFullUri()) == -1)
+		_body = getErrorPage(404);
+	else
+		_body = getErrorPage(_code);
+
+}
+
+void	Response::generateHeader(void)
+{
+	std::stringstream ss;
+	std::string tmp;
+
+	ss << "HTTP/1.1" << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\n";
+	ss << "Content-Type: " << getContentType() << "\r\n";
+	ss << "Content-Length: " << _body.size() << "\r\n";
+	ss << "Server: poheck\r\n";
+	if (_request.getConnection() == "keep-alive")
+		ss << "Keep-Alive: timeout=" << _request.getLifeTime() << "\r\n";
+	ss << "Date: " << getTime() << "\r\n";
+	ss << "\r\n";
+	_header = ss.str();
 }
 
 void	Response::methodGet(void)
 {
-	std::stringstream ss;
-	std::string tmp;
-	//Client
-	ss << _request.getVersion() << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\nContent-Type: text/html\r\n\r\n";
-	_Client = ss.str();
-	//body
-	if (!_request.badCode(_request.getCode()) && _request.isDir(_request.getFullUri()) == 0)
-		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
-	else if (!_request.badCode(_request.getCode()))
-		OpenResponseFile(_request.getFullUri().c_str());
-	else
-		_body = getErrorPage(_request.getCode());
+
+	generateBody();
+	generateHeader();
 	std::cout << GREEN << "GET method called\n" << ZERO_C;
 
+	
+	
 }
 
 //-------------------------------------------------GET/SET---------------------------------------

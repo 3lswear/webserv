@@ -28,7 +28,7 @@ private:
 	int			_clientBodySize;
 
 	std::map<int, std::string>	_errorPages;
-	std::vector<location>		_locations;
+	std::vector<location *>		_locations;
 
 public:
 	void	setServerName(std::string);
@@ -36,14 +36,14 @@ public:
 	void	setPort(int);
 	void	setClientBodySize(int);
 	void	setErrorPages(std::map<int, std::string>);
-	void	setLocations(std::vector<location>);
+	void	setLocations(std::vector<location *>);
 	void	setRoot(TOMLMap *);
 
 	std::string					getServerName(void);
 	std::string					getHost(void);
 	int							getPort(void);
 	int							getClientBodySize(void);
-	std::vector<location>		getLocations(void);
+	std::vector<location *>		getLocations(void);
 	std::map<int, std::string>	getErrorPages(void);
 	TOMLMap						*getRoot(void);
 

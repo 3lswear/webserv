@@ -9,9 +9,10 @@ class Response
 {
 private:
     std::string     _body;
-    std::string     _Client;
+    std::string     _header;
     Request         _request;
     ServerConfig    *_config;
+    int             _code;
 
 private:
     static std::map<std::string, std::string> _errorCode;
@@ -21,9 +22,12 @@ private:
     // void                        methodPost(void);
     // void                        methodDelete(void);
     void                        invalidClient(void);
-
+    void                        generateHeader(void);
+    void                        generateBody(void);
+    std::string                 getTime(void);
+    std::string                 getContentType(void);
 public:
-    std::string                 getClient(void);
+    std::string                 getHeader(void);
     std::string                 getBody(void);
     static std::string			getReasonPhrase(std::string);
 	static std::string			getReasonPhrase(int);

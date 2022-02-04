@@ -17,8 +17,8 @@ private:
 private:
 	int		_ret;
 	int		_fd;
+	struct timeval	_time;
 	unsigned int		_sended;
-	unsigned int		_received;
 	char	*_buff;
 
 
@@ -38,9 +38,10 @@ public:
 	void						setRawData(char *);
 	void						setFd(int);
 	int							getFd(void);
-	unsigned int getRecvCounter(void) const;
-
-
+	unsigned int 				getRecvCounter(void) const;
+	bool						isEmpty(void);
+	bool						TimeToDie(void);
+	void						updateTimeToDie(void);
 public:
 	int							parseRequest(void);
 

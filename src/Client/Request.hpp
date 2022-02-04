@@ -12,7 +12,9 @@ private:
 	
 	int			_ret;
 	int			_row;
+	int			_lifeTime;
 	unsigned int			_contentLength;
+	unsigned int			_received;		
 	unsigned int 			_headerSize;
 
 	std::string _URI;
@@ -24,6 +26,7 @@ private:
     std::string _fullURI;
     std::string _version;
 	std::string	_location;
+	std::string	_connection;
 	std::map<std::string, std::string> _headerField;
 
 	ServerConfig	*_config;
@@ -39,10 +42,13 @@ public:
 	std::string					getFullUri(void);
 	std::string					getVersion(void);
 	std::string					getLocation(void);
+	std::string					getConnection(void);
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
+	int							getLifeTime(void);
 	unsigned int				getContentLength(void) const;
 	unsigned int				getHeaderSize(void) const;
+	unsigned int				getRecved(void)const;
 	std::map<std::string, std::string>	getClientFields(void);
 	bool						getChunked(void);
 
@@ -71,6 +77,7 @@ public:
 	void						clear(void);
 	void						splitData(char *);
 
+	void						increaseRecvCounter(unsigned int n);
 	~Request();
 };
 

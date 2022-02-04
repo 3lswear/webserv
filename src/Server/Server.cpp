@@ -82,19 +82,18 @@ void Server::readSocket(int fd, std::map<int, Client> &client_map)
 		return;
 	}
 	client_map[fd].setRawData(buf);
-	status = client_map[fd].parseRequest();
 	client_map[fd].increaseRecvCounter(bytes_read);
-	client_map[fd].printClientInfo();
+	status = client_map[fd].parseRequest();
+	// client_map[fd].printClientInfo();
 
 	if ((bytes_read < BUFFSIZE) && client_map[fd].allRecved())
 	{
 		client_map[fd].allRead = true;
 	}
 
-	std::cerr << "bytes_read " << bytes_read << std::endl;;
-	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;;
+	std::cerr << "recvCounter " << client_map[fd].getRecvCounter() << std::endl;
 	std::cerr << "contentLength " << client_map[fd].getRequest().getContentLength() << std::endl;
-	std::cerr << "allRead " << client_map[fd].allRead << std::endl;;
+	std::cerr << "allRead " << client_map[fd].allRead << std::endl;
 
 	std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 	bzero(buf, BUFFSIZE);
@@ -155,7 +154,7 @@ void	Server::start(void)
 			std::cout << TURQ << "IN SEND LOOP" << RESET << std::endl;
 			Client &client = client_it->second;
 
-			if (!client.allRead)
+			if (!client.allRead && !client.isEmpty())
 			{
 				readSocket(client_it->first, client_map);
 			}
@@ -169,8 +168,9 @@ void	Server::start(void)
 			
 			}
 
-			if (client.readyToSend() && client.allSended())
+			if ((client.readyToSend() && client.allSended()) || client.isEmpty())
 			{
+				client_map[fd].printClientInfo();
 				close(client_it->first);
 				std::cerr << RED <<
 					"deleting client "
@@ -219,15 +219,25 @@ void	Server::start(void)
 void	Server::end(void)
 {
 	std::vector<ServerConfig *>::iterator pri;
+	std::vector<location *>::iterator	loc;
+	std::vector< location *> l;
 
 	pri = _configs.begin();
 	while (pri != _configs.end())
 	{
 		(*pri)->printFields();
+		l = (*pri)->getLocations();
+		loc = l.begin();
+		while (loc != l.end())
+		{
+			delete *loc;
+			loc++;
+		}
 		delete *pri;
 		pri++;
 	}
 }
+
 //----------------------------------------------Other------------------------------------------------------------------------------------------------
 void	Server::checkError(int fd, std::string str)
 {

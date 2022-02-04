@@ -10,6 +10,10 @@ Request::Request()
 	_chunked = false;
 	_head_ok = false;
 	_body_ok = false;
+	_received = 0;
+	_headerSize = 0;
+	_lifeTime = 5;
+
 }
 
 Request::Request(char *str)
@@ -19,8 +23,11 @@ Request::Request(char *str)
     _data = str;
 	_head_ok = false;
 	_body_ok = false;
+	_received = 0;
 	_chunked = false;
 	_contentLength = 0;
+	_headerSize = 0;
+	_lifeTime = 5;
 }
 
 //-------------------------------------------------Get/Set---------------------------------------
@@ -57,6 +64,10 @@ std::string					Request::getLocation(void)
 {
     return (_location);
 }
+std::string					Request::getConnection(void)
+{
+	return (_connection);
+}
 ServerConfig				*Request::getConfig(void)
 {
     return (_config);
@@ -64,6 +75,10 @@ ServerConfig				*Request::getConfig(void)
 int							Request::getCode(void)
 {
     return (_ret);
+}
+int							Request::getLifeTime(void)
+{
+	return (_lifeTime);
 }
 std::map<std::string, std::string>	Request::getClientFields(void)
 {
@@ -82,7 +97,10 @@ unsigned int Request::getHeaderSize(void) const
 {
 	return (_headerSize);
 }
-
+unsigned int Request::getRecved(void) const
+{
+	return (_received);
+}
 void                        Request::setData(char *str)
 {
     this->_data = str;
@@ -99,7 +117,10 @@ void                        Request::setConfig(ServerConfig *config)
 
 //-------------------------------------------------Parsing---------------------------------------
 
-
+void	Request::increaseRecvCounter(unsigned int n)
+{
+	_received += n;
+}
 void	Request::parseURI(std::string str)
 {
 	std::string	tmp;
@@ -142,9 +163,10 @@ int	Request::parseStartLine(std::string str)
 void	Request::splitData(char *data)
 {
 	int	pos;
+	std::stringstream ss;
 	std::string	str;
 
-	str = data;
+	str = std::string(data);
 	if (!_head_ok)
 	{
 		pos = str.find("\r\n\r\n");
@@ -165,9 +187,11 @@ void	Request::splitData(char *data)
 		return ;
 	else if (!_body_ok)
 	{
-		_body += str.substr(0, str.size());
-		if (_body.size() >= _contentLength)
+		_body += str;
+		if ((_received - _headerSize) == _contentLength)
+		{
 			_body_ok = true;
+		}
 	}
 }
 
@@ -231,8 +255,11 @@ void    Request::copyFromMap()
 {
 	std::map<std::string, std::string>::iterator it;
 	int	pos;
+	
 	//host
-    _host = _headerField.find("host")->second;
+    it = _headerField.find("host");
+	if (it != _headerField.end())
+		_host = it->second;
 
 	//content-lenght
 	it = _headerField.find("content-length");
@@ -246,6 +273,10 @@ void    Request::copyFromMap()
 		if ( pos != -1)
 			_chunked = true;
 	}
+	//connection
+	it = _headerField.find("connection");
+	if (it != _headerField.end())
+		_connection = it->second;
 }
 
 

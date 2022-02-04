@@ -1,0 +1,70 @@
+[[server]]
+	name = "Edu"
+	host = "127.0.0.1"
+	port = 8080
+	body_size_limit = 100000
+	[server.error_page]
+		400 = "/var/www/poheck/Edu/errorPages/error_400.html"
+		403 = "/var/www/poheck/Edu/errorPages/error_403.html"
+		404 = "/var/www/poheck/Edu/errorPages/error_404.html"
+	[[server.location]]
+		location = "/"
+		root = "/var/www/poheck/Edu/"
+		methods = ["GET"]
+		autoindex = false
+		directory_file = "index.html"
+	[[server.location]]
+		location = "/errorlist"
+		root = "/var/www/poheck/Edu/errorPages/"
+		methods = ["GET"]
+		autoindex = false
+		directory_file = "this.html"
+	[[server.location]]
+		location = "/images"
+		root = "/var/www/poheck/Edu/images/"
+		methods = ["GET", "POST", "DELETE"]
+		autoindex = true
+		directory_file = "oops.html"
+	[[server.location]]
+		location = "/cats"
+		root = "/var/www/poheck/Edu/images/cats/"
+		methods = ["GET", "POST", "DELETE"]
+		autoindex = true
+	[[server.location]]
+		location = "/dogs"
+		root = "/var/www/poheck/Edu/images/dogs/"
+		methods = ["GET", "POST", "DELETE"]
+		autoindex = true
+	[[server.location]]
+		location = "/docs"
+		root = "/var/www/poheck/Edu/docs/"
+		redirect = ["301","http::/127.0.0.1::8080/documents"]
+	[[server.location]]
+		location = "/documents"
+		root = "/var/www/poheck/Edu/documents/"
+		methods = ["GET", "DELETE"]
+		autoindex = true
+		upload_accept = true
+		upload_dir = "/var/www/poheck/Edu/upload/"
+	[[server.location]]
+		location = "/upload"
+		root = "/var/www/poheck/Edu/upload/"
+		methods = ["POST", "DELETE"]
+		autoindex = true
+		upload_accept = true
+		upload_dir = "/var/www/poheck/Edu/upload/"
+[[server]]
+	name = "2222"
+	host = "localhost"
+	port = 8081
+	body_size_limit = 65356
+	[server.error_page]
+		404 = "/var/www/poheck/errorPages/error_404.html"
+	[[server.location]]
+		location = "/root2/"
+		root = "/var/www/html/jopa.html"
+		methods = ["GET", "POST"]
+		autoindex = true
+		directory_file = "its_a_directory.html"
+		upload_accept = false
+		upload_dir = "/var/www/html/upload"

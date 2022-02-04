@@ -5,7 +5,6 @@
 Client::Client()
 {
 	allRead = false;
-	_received = 0;
 	this->_fd = -1;
 	this->_sended = 0;
 }
@@ -13,7 +12,6 @@ Client::Client()
 Client::Client(char *str)
 {
 	allRead = false;
-	_received = 0;
 	this->_fd = -1;
 	this->_buff = str;
 	this->_sended = 0;
@@ -23,7 +21,6 @@ Client::Client(char *str)
 Client::Client(char *str, ServerConfig *config)
 {
 	allRead = false;
-	_received = 0;
 	this->_fd = -1;
 	this->_config = config;
 	this->_buff = str;
@@ -60,7 +57,7 @@ unsigned int Client::getCounter(void) const
 
 unsigned int Client::getRecvCounter(void) const
 {
-	return _received;
+	return _request.getRecved();
 }
 
 void	Client::setRawData(char *str)
@@ -107,14 +104,8 @@ bool	Client::allSended(void)
 
 bool	Client::allRecved(void)
 {
-	if (_request.getContentLength() == _received)
-	{
-		std::cout << "contentLength, _received "
-			<< _request.getContentLength()
-			<< " " <<
-			_received << std::endl;
+	if (_request.getContentLength() == (_request.getRecved() - _request.getHeaderSize()))
 		return (true);
-	}
 	else
 		return (false);
 }
@@ -126,9 +117,7 @@ void	Client::increaseCounter(void)
 
 void 	Client::increaseRecvCounter(unsigned int n)
 {
-	if (_received == 0)
-		_received -= _request.getHeaderSize();
-	_received += n;
+	_request.increaseRecvCounter(n);
 }
 
 //Генерирует response. Далее респонс можно получить через функцию getStrToSend()
@@ -136,7 +125,7 @@ int	Client::sendResponse(int	fd)
 {
 	_response.setData(_request, _config);
 	_response.generate();
-	_headerToSend = _response.getClient();
+	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_ret = sendData(fd, _headerToSend + _bodyToSend);
 
@@ -147,7 +136,7 @@ std::string	Client::generateRespons(void)
 {
 	_response.setData(_request, _config);
 	_response.generate();
-	_headerToSend = _response.getClient();
+	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_toSend = _headerToSend + _bodyToSend;
 
@@ -160,7 +149,10 @@ std::string	Client::generateRespons(void)
 
 bool	Client::readyToSend(void)
 {
-	return(_request.ok());
+	if (_request.ok())
+		return(_request.ok());
+	else 
+		return false;
 }
 
 void	Client::printClientInfo(void)
@@ -170,22 +162,53 @@ void	Client::printClientInfo(void)
 	std::map<std::string, std::string>::iterator it1;
 
 	map = _request.getClientFields();
-	std::cout << PINK << "request method = " << _request.getMethod() << ZERO_C << std::endl;
-	std::cout << PINK << "request URI = " << _request.getURI() << ZERO_C << std::endl;
-	std::cout << PINK << "host  = " << _request.getHost() << ZERO_C << std::endl;
-	std::cout << PINK << "request query = " << _request.getQuery() << ZERO_C << std::endl;
-	std::cout << PINK << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
-	// std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
+	std::cout << BLUE << std::endl << "PARSED REQUEST" << ZERO_C << std::endl << std::endl;
+	std::cout << GREEN << "request method = " << _request.getMethod() << ZERO_C << std::endl;
+	std::cout << GREEN << "request URI = " << _request.getURI() << ZERO_C << std::endl;
+	std::cout << GREEN << "host  = " << _request.getHost() << ZERO_C << std::endl;
+	std::cout << GREEN << "request query = " << _request.getQuery() << ZERO_C << std::endl;
+	std::cout << GREEN << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
+	std::cout << GREEN << "content-length = " << _request.getContentLength() << ZERO_C << std::endl;
+	std::cout << GREEN << "connection type = " << _request.getConnection() << ZERO_C << std::endl;
+
+	std::cout << BLUE << std::endl << "RESPONSE" << ZERO_C << std::endl << std::endl;
+	std::cout << GREEN << _response.getHeader() << ZERO_C << std::endl;
 	
-	std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;
-	for ( it = map.begin(); it != map.end() ; it++)
-	{
-		std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
-	}
-	std::cout << TURGUOISE << "Client BODY" << ZERO_C << std::endl;
-	std::cout << GREEN << _request.getBody().size() << ZERO_C << std::endl;
+	// std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
+	// std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;
+	// for ( it = map.begin(); it != map.end() ; it++)
+	// {
+	// 	std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
+	// }
+	// std::cout << TURGUOISE << "Client BODY" << ZERO_C << std::endl;
+	// std::cout << GREEN << _request.getBody().size() << ZERO_C << std::endl;
 	/* std::cout << BLUE << _request.getBody() << ZERO_C << std::endl; */
 	
+}
+
+bool	Client::isEmpty(void)
+{
+	if (!_request.ok() && _request.getHeaderSize() == 0
+		&& _request.getContentLength() == 0)
+		return (true);
+	else
+		return (false);
+}
+
+bool	Client::TimeToDie(void)
+{
+	struct timeval curTime;
+
+	gettimeofday(&curTime, NULL);
+	if ((curTime.tv_sec - _time.tv_sec) >= _request.getLifeTime())
+		return (true);
+	else
+		return (false);
+}
+
+void	Client::updateTimeToDie(void)
+{
+	gettimeofday(&_time, NULL);
 }
 
 void	Client::clear(void)
