@@ -146,8 +146,8 @@ void	Server::start(void)
 	int fd;
 	int ready_num = 0;
 
-	unsigned int client_events = EPOLLIN | EPOLLOUT | EPOLLET;
-	unsigned int server_events = EPOLLIN | EPOLLOUT | EPOLLET;
+	unsigned int client_events = EPOLLIN;
+	unsigned int server_events = EPOLLIN | EPOLLOUT;
 	
 	_epoll_fd = epoll_create(1337);
 	checkError(server_sock.init(MAX_CLIENT), "Socket init");
@@ -159,43 +159,7 @@ void	Server::start(void)
 	while (1)
 	{
 
-		// sending
-		for (client_it = client_map.begin();
-				client_it != client_map.end(); ++client_it)
-		{
-			std::cout << TURQ << "IN SEND LOOP" << RESET << std::endl;
-			Client &client = client_it->second;
-
-			if (!client.allRead && !client.isEmpty())
-			{
-				readSocket(client, fd);
-			}
-			if (client.readyToSend())
-			{
-				epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, client_it->first, NULL);
-				std::cout << TURQ << "readyToSend " << client_it->first << RESET << std::endl;
-				client.generateRespons();
-
-				sendData(client, client_it->first);
-			
-			}
-
-			if ((client.readyToSend() && client.allSended()) || client.isEmpty())
-			{
-				/* SUS */
-				/* client_map[fd].printClientInfo(); */
-				close(client_it->first);
-				std::cerr << RED <<
-					"deleting client "
-					<< client_it->first
-					<<
-					RESET
-					<< std::endl;
-				client_map.erase(client_it);
-			}
-		}
-
-		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 100);
+		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
 		/* std::cout << TURQ << "ready_num " << ready_num << RESET << std::endl; */
 
 		if (ready_num < 0)
@@ -203,9 +167,10 @@ void	Server::start(void)
 		for (int i = 0; i < ready_num; i++)
 		{
 			fd = _events[i].data.fd;
+			unsigned int events = _events[i].events;
 
 			DBOUT << "FD is " << fd << ENDL;
-			print_epoll_events(_events[i].events);
+			print_epoll_events(events);
 
 			if (fd == server_sock.getSocketFd())
 			{
@@ -221,7 +186,37 @@ void	Server::start(void)
 				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
 				/* _client--; */
 				client_map[fd];
-				readSocket(client_map[fd], fd);
+				if (events & EPOLLIN)
+				{
+					DBOUT << GREEN << "doing readSocket" << ENDL;
+					readSocket(client_map[fd], fd);
+					if (client_map[fd].readyToSend())
+					{
+						struct epoll_event ev;
+
+						ev.events = EPOLLOUT;
+						ev.data.fd = fd;
+						assert( epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == 0);
+						DBOUT << GREEN << "rearmed to EPOLLOUT" << ENDL;
+					}
+				}
+				else if (events & EPOLLOUT)
+				{
+					DBOUT << GREEN << "doing sendData" << ENDL;
+					client_map[fd].printClientInfo();
+					client_map[fd].generateRespons();
+					sendData(client_map[fd], fd);
+					if ((client_map[fd].readyToSend() && client_map[fd].allSended()))
+					{
+						epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+						close(fd);
+						client_map.erase(fd);
+						DBOUT << RED <<
+							"deleting client "
+							<< fd
+							<< ENDL;
+					}
+				}
 			}
 		}
 		ready_num = 0;
