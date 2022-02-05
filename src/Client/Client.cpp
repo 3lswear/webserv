@@ -4,6 +4,7 @@
 
 Client::Client()
 {
+	DBOUT << "Client constructor " << this << ENDL;
 	allRead = false;
 	done = false;
 	this->_fd = -1;
@@ -12,6 +13,7 @@ Client::Client()
 
 Client::Client(char *str)
 {
+	DBOUT << "Client constructor " << this << ENDL;
 	allRead = false;
 	done = false;
 	this->_fd = -1;
@@ -22,6 +24,7 @@ Client::Client(char *str)
 
 Client::Client(char *str, ServerConfig *config)
 {
+	DBOUT << "Client constructor " << this << ENDL;
 	allRead = false;
 	done = false;
 	this->_fd = -1;
@@ -239,5 +242,5 @@ void	Client::clear(void)
 
 Client::~Client()
 {
-	DBOUT << "client destructor called" << ENDL;
+	DBOUT << "client destructor called " << this << ENDL;
 }
