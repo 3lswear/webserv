@@ -141,6 +141,7 @@ void	Response::generateHeader(void)
 	if (_request.getConnection() == "keep-alive")
 		ss << "Keep-Alive: timeout=" << _request.getLifeTime() << "\r\n";
 	ss << "Date: " << getTime() << "\r\n";
+	ss << "Cache-Control: no-store, no-cache, must-revalidate\r\n";
 	ss << "\r\n";
 	_header = ss.str();
 }
