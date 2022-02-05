@@ -5,6 +5,7 @@
 Client::Client()
 {
 	allRead = false;
+	done = false;
 	this->_fd = -1;
 	this->_sended = 0;
 }
@@ -12,6 +13,7 @@ Client::Client()
 Client::Client(char *str)
 {
 	allRead = false;
+	done = false;
 	this->_fd = -1;
 	this->_buff = str;
 	this->_sended = 0;
@@ -21,6 +23,7 @@ Client::Client(char *str)
 Client::Client(char *str, ServerConfig *config)
 {
 	allRead = false;
+	done = false;
 	this->_fd = -1;
 	this->_config = config;
 	this->_buff = str;
@@ -40,9 +43,9 @@ Response	Client::getResponse(void)
 	return (_response);
 }
 
-std::string	Client::getStrToSend(void)
+char	*Client::getStrToSend(void)
 {
-	return (_toSend);
+	return (_to_send_char);
 }
 
 int	Client::getFd(void)
@@ -98,8 +101,8 @@ bool Client::isChunked(void)
 bool	Client::allSended(void)
 {
 	if (_toSend.size() <= _sended)
-		return (true);
-	return (false);
+		done = true;
+	return (done);
 }
 
 bool	Client::allRecved(void)
@@ -134,11 +137,20 @@ int	Client::sendResponse(int	fd)
 
 std::string	Client::generateRespons(void)
 {
+	size_t len;
+
 	_response.setData(_request, _config);
 	_response.generate();
 	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_toSend = _headerToSend + _bodyToSend;
+
+
+	len = _toSend.size();
+	response_len = len;
+	/* _to_send_char = new char[len + 1]; */
+	_to_send_char = (char *)malloc(sizeof(char) * (len + 1));
+	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
 
 	return (_toSend);
 }
@@ -222,8 +234,10 @@ void	Client::clear(void)
 	_bodyToSend = "";
 	_headerToSend = "";
 	_toSend = "";
+	free(_to_send_char);
 }
 
 Client::~Client()
 {
+	DBOUT << "client destructor called" << ENDL;
 }
