@@ -87,7 +87,7 @@ void Server::readSocket(Client &client, int fd)
 
 	int status;
 	int bytes_read;
-	char buf[BUFFSIZE + 1] = {0};
+	char buf[BUFFSIZE + 1];
 
 	DBOUT << TURQ << "IN readSocket" << RESET << std::endl;
 	DBOUT << "client in readSocket "<< &client << ENDL;
@@ -97,6 +97,7 @@ void Server::readSocket(Client &client, int fd)
 		client.allRead = true;
 		return;
 	}
+	buf[bytes_read + 1] = '\0';
 	client.setRawData(buf);
 	client.increaseRecvCounter(bytes_read);
 	status = client.parseRequest();

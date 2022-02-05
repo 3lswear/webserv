@@ -8,6 +8,7 @@ Client::Client()
 	done = false;
 	this->_fd = -1;
 	this->_sended = 0;
+	_to_send_char = NULL;
 }
 
 Client::Client(char *str)
@@ -17,11 +18,14 @@ Client::Client(char *str)
 	this->_fd = -1;
 	this->_buff = str;
 	this->_sended = 0;
+	_to_send_char = NULL;
+
 
 }
 
 Client::Client(char *str, ServerConfig *config)
 {
+	_to_send_char = NULL;
 	allRead = false;
 	done = false;
 	this->_fd = -1;
@@ -234,7 +238,8 @@ void	Client::clear(void)
 	_bodyToSend = "";
 	_headerToSend = "";
 	_toSend = "";
-	free(_to_send_char);
+	if (_to_send_char)
+		free(_to_send_char);
 }
 
 Client::~Client()
