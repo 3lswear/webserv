@@ -59,22 +59,25 @@ void	Server::readConfig(void)
 
 void Server::sendData(Client &client, int fd)
 {
-	std::string tmp = client.getStrToSend();
-	unsigned int size_diff = tmp.size() - client.getCounter();
-
+	/* std::string tmp = client.getStrToSend(); */
+	char *tmp = client.getStrToSend();
+	size_t size_diff = client.response_len - client.getCounter();
+	size_t send_len;
 
 	if (size_diff < BUFFSIZE)
-	{
-		tmp = tmp.substr(client.getCounter(), size_diff);
-	}
+		send_len = size_diff;
 	else
-		tmp = tmp.substr(client.getCounter(), BUFFSIZE);
+		send_len = BUFFSIZE;
 
 	/* std::cout << YELLO << tmp << RESET << std::endl; */
 	/* std::cout << GREEN << client.getCounter() << RESET << std::endl; */
 
 
-	send(fd, tmp.c_str(), tmp.size(), 0);
+	if (send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL) < 0)
+	{
+		DBOUT << RED << "SEND FAILED !@!!!" << ENDL;
+		client.done = true;
+	}
 	client.increaseCounter();
 
 }
@@ -86,7 +89,7 @@ void Server::readSocket(Client &client, int fd)
 	int bytes_read;
 	char buf[BUFFSIZE + 1] = {0};
 
-	std::cout << TURQ << "IN readSocket" << RESET << std::endl;
+	DBOUT << TURQ << "IN readSocket" << RESET << std::endl;
 	bytes_read = recv(fd, buf, BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
@@ -107,7 +110,7 @@ void Server::readSocket(Client &client, int fd)
 	std::cerr << "contentLength " << client.getRequest().getContentLength() << std::endl;
 	std::cerr << "allRead " << client.allRead << std::endl;
 
-	std::cout << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
+	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 	bzero(buf, BUFFSIZE);
 }
 
@@ -142,19 +145,18 @@ void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
 	std::map<int, Client> client_map;
-	std::map<int, Client>::iterator client_it;
 	int fd;
 	int ready_num = 0;
 
 	unsigned int client_events = EPOLLIN;
-	unsigned int server_events = EPOLLIN | EPOLLOUT;
+	unsigned int server_events = EPOLLIN;
 	
 	_epoll_fd = epoll_create(1337);
 	checkError(server_sock.init(MAX_CLIENT), "Socket init");
 	setNonBlock(server_sock.getSocketFd());
 	setNonBlock(_epoll_fd);
 
-	std::cerr << YELLO << "adding server_sock..." << RESET << std::endl;
+	DBOUT << YELLO << "adding server_sock..." << ENDL;
 	add_to_epoll_list(server_sock.getSocketFd(), server_events);
 	while (1)
 	{
@@ -169,8 +171,8 @@ void	Server::start(void)
 			fd = _events[i].data.fd;
 			unsigned int events = _events[i].events;
 
-			DBOUT << "FD is " << fd << ENDL;
-			print_epoll_events(events);
+			/* DBOUT << "FD is " << fd << ENDL; */
+			/* print_epoll_events(events); */
 
 			if (fd == server_sock.getSocketFd())
 			{
@@ -183,15 +185,18 @@ void	Server::start(void)
 			}
 			else
 			{
-				std::cout << TURQ << "IN FOR LOOP" << RESET << std::endl;
+				/* DBOUT << TURQ << "IN FOR LOOP" << RESET << std::endl; */
 				/* _client--; */
-				client_map[fd];
+				/* client_map[fd]; */
+				/* client_map.insert(std::make_pair(fd, Client())); */
 				if (events & EPOLLIN)
 				{
 					DBOUT << GREEN << "doing readSocket" << ENDL;
 					readSocket(client_map[fd], fd);
 					if (client_map[fd].readyToSend())
 					{
+						client_map[fd].generateRespons();
+
 						struct epoll_event ev;
 
 						ev.events = EPOLLOUT;
@@ -202,14 +207,14 @@ void	Server::start(void)
 				}
 				else if (events & EPOLLOUT)
 				{
-					DBOUT << GREEN << "doing sendData" << ENDL;
-					client_map[fd].printClientInfo();
-					client_map[fd].generateRespons();
+					/* DBOUT << GREEN << "doing sendData" << ENDL; */
+					/* client_map[fd].printClientInfo(); */
 					sendData(client_map[fd], fd);
-					if ((client_map[fd].readyToSend() && client_map[fd].allSended()))
+					if (client_map[fd].allSended())
 					{
 						epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 						close(fd);
+						client_map[fd].clear();
 						client_map.erase(fd);
 						DBOUT << RED <<
 							"deleting client "
@@ -219,11 +224,10 @@ void	Server::start(void)
 				}
 			}
 		}
-		ready_num = 0;
 
 	}
 	close(server_sock.getSocketFd());
-	std::cerr << "end;" << std::endl;
+	DBOUT << RED << "end;" << ENDL;
 }
 
 
