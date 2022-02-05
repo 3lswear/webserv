@@ -90,6 +90,7 @@ void Server::readSocket(Client &client, int fd)
 	char buf[BUFFSIZE + 1] = {0};
 
 	DBOUT << TURQ << "IN readSocket" << RESET << std::endl;
+	DBOUT << "client in readSocket "<< &client << ENDL;
 	bytes_read = recv(fd, buf, BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
@@ -144,7 +145,7 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 void	Server::start(void)
 {
 	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
-	std::map<int, Client> client_map;
+	std::map<int, Client*> client_map;
 	int fd;
 	int ready_num = 0;
 
@@ -185,17 +186,14 @@ void	Server::start(void)
 			}
 			else
 			{
-				/* DBOUT << TURQ << "IN FOR LOOP" << RESET << std::endl; */
-				/* _client--; */
-				/* client_map[fd]; */
-				/* client_map.insert(std::make_pair(fd, Client())); */
+				if (client_map.find(fd) == client_map.end())
+					client_map[fd] = new Client();
 				if (events & EPOLLIN)
 				{
-					DBOUT << GREEN << "doing readSocket" << ENDL;
-					readSocket(client_map[fd], fd);
-					if (client_map[fd].readyToSend())
+					readSocket(*client_map[fd], fd);
+					if (client_map[fd]->readyToSend())
 					{
-						client_map[fd].generateRespons();
+						client_map[fd]->generateRespons();
 
 						struct epoll_event ev;
 
@@ -209,12 +207,13 @@ void	Server::start(void)
 				{
 					/* DBOUT << GREEN << "doing sendData" << ENDL; */
 					/* client_map[fd].printClientInfo(); */
-					sendData(client_map[fd], fd);
-					if (client_map[fd].allSended())
+					sendData(*client_map[fd], fd);
+					if (client_map[fd]->allSended())
 					{
 						epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 						close(fd);
-						client_map[fd].clear();
+						client_map[fd]->clear();
+						delete (client_map[fd]);
 						client_map.erase(fd);
 						DBOUT << RED <<
 							"deleting client "
