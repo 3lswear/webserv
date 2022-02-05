@@ -114,6 +114,20 @@ void Server::readSocket(Client &client, int fd)
 	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
 	bzero(buf, BUFFSIZE);
 }
+int Server::delete_client(std::map<int,Client *> &client_map, int fd)
+{
+	int ret;
+	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+	close(fd);
+	client_map[fd]->clear();
+	delete (client_map[fd]);
+	client_map.erase(fd);
+	DBOUT << RED <<
+		"deleting client "
+		<< fd
+		<< ENDL;
+	return (ret);
+}
 
 void	Server::setupConfig(void)
 {
@@ -202,6 +216,8 @@ void	Server::start(void)
 						assert( epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == 0);
 						DBOUT << GREEN << "rearmed to EPOLLOUT" << ENDL;
 					}
+					if (client_map[fd]->isEmpty())
+						delete_client(client_map, fd);
 				}
 				else if (events & EPOLLOUT)
 				{
@@ -210,15 +226,7 @@ void	Server::start(void)
 					sendData(*client_map[fd], fd);
 					if (client_map[fd]->allSended())
 					{
-						epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-						close(fd);
-						client_map[fd]->clear();
-						delete (client_map[fd]);
-						client_map.erase(fd);
-						DBOUT << RED <<
-							"deleting client "
-							<< fd
-							<< ENDL;
+						delete_client(client_map, fd);
 					}
 				}
 			}

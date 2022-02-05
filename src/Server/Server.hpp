@@ -32,6 +32,7 @@ class Server
 		void setNonBlock(int fd);
 		void sendData(Client &client, int fd);
 		void readSocket(Client &client, int fd);
+		int delete_client(std::map<int,Client *> &map, int fd);
 
 		enum e_req_status
 		{
