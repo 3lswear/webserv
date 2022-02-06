@@ -11,14 +11,12 @@
 Server::Server()
 {
 	bzero(_events, sizeof(_events));
-	_client = 0;
 
 }
 
 Server::Server(std::string path)
 {
 	(void)path;
-	_client = 0;
 }
 
 void Server::print_epoll_events(unsigned int events)
@@ -55,6 +53,8 @@ void	Server::readConfig(void)
 		_configs.push_back(new ServerConfig(*it));
 		++it;
 	}
+
+	clean_parsed(root);
 }
 
 void Server::sendData(Client &client, int fd)
@@ -69,8 +69,8 @@ void Server::sendData(Client &client, int fd)
 	else
 		send_len = BUFFSIZE;
 
-	/* std::cout << YELLO << tmp << RESET << std::endl; */
-	/* std::cout << GREEN << client.getCounter() << RESET << std::endl; */
+	/* DBOUT << YELLO << tmp << ENDL; */
+	/* DBOUT << GREEN << client.getCounter() << ENDL; */
 
 
 	if (send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL) < 0)
@@ -89,7 +89,7 @@ void Server::readSocket(Client &client, int fd)
 	int bytes_read;
 	char buf[BUFFSIZE + 1];
 
-	DBOUT << TURQ << "IN readSocket" << RESET << std::endl;
+	DBOUT << TURQ << "IN readSocket" << ENDL;
 	DBOUT << "client in readSocket "<< &client << ENDL;
 	bytes_read = recv(fd, buf, BUFFSIZE, 0);
 	if (bytes_read == 0)
@@ -108,13 +108,13 @@ void Server::readSocket(Client &client, int fd)
 		client.allRead = true;
 	}
 
-	std::cerr << "recvCounter " << client.getRecvCounter() << std::endl;
-	std::cerr << "contentLength " << client.getRequest().getContentLength() << std::endl;
-	std::cerr << "allRead " << client.allRead << std::endl;
+	DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
+	DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
+	DBOUT << GREEN << "allRead " << client.allRead << ENDL;
 
-	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << RESET << std::endl;
-	bzero(buf, BUFFSIZE);
+	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
 }
+
 int Server::delete_client(std::map<int,Client *> &client_map, int fd)
 {
 	int ret;
@@ -149,12 +149,11 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 	ev.data.fd = fd;
 
 	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
-	_client++;
-	std::cerr << YELLO
+	DBOUT << YELLO
 		<< "add socket "
 		<< fd
 		<< " to epoll_list"
-		<< RESET << std::endl;
+		<< ENDL;
 }
 
 void	Server::start(void)
@@ -178,7 +177,7 @@ void	Server::start(void)
 	{
 
 		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
-		/* std::cout << TURQ << "ready_num " << ready_num << RESET << std::endl; */
+		/* DBOUT << TURQ << "ready_num " << ready_num << ENDL; */
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
@@ -267,14 +266,110 @@ void	Server::checkError(int fd, std::string str)
 {
 	if (fd < 0)
 	{
-		std::cout << RED << "Server ERROR: " << str << ZERO_C << std::endl;
+		DBOUT << RED << "Server ERROR: " << str << ENDL;
 		exit(1);
 	}
 	else
-		std::cout << GREEN << "Server SUCCESS: " << str << ZERO_C << std::endl;
+		DBOUT << GREEN << "Server SUCCESS: " << str << ENDL;
+}
+
+void Server::clean_generic(toml_node *node)
+{
+	switch (node->type)
+	{
+		case toml_node::STRING:
+		{
+			DBOUT << "cleaning string" << ENDL;
+			delete node->getString();
+		}
+		break;
+		case toml_node::MAPARRAY:
+		{
+			DBOUT << "cleaning MAPARRAY" << ENDL;
+			TOMLMapArray *map_array = node->getMapArray();
+			for (TOMLMapArray::iterator it = map_array->begin();
+					it != map_array->end(); ++it)
+			{
+				DBOUT << "cleaning a MAP of MAPARRAY" << ENDL;
+				TOMLMap *map = *it;
+				TOMLMap::iterator map_it = map->begin();
+				for (map_it = map->begin();
+						map_it != map->end(); ++map_it)
+				{
+					DBOUT << "cleaning a MAP item " << map_it->first << ENDL;
+					clean_generic(map_it->second);
+					/* map->erase(map_it); */
+				}
+				map->clear();
+				delete map;
+			}
+			map_array->clear();
+			delete map_array;
+			DBOUT << "end cleaning MAPARRAY" << ENDL;
+		}
+		break;
+		case toml_node::MAP:
+		{
+			DBOUT << "cleaning MAP" << ENDL;
+			TOMLMap *map = node->getMap();
+			for (TOMLMap::iterator it = map->begin(); it != map->end(); ++it)
+			{
+				DBOUT << "key is " << it->first << ENDL;
+				clean_generic(it->second);
+				/* map->erase(it); */
+			}
+			map->clear();
+			delete map;
+		}
+		break;
+
+		case toml_node::ARRAY:
+		{
+			DBOUT << "cleaning ARRAY" << ENDL;
+			TOMLArray *arr = node->getArray();
+			for (TOMLArray::iterator it = arr->begin();
+					it != arr->end(); ++it)
+			{
+				clean_generic(*it);
+			}
+			arr->clear();
+			delete arr;
+			DBOUT << "end cleaning MAP" << ENDL;
+		}
+		break;
+
+		default:
+		{
+			DBOUT << "Cleaning type " << node->type << " not implemented :)" << ENDL;
+		}
+	}
+	delete node;
+
+}
+
+void Server::clean_parsed(TOMLMap *root)
+{
+	TOMLMap::iterator it;
+
+	DBOUT << ">>> cleaning up: <<<" << std::endl;
+	for (it = root->begin(); it != root->end(); ++it)
+	{
+		/* DBOUT << RED << it->first */
+		/* 	<< ": " << GREEN */
+		/* 	<< *(it->second->toString()); */
+
+		clean_generic(it->second);
+		/* delete it->second; */
+		std::cout << ", " << std::endl;
+	}
+	DBOUT << YELLO << "end of clean" << ENDL;
+	root->clear();
+	delete root;
+	root = NULL;
 }
 
 Server::~Server()
 {
+	
 }
 

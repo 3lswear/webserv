@@ -6,7 +6,9 @@ SANFLAGS = -fsanitize=address
 
 # SANFLAGS = -fsanitize=leak
 
-CXXFLAGS = -Wall -Wextra -Werror -g -std=c++98 -fno-limit-debug-info $(SANFLAGS) -DDEBUG
+DEBUGFLAGS = -g -fno-limit-debug-info
+
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(DEBUGFLAGS) $(SANFLAGS) -DDEBUG
 
 CPPFLAGS += -MD -MP
 
@@ -20,12 +22,12 @@ OBJ = $(SRC:.cpp=.o)
 all: $(NAME)
 
 $(OBJ): %.o: %.cpp $(SRC) Makefile
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -I $(INCLUDES)  -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -I $(INCLUDES) -o $@
 
 -include $(SRC:%.cpp=%.d)
 
 $(NAME): $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OBJ)  -o $(NAME)
+	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
 
 clean:
 	$(RM) $(OBJ)

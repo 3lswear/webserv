@@ -15,7 +15,6 @@ class Server
 	private:
 		int	_port;
 		int	_epoll_fd;
-		int	_client;
 		struct epoll_event	_events[MAX_CLIENT];
 		struct sockaddr_in _addres;
 		std::string _ip;
@@ -33,6 +32,9 @@ class Server
 		void sendData(Client &client, int fd);
 		void readSocket(Client &client, int fd);
 		int delete_client(std::map<int,Client *> &map, int fd);
+
+		static void clean_generic(toml_node *node);
+		static void clean_parsed(TOMLMap *root);
 
 		enum e_req_status
 		{
