@@ -34,15 +34,15 @@ private:
 	bool			_body_ok;
 	bool			_chunked;
 public:
-	std::string					getURI(void);
-	std::string					getBody(void);
-	std::string					getHost(void);
-	std::string					getQuery(void);
-	std::string					getMethod(void);
-	std::string					getFullUri(void);
-	std::string					getVersion(void);
-	std::string					getLocation(void);
-	std::string					getConnection(void);
+	std::string					&getURI(void);
+	std::string					&getBody(void);
+	std::string					&getHost(void);
+	std::string					&getQuery(void);
+	std::string					&getMethod(void);
+	std::string					&getFullUri(void);
+	std::string					&getVersion(void);
+	std::string					&getLocation(void);
+	std::string					&getConnection(void);
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
 	int							getLifeTime(void);

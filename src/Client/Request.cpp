@@ -32,39 +32,39 @@ Request::Request(char *str)
 
 //-------------------------------------------------Get/Set---------------------------------------
 
-std::string					Request::getURI(void)
+std::string					&Request::getURI(void)
 {
     return (_URI);
 }
-std::string					Request::getBody(void)
+std::string					&Request::getBody(void)
 {
     return (_body);
 }
-std::string					Request::getHost(void)
+std::string					&Request::getHost(void)
 {
     return (_host);
 }
-std::string					Request::getQuery(void)
+std::string					&Request::getQuery(void)
 {
     return(_query);
 }
-std::string					Request::getMethod(void)
+std::string					&Request::getMethod(void)
 {
     return  (_method);
 }
-std::string					Request::getFullUri(void)
+std::string					&Request::getFullUri(void)
 {
     return (_fullURI);
 }
-std::string					Request::getVersion(void)
+std::string					&Request::getVersion(void)
 {
     return (_version);
 }
-std::string					Request::getLocation(void)
+std::string					&Request::getLocation(void)
 {
     return (_location);
 }
-std::string					Request::getConnection(void)
+std::string					&Request::getConnection(void)
 {
 	return (_connection);
 }
@@ -155,8 +155,6 @@ int	Request::parseStartLine(std::string str)
 	else if (_method != "GET" && _method != "POST"
 			&& _method != "DELETE")
 		_ret =  405;
-	else if (isFile(_fullURI) != 0 && isDir(_fullURI) != 0)
-        _ret = 404;
 	return (_ret);
 }
 
@@ -203,7 +201,7 @@ int	Request::parseClientfield(std::string str)
 
 	distance = str.find(":");
 	if (distance < 0 && str != "\r")
-		return 400;
+		return 200;
 	key = str.substr(0, distance);
 	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 	value = str.erase(0, distance + 1);

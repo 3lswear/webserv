@@ -13,32 +13,32 @@ ServerConfig::ServerConfig(TOMLMap *map)
 }
 
 //--------------------------------------------------GET/SET---------------------------------------
-std::string					ServerConfig::getServerName(void)
+std::string					&ServerConfig::getServerName(void)
 {
 	return (_serverName);
 }
 
-std::string					ServerConfig::getHost(void)
+std::string					&ServerConfig::getHost(void)
 {
 	return (_host);
 }
 
-int							ServerConfig::getPort(void)
+int							&ServerConfig::getPort(void)
 {
 	return (_port);
 }
 
-int							ServerConfig::getClientBodySize(void)
+int							&ServerConfig::getClientBodySize(void)
 {
 	return (_clientBodySize);
 }
 
-std::vector<location *>		ServerConfig::getLocations(void)
+std::vector<location *>		&ServerConfig::getLocations(void)
 {
 	return (_locations);
 }
 
-std::map<int, std::string>	ServerConfig::getErrorPages(void)
+std::map<int, std::string>	&ServerConfig::getErrorPages(void)
 {
 	return (_errorPages);
 }
