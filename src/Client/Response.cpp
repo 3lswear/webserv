@@ -66,7 +66,7 @@ std::string		Response::getTime(void)
 
 	gettimeofday(&currTime, NULL);
 	t = gmtime(&currTime.tv_sec);
-	strftime(buff, 1337, "%a, %d %b %Y %H:%M:%S GTM", t);
+	strftime(buff, 1337, "%a, %d %b %Y %H:%M:%S GMT", t);
 
 	return (buff);
 }
@@ -141,6 +141,7 @@ void	Response::generateHeader(void)
 	if (_request.getConnection() == "keep-alive")
 		ss << "Keep-Alive: timeout=" << _request.getLifeTime() << "\r\n";
 	ss << "Date: " << getTime() << "\r\n";
+	ss << "Cache-Control: no-store, no-cache, must-revalidate\r\n";
 	ss << "\r\n";
 	_header = ss.str();
 }

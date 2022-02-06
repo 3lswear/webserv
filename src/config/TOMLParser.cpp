@@ -444,6 +444,7 @@ namespace config
 					}
 					else
 						(it->second)->getMapArray()->push_back(map_node->getMap());
+					delete map_node;
 				}
 				else if (type == toml_node::MAP)
 				{
@@ -460,13 +461,13 @@ namespace config
 			{
 				it = local_root->find(*subname);
 
-				toml_node *map_node2;
-				map_node2 = new toml_node;
-				TOMLMap *map = new TOMLMap;
-				map_node2->setObject(map);
 				/* subname not found in local_root */
 				if (it == local_root->end())
 				{
+					toml_node *map_node2;
+					map_node2 = new toml_node;
+					TOMLMap *map = new TOMLMap;
+					map_node2->setObject(map);
 					(*local_root)[*subname] = map_node2;
 					local_root = map;
 				}

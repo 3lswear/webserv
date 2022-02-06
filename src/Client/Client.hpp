@@ -6,6 +6,7 @@
 #include "ServerConfig.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include <cstring>
 
 class Client
 {
@@ -25,15 +26,28 @@ private:
 	std::string	_bodyToSend;
 	std::string	_headerToSend;
 	std::string	_toSend;
+	char *_to_send_char;
 	std::map<std::string, std::string> _errorCode;
 
 public:
 	bool allRead;
+	enum e_req_status
+	{
+		READING,
+		WRITING,
+		ENDED
+	} req_status; 
+
+	int serverfd;
+	size_t readn;
+	size_t left;
+	bool done;
+	size_t response_len;
 	
 public:
 	Request						getRequest(void);
 	Response					getResponse(void);
-	std::string					getStrToSend(void);
+	char 						*getStrToSend(void);
 	unsigned int				getCounter(void) const;
 	void						setRawData(char *);
 	void						setFd(int);
