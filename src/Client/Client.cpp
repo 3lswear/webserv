@@ -32,7 +32,6 @@ Client::Client(char *str, ServerConfig *config)
 	this->_config = config;
 	this->_buff = str;
 	this->_sended = 0;
-
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
@@ -152,8 +151,29 @@ std::string	Client::generateRespons(void)
 
 	len = _toSend.size();
 	response_len = len;
-	/* _to_send_char = new char[len + 1]; */
-	_to_send_char = (char *)malloc(sizeof(char) * (len + 1));
+	_to_send_char = new char[len + 1];
+	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
+
+	return (_toSend);
+}
+
+std::string	Client::generateRespons(serverListen &reqData, std::vector<ServerConfig *> &configs)
+{
+	size_t		len;
+	location	*tmp;
+
+	_config	=	Config::getConfig(configs, _request, reqData);
+	tmp 	=	Config::getLocation(_config->getLocations(), _request.getURI());
+	_response.setData(_request, _config, tmp);
+	_response.generate();
+	_headerToSend = _response.getHeader();
+	_bodyToSend = _response.getBody();
+	_toSend = _headerToSend + _bodyToSend;
+
+
+	len = _toSend.size();
+	response_len = len;
+	_to_send_char = new char[len + 1];
 	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
 
 	return (_toSend);
@@ -189,17 +209,6 @@ void	Client::printClientInfo(void)
 
 	std::cout << BLUE << std::endl << "RESPONSE" << ZERO_C << std::endl << std::endl;
 	std::cout << GREEN << _response.getHeader() << ZERO_C << std::endl;
-	
-	// std::cout << YELLOW << "request Client:\n" << _buff << ZERO_C << std::endl;
-	// std::cout << TURGUOISE << "Client MAP" << ZERO_C << std::endl;
-	// for ( it = map.begin(); it != map.end() ; it++)
-	// {
-	// 	std::cout << PINK << it->first << BLUE << it->second << ZERO_C << std::endl;
-	// }
-	// std::cout << TURGUOISE << "Client BODY" << ZERO_C << std::endl;
-	// std::cout << GREEN << _request.getBody().size() << ZERO_C << std::endl;
-	/* std::cout << BLUE << _request.getBody() << ZERO_C << std::endl; */
-	
 }
 
 bool	Client::isEmpty(void)
@@ -239,7 +248,7 @@ void	Client::clear(void)
 	_headerToSend = "";
 	_toSend = "";
 	if (_to_send_char)
-		free(_to_send_char);
+		delete[] _to_send_char;
 }
 
 Client::~Client()

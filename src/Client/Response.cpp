@@ -26,6 +26,61 @@ void            Response::setData(Request request, ServerConfig *config)
 	_config = config;
 }
 
+void            Response::setData(Request &request, ServerConfig *config, location *loc)
+{
+	_request = request;
+	_code = request.getCode();
+	_config = config;
+	_location = loc;
+}
+
+void		Response::setHeaderBlocks(void)
+{
+	setContentType();
+    setContentLength();
+    setServer();
+    setConnection();
+    setDate();
+    setCacheControl();
+    // setLocation(void);
+    // setLanguage(void);
+    // setTransferEncoding(void);
+}
+void	Response::setContentType(void)
+{
+	_contentType = getContentType();
+}
+
+void	Response::setContentLength()
+{
+	_contentLength = _body.size();
+}
+
+void	Response::setServer(void)
+{
+	_server = "Poheck/1.0";
+}
+
+void	Response::setConnection()
+{
+	std::stringstream ss;
+	if (_request.getConnection() == "keep-alive")
+	{
+		ss << "timeout=" << _request.getLifeTime();
+		_keepAlive = ss.str();
+	}
+}
+
+void	Response::setDate(void)
+{
+	_date = getTime();
+}
+
+void	Response::setCacheControl(void)
+{
+	_cacheControl = "no-store, no-cache, must-revalidate";
+}
+
 //-------------------------------------------------File---------------------------------------
 
 void Response::OpenResponseFile(const char *path)
@@ -46,6 +101,7 @@ void Response::OpenResponseFile(const char *path)
 
 void    Response::generate()
 {
+	_fullURI = _request.getFullUri();
 	if (_request.badCode(_request.getCode()))
 		invalidClient();
 	else if (_request.getMethod() == "GET")
@@ -54,6 +110,40 @@ void    Response::generate()
 	// 	methodPost();
 	// else
 	// 	methodDelete();	
+}
+
+std::string	Response::getFullURI(std::string &str, std::string	&str2)
+{
+	std::string	line;
+	unsigned long	pos = str.find_last_of("/");
+	if (pos == str.size() - 1)
+		line = str.substr(0, pos - 1);
+	line = line + str2;
+	return (line);
+}
+
+void	Response::generate2(void)
+{
+	_errorPages = _config->getErrorPages();
+	_Autoindex	= _location->autoindex;
+	_code = _request.getCode();
+	_hostPort.ip = _config->getHost();
+	_hostPort.port = _config->getPort();
+	_fullURI = getFullURI(_location->root, _request.getURI());
+	_method = _request.getMethod();
+	
+	if (_request.badCode(_code))
+	{
+		invalidClient();
+		return;
+	}
+	if (_method == "GET")
+		methodGet();
+	// else if (_method == "POST")
+	// 	methodPost();
+	// else
+	// 	methodDelete();
+	
 }
 
 //-------------------------------------------------HEADER/BODY---------------------------------------
@@ -73,7 +163,7 @@ std::string		Response::getTime(void)
 
 std::string		Response::getContentType(void)
 {
-	std::string	path = _request.getFullUri();
+	std::string	path = _fullURI;
 	std::string	type = path.substr(path.rfind(".") + 1, path.size() - path.rfind("."));
 
 	if (_request.isDir(path) == 0)
@@ -107,13 +197,17 @@ std::string		Response::getContentType(void)
 
 void	Response::invalidClient(void)
 {
-	std::stringstream ss;
-	std::string tmp;
+	std::map<int, std::string>::iterator	it;
 
-	//body
-	generateBody();
-	//Header
+	it = _errorPages.find(_code);
+	if (it != _errorPages.end())
+		OpenResponseFile(it->second.c_str());
+	else
+		_body = getErrorPage(_code);
+	setHeaderBlocks();
 	generateHeader();
+
+	DBOUT << RED << "Error Method called" << ENDL;
 }
 
 void	Response::generateBody(void)
@@ -134,14 +228,15 @@ void	Response::generateHeader(void)
 	std::stringstream ss;
 	std::string tmp;
 
-	ss << "HTTP/1.1" << " " << _request.getCode() << " " << getReasonPhrase(_request.getCode()) << "\r\n";
-	ss << "Content-Type: " << getContentType() << "\r\n";
-	ss << "Content-Length: " << _body.size() << "\r\n";
-	ss << "Server: poheck\r\n";
-	if (_request.getConnection() == "keep-alive")
-		ss << "Keep-Alive: timeout=" << _request.getLifeTime() << "\r\n";
-	ss << "Date: " << getTime() << "\r\n";
-	ss << "Cache-Control: no-store, no-cache, must-revalidate\r\n";
+	ss << "HTTP/1.1" << " " << _code << " " << getReasonPhrase(_code) << "\r\n";
+	ss << "Content-Type: " << _contentType << "\r\n";
+	ss << "Content-Length: " << _contentLength << "\r\n";
+	ss << "Server: " << _server << "\r\n";
+	if (!_keepAlive.empty())
+		ss << "Keep-Alive: " <<_keepAlive << "\r\n";
+	ss << "Date: " << _date << "\r\n";
+	if (!_cacheControl.empty())
+		ss << "Cache-Control: " << _cacheControl << "\r\n";
 	ss << "\r\n";
 	_header = ss.str();
 }
@@ -150,6 +245,9 @@ void	Response::methodGet(void)
 {
 
 	generateBody();
+	setHeaderBlocks();
+	DBOUT << RED << _fullURI << ENDL;
+	DBOUT << _body.size() << ENDL;
 	generateHeader();
 	std::cout << GREEN << "GET method called\n" << ZERO_C;
 

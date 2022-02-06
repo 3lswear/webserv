@@ -6,6 +6,7 @@
 #include "ServerConfig.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Config.hpp"
 #include <cstring>
 
 class Client
@@ -18,7 +19,7 @@ private:
 private:
 	int		_ret;
 	int		_fd;
-	struct timeval	_time;
+	struct	timeval	_time;
 	unsigned int		_sended;
 	char	*_buff;
 
@@ -71,12 +72,12 @@ public:
 	void						increaseCounter(void);
 	void						increaseRecvCounter(unsigned int n);
 	std::string					generateRespons(void);
+	std::string					generateRespons(serverListen &, std::vector<ServerConfig *> &);
 
 	Client();
 	Client(char *);
 	Client(char *, ServerConfig *config);
 	~Client();
-
 
 };
 
