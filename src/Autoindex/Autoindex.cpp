@@ -14,6 +14,9 @@ std::string Autoindex::getPage(std::string path, std::string allpath, std::strin
     <html>\n\
     <head>\n\
             <title>" + allpath + "</title>\n\
+			<style>\n\
+				p {font-family: monospace; font-size: 1.5em;}\n\
+			</style>\n\
     </head>\n\
     <body>\n\
     <h1>" + allpath + "</h1>\n\
