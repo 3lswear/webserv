@@ -53,6 +53,8 @@ void	Server::readConfig(void)
 		_configs.push_back(new ServerConfig(*it));
 		++it;
 	}
+
+	clean_parsed(root);
 }
 
 void Server::sendData(Client &client, int fd)
@@ -271,7 +273,81 @@ void	Server::checkError(int fd, std::string str)
 		DBOUT << GREEN << "Server SUCCESS: " << str << ENDL;
 }
 
+void Server::clean_generic(toml_node *node)
+{
+	switch (node->type)
+	{
+		case toml_node::STRING:
+		{
+			DBOUT << "cleaning string" << ENDL;
+			delete node->getString();
+			delete node;
+		}
+		break;
+		case toml_node::MAPARRAY:
+		{
+			DBOUT << "cleaning MAPARRAY" << ENDL;
+			TOMLMapArray *map_array = node->getMapArray();
+			for (TOMLMapArray::iterator it = map_array->begin();
+					it != map_array->end(); ++it)
+			{
+				TOMLMap *map = *it;
+				for (TOMLMap::iterator map_it = map->begin();
+						map_it != map->end(); ++map_it)
+				{
+					clean_generic(map_it->second);
+				}
+			}
+			DBOUT << "end cleaning MAPARRAY" << ENDL;
+		}
+		break;
+		case toml_node::MAP:
+		{
+			DBOUT << "cleaning MAP" << ENDL;
+			TOMLMap *map = node->getMap();
+			for (TOMLMap::iterator it = map->begin(); it != map->end(); ++it)
+			{
+				DBOUT << "key is " << it->first << ENDL;
+				clean_generic(it->second);
+				map->erase(it);
+			}
+			map->clear();
+			delete node;
+			DBOUT << "end cleaning MAP" << ENDL;
+		}
+		break;
+
+		default:
+		{
+			DBOUT << "Cleaning " << node->type << " not implemented :)" << ENDL;
+			delete node;
+		}
+	}
+
+}
+
+void Server::clean_parsed(TOMLMap *root)
+{
+	TOMLMap::iterator it;
+
+	DBOUT << ">>> cleaning up: <<<" << std::endl;
+	for (it = root->begin(); it != root->end(); ++it)
+	{
+		DBOUT << RED << it->first
+			<< ": " << GREEN
+			<< *(it->second->toString());
+
+		clean_generic(it->second);
+		/* delete it->second; */
+		std::cout << ", " << std::endl;
+	}
+	DBOUT << YELLO << "end of clean" << ENDL;
+	/* delete root; */
+	root = NULL;
+}
+
 Server::~Server()
 {
+	
 }
 
