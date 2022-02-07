@@ -105,6 +105,12 @@ void                        Request::setData(char *str)
 {
     this->_data = str;
 }
+
+void						Request::setData(std::string &str)
+{
+	_stringBUF = str;
+}
+
 void                        Request::setData(char *str, ServerConfig *config)
 {
     _data = str;
@@ -152,16 +158,12 @@ int	Request::parseStartLine(std::string str)
 
 	if (_version != "HTTP/1.1")
 		_ret =  505;
-	else if (_method != "GET" && _method != "POST"
-			&& _method != "DELETE")
-		_ret =  405;
 	return (_ret);
 }
 
-void	Request::splitData(char *data)
+void	Request::splitData(std::string	&data)
 {
 	int	pos;
-	std::stringstream ss;
 	std::string	str;
 
 	str = std::string(data);
@@ -175,7 +177,7 @@ void	Request::splitData(char *data)
 		}
 		_head = str.substr(0, pos) + "\n";
 		_headerSize = _head.size() + 3;
-		str.erase(0, pos + 4);
+		data.erase(0, pos + 4);
 		_head_ok = true;
 		parseHeader();
 		if (_contentLength == 0)
@@ -185,7 +187,8 @@ void	Request::splitData(char *data)
 		return ;
 	else if (!_body_ok)
 	{
-		_body += str;
+
+		_body.insert(_body.end(), data.begin(), data.end());
 		if ((_received - _headerSize) == _contentLength)
 		{
 			_body_ok = true;
@@ -241,7 +244,7 @@ int	Request::parseHeader(void)
 int	Request::parseRequest(void)
 {
 	if (!_head_ok || !_body_ok)
-		splitData(_data);
+		splitData(_stringBUF);
 
 	return (_ret);
 }

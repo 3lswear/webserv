@@ -71,6 +71,11 @@ void	Client::setRawData(char *str)
 	this->_buff = str;
 }
 
+void	Client::setRawData(std::string	&buf)
+{
+	_stringBUF = buf;
+}
+
 void	Client::setFd(int fd)
 {
 	this->_fd = fd;
@@ -80,7 +85,8 @@ void	Client::setFd(int fd)
 
 int	Client::parseRequest(void)
 {
-	_request.setData(_buff);
+	// _request.setData(_buff);
+	_request.setData(_stringBUF);
 	_ret = _request.parseRequest();
 
 	return (_ret);
@@ -154,6 +160,9 @@ std::string	Client::generateRespons(void)
 	_to_send_char = new char[len + 1];
 	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
 
+	// DBOUT << "len = " << len << ENDL;
+	// DBOUT << "strlen = " << strlen(_to_send_char) << ENDL;
+	// DBOUT << "content_lenth = " << _request.getContentLength() << ENDL;
 	return (_toSend);
 }
 

@@ -87,18 +87,21 @@ void Server::readSocket(Client &client, int fd)
 
 	int status;
 	int bytes_read;
-	char buf[BUFFSIZE + 1];
+	// char buf[BUFFSIZE + 1];
+	std::string	stringBUF(BUFFSIZE, 0);
 
 	DBOUT << TURQ << "IN readSocket" << ENDL;
 	DBOUT << "client in readSocket "<< &client << ENDL;
-	bytes_read = recv(fd, buf, BUFFSIZE, 0);
+	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
 		client.allRead = true;
 		return;
 	}
-	buf[bytes_read + 1] = '\0';
-	client.setRawData(buf);
+	// buf[bytes_read + 1] = '\0';
+	stringBUF.erase(bytes_read, stringBUF.size());
+	client.setRawData(stringBUF);
+	// client.setRawData(buf);
 	client.increaseRecvCounter(bytes_read);
 	status = client.parseRequest();
 	// client_map[fd].printClientInfo();

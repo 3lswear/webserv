@@ -49,7 +49,9 @@ void		Response::setHeaderBlocks(void)
 }
 void	Response::setContentType(void)
 {
-	if (_request.badCode(_code))
+	if (_code == 204)
+		return ;
+	else if (_request.badCode(_code))
 		_contentType = "text/html";
 	else
 		_contentType = getContentType();
@@ -254,7 +256,8 @@ void	Response::generateHeader(void)
 	std::string tmp;
 
 	ss << "HTTP/1.1" << " " << _code << " " << getReasonPhrase(_code) << "\r\n";
-	ss << "Content-Type: " << _contentType << "\r\n";
+	if (!_contentType.empty())
+		ss << "Content-Type: " << _contentType << "\r\n";
 	ss << "Content-Length: " << _contentLength << "\r\n";
 	ss << "Server: " << _server << "\r\n";
 	if (!_keepAlive.empty())
@@ -273,10 +276,10 @@ void    Response::generate()
 		invalidClient();
 	else if (_request.getMethod() == "GET")
 		methodGet();
-	// else if (_request.getMethod() == "POST")
-	// 	methodPost();
-	// else
-	// 	methodDelete();	
+	else if (_request.getMethod() == "DELETE")
+		methodDelete();
+	else
+		methodPost();
 }
 
 void	Response::generate2(void)
@@ -325,6 +328,9 @@ void	Response::methodGet(void)
 }
 void	Response::methodPost(void)
 {
+	std::ofstream outfile(_fullURI.c_str(), std::ios::out | std::ios::binary);
+
+	outfile.write(_request.getBody().data(), _request.getBody().size());
 	_code = 204;
 	setHeaderBlocks();
 	generateHeader();

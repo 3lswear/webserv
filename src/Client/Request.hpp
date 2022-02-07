@@ -9,6 +9,7 @@ class Request
 {
 private:
 	char		*_data;
+	char		*_pointerBody;
 	
 	int			_ret;
 	int			_row;
@@ -29,6 +30,7 @@ private:
 	std::string	_connection;
 	std::map<std::string, std::string> _headerField;
 
+	std::string		_stringBUF;
 	ServerConfig	*_config;
 	bool			_head_ok;
 	bool			_body_ok;
@@ -49,11 +51,14 @@ public:
 	unsigned int				getContentLength(void) const;
 	unsigned int				getHeaderSize(void) const;
 	unsigned int				getRecved(void)const;
+	char						*getPointerBody(void)const;
+	
 	std::map<std::string, std::string>	getClientFields(void);
 	bool						getChunked(void);
 
 	void						setConfig(ServerConfig *config);
 	void						setData(char *);
+	void						setData(std::string &);
 	void						setData(char *, ServerConfig *);
 
 public:
@@ -75,7 +80,7 @@ public:
 	bool						autoindexOn(void);
 	void						copyFromMap(void);
 	void						clear(void);
-	void						splitData(char *);
+	void						splitData(std::string	&);
 
 	void						increaseRecvCounter(unsigned int n);
 	~Request();

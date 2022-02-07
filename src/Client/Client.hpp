@@ -23,7 +23,7 @@ private:
 	unsigned int		_sended;
 	char	*_buff;
 
-
+	std::string	_stringBUF;
 	std::string	_bodyToSend;
 	std::string	_headerToSend;
 	std::string	_toSend;
@@ -51,6 +51,7 @@ public:
 	char 						*getStrToSend(void);
 	unsigned int				getCounter(void) const;
 	void						setRawData(char *);
+	void						setRawData(std::string	&);
 	void						setFd(int);
 	int							getFd(void);
 	unsigned int 				getRecvCounter(void) const;
