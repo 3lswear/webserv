@@ -16,6 +16,12 @@ struct location
 	std::map<int, std::string>	redirect;
 };
 
+struct serverListen
+{
+	std::string	ip;
+	int 		port;
+};
+
 class ServerConfig
 {
 public:
@@ -39,12 +45,12 @@ public:
 	void	setLocations(std::vector<location *>);
 	void	setRoot(TOMLMap *);
 
-	std::string					getServerName(void);
-	std::string					getHost(void);
-	int							getPort(void);
-	int							getClientBodySize(void);
-	std::vector<location *>		getLocations(void);
-	std::map<int, std::string>	getErrorPages(void);
+	std::string					&getServerName(void);
+	std::string					&getHost(void);
+	int							&getPort(void);
+	int							&getClientBodySize(void);
+	std::vector<location *>		&getLocations(void);
+	std::map<int, std::string>	&getErrorPages(void);
 	TOMLMap						*getRoot(void);
 
 public:
