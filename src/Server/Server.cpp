@@ -71,6 +71,7 @@ void Server::sendData(Client &client, int fd)
 
 	/* DBOUT << YELLO << tmp << ENDL; */
 	/* DBOUT << GREEN << client.getCounter() << ENDL; */
+	DBOUT << "sent " << send_len << " to client " << fd << ENDL;
 
 
 	if (send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL) < 0)
@@ -149,6 +150,7 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 	ev.data.fd = fd;
 
 	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
+	/* setNonBlock(fd); */
 	DBOUT << YELLO
 		<< "add socket "
 		<< fd
@@ -158,8 +160,9 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 
 void	Server::start(void)
 {
-	Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1");
+	/* Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
 	std::map<int, Client*> client_map;
+	std::map<int, struct serverListen> configurations_map;
 	int fd;
 	int ready_num = 0;
 
@@ -167,16 +170,54 @@ void	Server::start(void)
 	unsigned int server_events = EPOLLIN;
 	
 	_epoll_fd = epoll_create(1337);
-	checkError(server_sock.init(MAX_CLIENT), "Socket init");
-	setNonBlock(server_sock.getSocketFd());
+
+
+	for (std::vector<ServerConfig *>::iterator it = _configs.begin();
+			it != _configs.end(); ++it)
+	{
+		ServerConfig *config = *it;
+		Socket server_sock(AF_INET, SOCK_STREAM, 0, config->getPort(), config->getHost());
+		if (server_sock.init(MAX_CLIENT) >= 0)
+		{
+			struct serverListen listenparams;
+			listenparams.ip = config->getHost();
+			listenparams.port = config->getPort();
+
+			setNonBlock(server_sock.getSocketFd());
+			configurations_map[server_sock.getSocketFd()] = listenparams;
+			DBOUT << YELLO << "adding server_sock..." << ENDL;
+			add_to_epoll_list(server_sock.getSocketFd(), server_events);
+
+			DBOUT << GREEN
+				<< config->getServerName()
+				<< " started on "
+				<< config->getHost()
+				<< ":"
+				<< config->getPort()
+				<< ENDL;
+		}
+		else
+		{
+			DBOUT << RED
+				<< config->getServerName()
+				<< " failed to bind to "
+				<< config->getHost()
+				<< ":"
+				<< config->getPort()
+				<< ENDL;
+		}
+
+	}
+	/* checkError(server_sock.init(MAX_CLIENT), "Socket init"); */
+	/* setNonBlock(server_sock.getSocketFd()); */
 	setNonBlock(_epoll_fd);
 
-	DBOUT << YELLO << "adding server_sock..." << ENDL;
-	add_to_epoll_list(server_sock.getSocketFd(), server_events);
+	/* DBOUT << YELLO << "adding server_sock..." << ENDL; */
+	/* add_to_epoll_list(server_sock.getSocketFd(), server_events); */
 	while (1)
 	{
 
-		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, -1);
+		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
 		/* DBOUT << TURQ << "ready_num " << ready_num << ENDL; */
 
 		if (ready_num < 0)
@@ -189,10 +230,10 @@ void	Server::start(void)
 			/* DBOUT << "FD is " << fd << ENDL; */
 			/* print_epoll_events(events); */
 
-			if (fd == server_sock.getSocketFd())
+			if (configurations_map.find(fd) != configurations_map.end())
 			{
-				int client_sock = accept(server_sock.getSocketFd(),
-						server_sock.getSockaddr(), server_sock.getSocklen());
+				int client_sock = accept(fd,
+						configurations_map[fd].getSockaddr(), server_sock.getSocklen());
 				if (client_sock > 0)
 					add_to_epoll_list(client_sock, client_events);
 				else

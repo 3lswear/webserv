@@ -65,7 +65,7 @@ int Socket::bindingSocket(void)
     int res;
 
     res = bind(_socketFd, (struct sockaddr *)&_addres, sizeof(_addres));
-    checkError(res, "Bind Socket");
+    /* checkError(res, "Bind Socket"); */
     return (res);
 }
 
@@ -74,7 +74,7 @@ int Socket::listeningSocket(int nbr)
     int res;
 
     res = listen(_socketFd, nbr);
-    checkError(res, "Listen Socket");
+    /* checkError(res, "Listen Socket"); */
     return (res);
 }
 
