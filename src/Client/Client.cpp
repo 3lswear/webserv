@@ -165,7 +165,7 @@ std::string	Client::generateRespons(serverListen &reqData, std::vector<ServerCon
 	_config	=	Config::getConfig(configs, _request, reqData);
 	tmp 	=	Config::getLocation(_config->getLocations(), _request.getURI());
 	_response.setData(_request, _config, tmp);
-	_response.generate();
+	_response.generate2();
 	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_toSend = _headerToSend + _bodyToSend;

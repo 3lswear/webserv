@@ -60,13 +60,14 @@ public:
     static std::string			getReasonPhrase(std::string);
 	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
-    std::string                 getFullURI(std::string &, std::string &);
+    std::string                 getFullURI();
 
-
+    bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);
     void                        setData(Request &, ServerConfig *, location *location);
 public:
 	void						OpenResponseFile(const char *path);
+	void						OpenErrorFile(int code);
 	void					    initErrorCode(void);
     void                        generate();
     void                        generate2();

@@ -5,6 +5,7 @@
 Response::Response()
 {
 	initErrorCode();
+	_Autoindex = true;
 	_code = 200;
 }
 
@@ -48,7 +49,10 @@ void		Response::setHeaderBlocks(void)
 }
 void	Response::setContentType(void)
 {
-	_contentType = getContentType();
+	if (_request.badCode(_code))
+		_contentType = "text/html";
+	else
+		_contentType = getContentType();
 }
 
 void	Response::setContentLength()
@@ -86,7 +90,6 @@ void	Response::setCacheControl(void)
 void Response::OpenResponseFile(const char *path)
 {
 	std::stringstream	ss;
-	// char 				buf[BUFFSIZE + 1] = {0};
 	std::ifstream		file(path, std::ifstream::in);
 
 	if (file.is_open())
@@ -96,69 +99,34 @@ void Response::OpenResponseFile(const char *path)
 		file.close();
 	}
 	else
-		_body = getErrorPage(403); 	
-}
-
-void    Response::generate()
-{
-	_fullURI = _request.getFullUri();
-	if (_request.badCode(_request.getCode()))
-		invalidClient();
-	else if (_request.getMethod() == "GET")
-		methodGet();
-	// else if (_request.getMethod() == "POST")
-	// 	methodPost();
-	// else
-	// 	methodDelete();	
-}
-
-std::string	Response::getFullURI(std::string &str, std::string	&str2)
-{
-	std::string	line;
-	unsigned long	pos = str.find_last_of("/");
-	if (pos == str.size() - 1)
-		line = str.substr(0, pos - 1);
-	line = line + str2;
-	return (line);
-}
-
-void	Response::generate2(void)
-{
-	_errorPages = _config->getErrorPages();
-	_Autoindex	= _location->autoindex;
-	_code = _request.getCode();
-	_hostPort.ip = _config->getHost();
-	_hostPort.port = _config->getPort();
-	_fullURI = getFullURI(_location->root, _request.getURI());
-	_method = _request.getMethod();
-	
-	if (_request.badCode(_code))
 	{
-		invalidClient();
-		return;
+		_code = 403;
+		OpenErrorFile(_code);
 	}
-	if (_method == "GET")
-		methodGet();
-	// else if (_method == "POST")
-	// 	methodPost();
-	// else
-	// 	methodDelete();
-	
 }
 
-//-------------------------------------------------HEADER/BODY---------------------------------------
-
-std::string		Response::getTime(void)
+void Response::OpenErrorFile(int code)
 {
-	char	buff[1337] = {0};
-	struct timeval	currTime;
-	struct tm		*t;
+	std::map<int, std::string>::iterator it;
+	std::stringstream	ss;
 
-	gettimeofday(&currTime, NULL);
-	t = gmtime(&currTime.tv_sec);
-	strftime(buff, 1337, "%a, %d %b %Y %H:%M:%S GMT", t);
+	it = _errorPages.find(code);
+	if (it != _errorPages.end())
+	{
+		const char *path = it->second.c_str();
+		std::ifstream		file(path, std::ifstream::in);
 
-	return (buff);
+		if (file.is_open())
+		{	
+			ss << file.rdbuf();
+			_body = ss.str();
+			file.close();
+		}
+		else
+			_body = getErrorPage(code);
+	}
+	else
+		_body = getErrorPage(code);
 }
 
 std::string		Response::getContentType(void)
@@ -195,34 +163,91 @@ std::string		Response::getContentType(void)
 
 }
 
-void	Response::invalidClient(void)
+std::string		Response::getTime(void)
 {
-	std::map<int, std::string>::iterator	it;
+	char	buff[1337] = {0};
+	struct timeval	currTime;
+	struct tm		*t;
 
-	it = _errorPages.find(_code);
-	if (it != _errorPages.end())
-		OpenResponseFile(it->second.c_str());
-	else
-		_body = getErrorPage(_code);
-	setHeaderBlocks();
-	generateHeader();
+	gettimeofday(&currTime, NULL);
+	t = gmtime(&currTime.tv_sec);
+	strftime(buff, 1337, "%a, %d %b %Y %H:%M:%S GMT", t);
 
-	DBOUT << RED << "Error Method called" << ENDL;
+	return (buff);
+}
+
+std::string	Response::getFullURI(void)
+{
+	std::string	tmp;
+	bool end = false;
+	std::string	ret = "";
+
+	if (!_location->directoryFile.empty())
+	{
+    	struct dirent *dirEnt;
+    	DIR *dir = opendir(_location->root.c_str());
+
+		if (dir == NULL)
+		{
+			_code = 404;
+			return "";
+		}
+		for (dirEnt = readdir(dir); !end && dirEnt; dirEnt = readdir(dir))
+		{
+			tmp = dirEnt->d_name;
+			if (tmp == _location->directoryFile)
+			{
+				ret = tmp;
+				end = true;
+			}
+		}
+	}
+	if (!end)
+	{
+		ret = _location->root;
+	}
+	return (ret);	
 }
 
 void	Response::generateBody(void)
 {
-	if (!_request.badCode(_code) && _request.isDir(_request.getFullUri()) == 0)
-		_body = Autoindex::getPage(_request.getURI(), _request.getFullUri(), _request.getHost());
+	if (!_request.badCode(_code) && _request.isDir(_fullURI) == 0)
+	{
+		if (_Autoindex)
+		{
+			_body = Autoindex::getPage(_request.getURI(), _fullURI, _request.getHost());
+			if (_body.empty())
+				_code = 404;
+		}
+		else
+			_code = 403;
+	}
 	else if (!_request.badCode(_code) && _request.isFile(_request.getFullUri()) == 0)
-		OpenResponseFile(_request.getFullUri().c_str());
-	else if (_request.isFile(_request.getFullUri()) == -1)
-		_body = getErrorPage(404);
-	else
-		_body = getErrorPage(_code);
+		OpenResponseFile(_fullURI.c_str());
+	else if (_request.isFile(_fullURI) == -1)
+		_code = 404;
+	
+	if (_request.badCode(_code))
+		OpenErrorFile(_code);
 
 }
 
+bool	Response::allowedMethod(std::string &method)
+{
+	std::vector<std::string>::iterator	it;
+
+	it = _location->methods.begin();
+
+	while (it != _location->methods.end())
+	{
+		if (*it == method)
+			return (true);
+		it++;
+	}
+	_code = 405;
+	return (false);
+	
+}
 void	Response::generateHeader(void)
 {
 	std::stringstream ss;
@@ -241,18 +266,86 @@ void	Response::generateHeader(void)
 	_header = ss.str();
 }
 
+void    Response::generate()
+{
+	_fullURI = _request.getFullUri();
+	if (_request.badCode(_request.getCode()))
+		invalidClient();
+	else if (_request.getMethod() == "GET")
+		methodGet();
+	// else if (_request.getMethod() == "POST")
+	// 	methodPost();
+	// else
+	// 	methodDelete();	
+}
+
+void	Response::generate2(void)
+{
+	_errorPages = _config->getErrorPages();
+	_Autoindex	= _location->autoindex;
+	_code = _request.getCode();
+	_hostPort.ip = _config->getHost();
+	_hostPort.port = _config->getPort();
+	_fullURI = getFullURI();
+	_method = _request.getMethod();
+
+	if (_request.badCode(_code) || !allowedMethod(_method))
+	{
+		invalidClient();
+		return;
+	}
+	if (_method == "GET")
+		methodGet();
+	else if (_method == "POST")
+		methodPost();
+	else
+		methodDelete();
+	
+}
+
+//-------------------------------------------------HEADER/BODY---------------------------------------
+
+
+void	Response::invalidClient(void)
+{
+	OpenErrorFile(_code);
+	setHeaderBlocks();
+	generateHeader();
+
+	DBOUT << RED << "Error Method called" << ENDL;
+}
+
+
 void	Response::methodGet(void)
 {
-
 	generateBody();
 	setHeaderBlocks();
-	DBOUT << RED << _fullURI << ENDL;
-	DBOUT << _body.size() << ENDL;
 	generateHeader();
 	std::cout << GREEN << "GET method called\n" << ZERO_C;
-
-	
-	
+}
+void	Response::methodPost(void)
+{
+	_code = 204;
+	setHeaderBlocks();
+	generateHeader();
+	DBOUT << GREEN << "POST method called" << ENDL;
+}
+void	Response::methodDelete(void)
+{
+	if (_request.isFile(_fullURI) == 0)
+	{
+		if (remove(_fullURI.c_str()) == 0)
+			_code = 204;
+		else
+			_code = 403;
+	}
+	else
+		_code = 404;
+	if (_code == 404 || _code == 403)
+		OpenErrorFile(_code);
+	setHeaderBlocks();
+	generateHeader();
+	DBOUT << GREEN << "Delete method called" <<  ENDL;
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
@@ -332,7 +425,7 @@ std::string	Response::getErrorPage(int code)
 
        ss << "<html><head><title>" << code <<" "<< getReasonPhrase(code) <<"</title></head><body>"
                <<"<center><h1>" << code <<" " << getReasonPhrase(code) <<"</h1></center> "
-               << "<hr><center>poheck/1.0.0 (KDE)</center></body></html>";
+               << "<hr><center>poheck/1.0.0 (genereted)</center></body></html>";
        Page = ss.str();
        return (Page);
  }
