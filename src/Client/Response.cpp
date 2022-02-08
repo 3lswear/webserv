@@ -236,6 +236,7 @@ void	Response::generateBody(void)
 
 bool	Response::allowedMethod(std::string &method)
 {
+	DBOUT << "allowedMethod called" << ENDL;
 	std::vector<std::string>::iterator	it;
 
 	it = _location->methods.begin();
@@ -290,7 +291,10 @@ void	Response::generate2(void)
 	_hostPort.ip = _config->getHost();
 	_hostPort.port = _config->getPort();
 	_fullURI = getFullURI();
+	DBOUT << "fullURI " << _fullURI << ENDL;
 	_method = _request.getMethod();
+
+	DBOUT << RED << "code is " << _code << ENDL;
 
 	if (_request.badCode(_code) || !allowedMethod(_method))
 	{

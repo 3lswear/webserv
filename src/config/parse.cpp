@@ -40,7 +40,7 @@ namespace config
 
 TOMLMap *parse(void)
 {
-	std::string filename = "config/simple.toml";
+	std::string filename = "config/real.toml";
 	config::TOMLParser parser(filename);
 	TOMLMap *root = parser.parse();
 	/* config::display(root); */

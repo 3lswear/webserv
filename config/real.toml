@@ -1,0 +1,40 @@
+[[server]]
+	name = "pohek1.org"
+	host = "127.0.0.1"
+	port = 8080
+	body_size_limit = 1000
+	[server.error_page]
+		404 = "error_404.html"
+	[[server.location]]
+		location = "/"
+		root = "www/"
+		redirect = ["301", "http://localhost/secret"]
+		methods = ["GET", "POST", "DELETE"]
+		autoindex = true
+		directory_file = "its_a_directory.html"
+		upload_accept = true
+		upload_dir = "/var/www/html/upload"
+	[[server.location]]
+		location = "/secret/"
+		root = "/var/www/html/secret.html"
+		methods = ["GET"]
+		autoindex = false
+		directory_file = "oops.html"
+[[server]]
+	name = "pohek2.org"
+	host = "127.0.0.1"
+	port = 8081
+	body_size_limit = 10000
+	[server.error_page]
+		404 = "error_404.html"
+		405 = "error_405.html"
+		406 = "error_406.html"
+		407 = "error_407.html"
+	[[server.location]]
+		location = "/"
+		root = "www/"
+		methods = ["GET", "POST"]
+		autoindex = true
+		directory_file = "its_a_directory.html"
+		upload_accept = false
+		upload_dir = "/var/www/html/upload"
