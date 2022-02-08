@@ -91,6 +91,7 @@ void	Response::setCacheControl(void)
 
 void Response::OpenResponseFile(const char *path)
 {
+	DBOUT << "in OPEN RESPONSE FILE " << path << ENDL;
 	std::stringstream	ss;
 	std::ifstream		file(path, std::ifstream::in);
 
@@ -180,35 +181,27 @@ std::string		Response::getTime(void)
 
 std::string	Response::getFullURI(void)
 {
+
 	std::string	tmp;
-	bool end = false;
 	std::string	ret = "";
+	int	len = _location->location.size();
+	tmp	= _request.getURI().substr(len);
 
-	if (!_location->directoryFile.empty())
+	tmp = _location->root + tmp;
+
+	if (_request.isDir(tmp) ==  0)
 	{
-    	struct dirent *dirEnt;
-    	DIR *dir = opendir(_location->root.c_str());
-
-		if (dir == NULL)
+		if (_location->directoryFile.empty())
+			ret = tmp;
+		else
 		{
-			_code = 404;
-			return "";
-		}
-		for (dirEnt = readdir(dir); !end && dirEnt; dirEnt = readdir(dir))
-		{
-			tmp = dirEnt->d_name;
-			if (tmp == _location->directoryFile)
-			{
-				ret = tmp;
-				end = true;
-			}
+			ret = tmp + _location->directoryFile;
 		}
 	}
-	if (!end)
-	{
-		ret = _location->root;
-	}
-	return (ret);	
+	else
+		ret = tmp;
+
+	return (ret);
 }
 
 void	Response::generateBody(void)
@@ -224,7 +217,7 @@ void	Response::generateBody(void)
 		else
 			_code = 403;
 	}
-	else if (!_request.badCode(_code) && _request.isFile(_request.getFullUri()) == 0)
+	else if (!_request.badCode(_code) && _request.isFile(_fullURI) == 0)
 		OpenResponseFile(_fullURI.c_str());
 	else if (_request.isFile(_fullURI) == -1)
 		_code = 404;
@@ -291,9 +284,9 @@ void	Response::generate2(void)
 	_hostPort.ip = _config->getHost();
 	_hostPort.port = _config->getPort();
 	_fullURI = getFullURI();
-	DBOUT << "fullURI " << _fullURI << ENDL;
 	_method = _request.getMethod();
 
+	DBOUT << "fullURI " << _fullURI << ENDL;
 	DBOUT << RED << "code is " << _code << ENDL;
 
 	if (_request.badCode(_code) || !allowedMethod(_method))
