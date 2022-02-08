@@ -161,6 +161,21 @@ int	Request::parseStartLine(std::string str)
 	return (_ret);
 }
 
+int								checkEnd(const std::string& str, const std::string& end)
+{
+	size_t	i = str.size();
+	size_t	j = end.size();
+
+	while (j > 0)
+	{
+		i--;
+		j--;
+		if (i < 0 || str[i] != end[j])
+			return (1);
+	}
+	return (0);
+}	
+
 void	Request::splitData(std::string	&data)
 {
 	int	pos;
@@ -176,15 +191,21 @@ void	Request::splitData(std::string	&data)
 			return; 
 		}
 		_head = str.substr(0, pos) + "\n";
-		_headerSize = _head.size() + 3;
+ 		_headerSize = _head.size() + 3;
 		data.erase(0, pos + 4);
 		_head_ok = true;
 		parseHeader();
-		if (_contentLength == 0)
+		if (_contentLength == 0 && !_chunked)
 			_body_ok = true;
 	}
 	if (badCode(_ret))
 		return ;
+	else if (_chunked)
+	{
+		_body.insert(_body.end(), data.begin(), data.end());
+		if (checkEnd(_body, "0\r\n\r\n") == 0)
+			_body_ok = true;
+	}
 	else if (!_body_ok)
 	{
 
@@ -193,6 +214,24 @@ void	Request::splitData(std::string	&data)
 		{
 			_body_ok = true;
 		}
+	}
+	if (_head_ok && _body_ok && _chunked)
+	{
+		std::string	&tmp = _body;
+		std::string	subchunk = tmp.substr(0, 100);
+		std::string	newBody = "";
+		int			chunksize = strtol(subchunk.c_str(), NULL, 16);
+		size_t 		i = 0;
+
+		while (chunksize)
+		{
+			i = tmp.find("\r\n", i) + 2;
+			newBody += tmp.substr(i, chunksize);
+			i += chunksize + 2;
+			subchunk = tmp.substr(i, 100);
+			chunksize = strtol(subchunk.c_str(), NULL, 16);
+		}
+		_body = newBody;
 	}
 }
 
