@@ -162,7 +162,7 @@ void	Server::start(void)
 {
 	/* Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
 	std::map<int, Client*> client_map;
-	std::map<int, struct serverListen> configurations_map;
+	std::map<int, Socket> configurations_map;
 	int fd;
 	int ready_num = 0;
 
@@ -179,12 +179,9 @@ void	Server::start(void)
 		Socket server_sock(AF_INET, SOCK_STREAM, 0, config->getPort(), config->getHost());
 		if (server_sock.init(MAX_CLIENT) >= 0)
 		{
-			struct serverListen listenparams;
-			listenparams.ip = config->getHost();
-			listenparams.port = config->getPort();
-
 			setNonBlock(server_sock.getSocketFd());
-			configurations_map[server_sock.getSocketFd()] = listenparams;
+			/* configurations_map[server_sock.getSocketFd()] = server_sock; */
+			configurations_map.insert(std::make_pair(server_sock.getSocketFd(), server_sock));
 			DBOUT << YELLO << "adding server_sock..." << ENDL;
 			add_to_epoll_list(server_sock.getSocketFd(), server_events);
 
@@ -218,7 +215,7 @@ void	Server::start(void)
 	{
 
 		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		/* DBOUT << TURQ << "ready_num " << ready_num << ENDL; */
+		DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
@@ -226,14 +223,17 @@ void	Server::start(void)
 		{
 			fd = _events[i].data.fd;
 			unsigned int events = _events[i].events;
+			std::map<int, Socket>::iterator sock_it;
 
 			/* DBOUT << "FD is " << fd << ENDL; */
 			/* print_epoll_events(events); */
 
-			if (configurations_map.find(fd) != configurations_map.end())
+			if ((events & EPOLLIN)
+					&& (sock_it = configurations_map.find(fd)) != configurations_map.end())
 			{
+				 /* = configurations_map.find(fd); */
 				int client_sock = accept(fd,
-						configurations_map[fd].getSockaddr(), server_sock.getSocklen());
+						(sock_it->second).getSockaddr(), (sock_it->second).getSocklen());
 				if (client_sock > 0)
 					add_to_epoll_list(client_sock, client_events);
 				else
@@ -274,7 +274,7 @@ void	Server::start(void)
 		}
 
 	}
-	close(server_sock.getSocketFd());
+	/* close(server_sock.getSocketFd()); */
 	DBOUT << RED << "end;" << ENDL;
 }
 
