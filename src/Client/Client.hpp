@@ -39,6 +39,8 @@ public:
 		ENDED
 	} req_status; 
 
+	struct serverListen connected_to;
+
 	int serverfd;
 	size_t readn;
 	size_t left;
@@ -72,9 +74,11 @@ public:
 	void						increaseCounter(void);
 	void						increaseRecvCounter(unsigned int n);
 	std::string					generateRespons(void);
-	std::string					generateRespons(serverListen &, std::vector<ServerConfig *> &);
+	/* std::string					generateRespons(serverListen &, std::vector<ServerConfig *> &); */
+	std::string					generateRespons(std::vector<ServerConfig *> &);
 
-	Client();
+	/* Client(); */
+	Client(struct serverListen servers_config);
 	Client(char *);
 	Client(char *, ServerConfig *config);
 	~Client();

@@ -235,20 +235,23 @@ void	Server::start(void)
 				int client_sock = accept(fd,
 						(sock_it->second).getSockaddr(), (sock_it->second).getSocklen());
 				if (client_sock > 0)
+				{
+					client_map[client_sock] = new Client((sock_it->second).min_config);
 					add_to_epoll_list(client_sock, client_events);
+				}
 				else
 					throw std::logic_error("accept didnt work");
 			}
 			else
 			{
-				if (client_map.find(fd) == client_map.end())
-					client_map[fd] = new Client();
+				/* if (client_map.find(fd) == client_map.end()) */
+				/* 	client_map[fd] = new Client(); */
 				if (events & EPOLLIN)
 				{
 					readSocket(*client_map[fd], fd);
 					if (client_map[fd]->readyToSend())
 					{
-						client_map[fd]->generateRespons();
+						client_map[fd]->generateRespons(_configs);
 
 						struct epoll_event ev;
 

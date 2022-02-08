@@ -2,13 +2,15 @@
 
 //-------------------------------------------------Constructors---------------------------------------
 
-Client::Client()
+Client::Client(struct serverListen servers_config)
 {
 	allRead = false;
 	done = false;
 	this->_fd = -1;
 	this->_sended = 0;
 	_to_send_char = NULL;
+
+	connected_to = servers_config;
 }
 
 Client::Client(char *str)
@@ -157,12 +159,12 @@ std::string	Client::generateRespons(void)
 	return (_toSend);
 }
 
-std::string	Client::generateRespons(serverListen &reqData, std::vector<ServerConfig *> &configs)
+std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 {
 	size_t		len;
 	location	*tmp;
 
-	_config	=	Config::getConfig(configs, _request, reqData);
+	_config	=	Config::getConfig(configs, _request, connected_to);
 	tmp 	=	Config::getLocation(_config->getLocations(), _request.getURI());
 	_response.setData(_request, _config, tmp);
 	_response.generate();
