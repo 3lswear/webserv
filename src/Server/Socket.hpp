@@ -2,6 +2,8 @@
 #define SOCKET_HPP
 
 #include "webserv.hpp"
+#include "ServerConfig.hpp"
+
 class Socket
 {
 private:
@@ -9,9 +11,9 @@ private:
     socklen_t           _addrlen;
 	struct sockaddr_in  _addres;
 
+    Socket();
     
 public:
-    Socket();
     Socket(int domain, int type, int protocol, int port, std::string ip);
     int getSocketFd(void);
     struct sockaddr_in getAddres(void);
@@ -24,6 +26,8 @@ public:
     int listeningSocket(int nbr);
     int init(int nbr);
     void checkError(int fd, std::string str);
+
+	struct serverListen min_config;
 
     ~Socket();
 };

@@ -15,6 +15,9 @@ Socket::Socket(int domain, int type, int protocol, int port, std::string ip)
     _addres.sin_port = htons(port);
     _addres.sin_addr.s_addr = inet_addr(ip.c_str());
     _addrlen = sizeof(_addres);
+
+	min_config.ip = ip;
+	min_config.port = port;
 }
 
 Socket::~Socket()
