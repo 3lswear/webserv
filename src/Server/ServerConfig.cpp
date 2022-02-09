@@ -184,6 +184,12 @@ int	ServerConfig::putLocation(toml_node *node)
 					return (1);
 				tmp->uploadDir = *it1->second->getString();	
 			}
+			else if (it1->first == "cgi_pass")
+			{
+				if (it1->second->get_type() != toml_node::STRING)
+					return (1);
+				tmp->cgi_pass = *it1->second->getString();	
+			}
 			else if (it1->first == "directory_file")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
@@ -281,6 +287,7 @@ void	ServerConfig::printFields(void)
 		std::cout << YELLOW << "uploadDir " << BLUE << (*it)->uploadDir <<std::endl;
 		std::cout << YELLOW << "autoindex " << BLUE << (*it)->autoindex <<std::endl;
 		std::cout << YELLOW << "uploadAccept " << BLUE << (*it)->uploadAccept <<std::endl;
+		std::cout << YELLOW << "cgi_pass " << BLUE << (*it)->cgi_pass <<std::endl;
 		std::cout << YELLOW << "methods " << std::endl;
 		it2 = (*it)->methods.begin();
 		while (it2 != (*it)->methods.end())

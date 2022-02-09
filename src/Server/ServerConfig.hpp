@@ -14,6 +14,7 @@ struct location
 	bool						uploadAccept;
 	std::vector<std::string>	methods;
 	std::map<int, std::string>	redirect;
+	std::string					cgi_pass;
 };
 
 struct serverListen

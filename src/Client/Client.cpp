@@ -176,7 +176,7 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	_config	=	Config::getConfig(configs, _request, connected_to);
 	tmp 	=	Config::getLocation(_config->getLocations(), _request.getURI());
 	_response.setData(_request, _config, tmp);
-	_response.generate2();
+	_response.generate2(connected_to);
 	_headerToSend = _response.getHeader();
 	_bodyToSend = _response.getBody();
 	_toSend = _headerToSend + _bodyToSend;
