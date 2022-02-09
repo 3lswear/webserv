@@ -214,7 +214,7 @@ std::string	Response::getFullURI(void)
 			ret = tmp;
 		else
 		{
-			ret = tmp + _location->directoryFile;
+			ret = tmp  + "/" + _location->directoryFile;
 		}
 	}
 	else
@@ -256,8 +256,10 @@ bool	Response::allowedMethod(std::string &method)
 	{
 		if (*it == method)
 			return (true);
+		DBOUT << BLUE << *it << ENDL;
 		it++;
 	}
+	DBOUT << "location " << _location->location << ENDL;
 	_code = 405;
 	return (false);
 	

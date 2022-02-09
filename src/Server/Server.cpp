@@ -104,7 +104,7 @@ void Server::readSocket(Client &client, int fd)
 	/* else if (bytes_read == -1) */
 	/* 	throw std::logic_error("JOPA CLIENTU"); */
 	// buf[bytes_read + 1] = '\0';
-	DBOUT << stringBUF << ENDL;
+	// DBOUT << stringBUF << ENDL;
 	stringBUF.erase(bytes_read, stringBUF.size());
 	/* DBOUT << "after erase" <<ENDL; */
 	/* DBOUT << stringBUF << ENDL; */
