@@ -93,6 +93,11 @@ void	Response::setLocation(void)
 		_locationSTR = _location->redirect[_code];
 }
 
+serverListen	Response::getListen()
+{
+	return (_listen);
+}
+
 //-------------------------------------------------File---------------------------------------
 
 void Response::OpenResponseFile(const char *path)

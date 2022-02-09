@@ -57,6 +57,7 @@ private:
     std::string                 getTime(void);
     std::string                 getContentType(void);
 public:
+    serverListen                getListen(void);
     std::string                 getHeader(void);
     std::string                 getBody(void);
     static std::string			getReasonPhrase(std::string);
