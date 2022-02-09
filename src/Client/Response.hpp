@@ -49,6 +49,7 @@ private:
 private:
     void                        methodGet(void);
     void                        methodPost(void);
+    void                        methodPut(void);
     void                        methodDelete(void);
     void                        invalidClient(void);
     void                        generateHeader(void);

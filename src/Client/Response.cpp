@@ -203,9 +203,6 @@ std::string	Response::getFullURI(void)
 		tmp	= _request.getURI().substr(len);
 		tmp = _location->root + tmp;
 	}
-	DBOUT << RED << _location->location << ENDL;
-	DBOUT << len << ENDL;
-	DBOUT << RED << tmp << ENDL;
 	if (_request.isDir(tmp) ==  0)
 	{
 		if (_location->directoryFile.empty() || _Autoindex)
@@ -323,9 +320,10 @@ void	Response::generate2(serverListen &l)
 		methodGet();
 	else if (_method == "POST")
 		methodPost();
-	else
+	else if (_method == "DELETE")
 		methodDelete();
-	
+	else if (_method == "PUT")
+		methodPut();
 }
 
 bool	Response::isRedirect()
@@ -365,11 +363,31 @@ void	Response::methodPost(void)
 	std::ofstream outfile(_fullURI.c_str(), std::ios::out | std::ios::binary);
 
 	outfile.write(_request.getBody().data(), _request.getBody().size());
+	outfile.close();
 	_code = 204;
 	setHeaderBlocks();
 	generateHeader();
 	DBOUT << GREEN << "POST method called" << ENDL;
 }
+
+void	Response::methodPut(void)
+{
+	_code = 201;
+	if (_request.isFile(_fullURI) == 0)
+		_code = 204;
+	std::ofstream	file(_fullURI.c_str(), std::ios::out | std::ios::binary);
+	if (!file.is_open())
+		_code = 403;
+	else
+	{
+		file.write(_request.getBody().data(), _request.getBody().size());
+	}
+	file.close();
+	setHeaderBlocks();
+	generateHeader();
+	DBOUT << GREEN << "PUT method called" << ENDL;
+}
+
 void	Response::methodDelete(void)
 {
 	if (_request.isFile(_fullURI) == 0)
@@ -387,6 +405,7 @@ void	Response::methodDelete(void)
 	generateHeader();
 	DBOUT << GREEN << "Delete method called" <<  ENDL;
 }
+
 
 //-------------------------------------------------GET/SET---------------------------------------
 

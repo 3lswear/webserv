@@ -28,7 +28,7 @@
 	[[server.location]]
 		location = "*.jpeg"
 		root = "www/images/jpegImg"
-		methods = ["GET"]
+		methods = ["GET", "PUT"]
 	[[server.location]]
 		location = "*.png"
 		root = "www/images/pngImg"
@@ -45,7 +45,7 @@
 	[[server.location]]
 		location = "*.php"
 		root = "www/script"
-		methods = ["GET", "POST"]
+		methods = ["GET"]
 		autoindex = false
 		cgi_pass = "/usr/bin/php-cgi"
 [[server]]
