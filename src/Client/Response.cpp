@@ -43,7 +43,7 @@ void		Response::setHeaderBlocks(void)
     setConnection();
     setDate();
     setCacheControl();
-    // setLocation(void);
+    setLocation();
     // setLanguage(void);
     // setTransferEncoding(void);
 }
@@ -85,6 +85,12 @@ void	Response::setDate(void)
 void	Response::setCacheControl(void)
 {
 	_cacheControl = "no-store, no-cache, must-revalidate";
+}
+
+void	Response::setLocation(void)
+{
+	if (_code == 301)
+		_locationSTR = _location->redirect[_code];
 }
 
 //-------------------------------------------------File---------------------------------------
@@ -185,13 +191,24 @@ std::string	Response::getFullURI(void)
 	std::string	tmp;
 	std::string	ret = "";
 	int	len = _location->location.size();
-	tmp	= _request.getURI().substr(len);
-
-	tmp = _location->root + tmp;
-
+	if (_location->location[0] == '*')
+	{
+		int	pos = 0;
+		pos = _request.getURI().rfind("/");
+		tmp = _request.getURI().substr(pos);
+		tmp = _location->root + tmp;
+	}
+	else
+	{
+		tmp	= _request.getURI().substr(len);
+		tmp = _location->root + tmp;
+	}
+	DBOUT << RED << _location->location << ENDL;
+	DBOUT << len << ENDL;
+	DBOUT << RED << tmp << ENDL;
 	if (_request.isDir(tmp) ==  0)
 	{
-		if (_location->directoryFile.empty())
+		if (_location->directoryFile.empty() || _Autoindex)
 			ret = tmp;
 		else
 		{
@@ -210,7 +227,7 @@ void	Response::generateBody(void)
 	{
 		if (_Autoindex)
 		{
-			_body = Autoindex::getPage(_request.getURI(), _fullURI, _request.getHost());
+			_body = Autoindex::getPage(_request.getURI(), _fullURI, _request.getHost(), _listen.port);
 			if (_body.empty())
 				_code = 404;
 		}
@@ -229,7 +246,6 @@ void	Response::generateBody(void)
 
 bool	Response::allowedMethod(std::string &method)
 {
-	DBOUT << "allowedMethod called" << ENDL;
 	std::vector<std::string>::iterator	it;
 
 	it = _location->methods.begin();
@@ -259,6 +275,8 @@ void	Response::generateHeader(void)
 	ss << "Date: " << _date << "\r\n";
 	if (!_cacheControl.empty())
 		ss << "Cache-Control: " << _cacheControl << "\r\n";
+	if (!_locationSTR.empty())
+		ss << "Location: " << _locationSTR << "\r\n";
 	ss << "\r\n";
 	_header = ss.str();
 }
@@ -276,20 +294,27 @@ void    Response::generate()
 		methodPost();
 }
 
-void	Response::generate2(void)
+void	Response::generate2(serverListen &l)
 {
-	_errorPages = _config->getErrorPages();
-	_Autoindex	= _location->autoindex;
-	_code = _request.getCode();
-	_hostPort.ip = _config->getHost();
-	_hostPort.port = _config->getPort();
-	_fullURI = getFullURI();
-	_method = _request.getMethod();
+	if (_config == NULL)
+	{
+		_code = 404;
+	}
+	else
+	{
+		_listen	= l;
+		_errorPages = _config->getErrorPages();
+		_Autoindex	= _location->autoindex;
+		_code = _request.getCode();
+		_hostPort.ip = _config->getHost();
+		_hostPort.port = _config->getPort();
+		_fullURI = getFullURI();
+		_method = _request.getMethod();
+	}
 
 	DBOUT << "fullURI " << _fullURI << ENDL;
 	DBOUT << RED << "code is " << _code << ENDL;
-
-	if (_request.badCode(_code) || !allowedMethod(_method))
+	if (_request.badCode(_code) || !allowedMethod(_method) || isRedirect())
 	{
 		invalidClient();
 		return;
@@ -303,12 +328,24 @@ void	Response::generate2(void)
 	
 }
 
+bool	Response::isRedirect()
+{
+	if (!_location->redirect.empty())
+	{
+		_code = 301;
+		return (true);
+	}
+	else
+		return (false);
+}
+
 //-------------------------------------------------HEADER/BODY---------------------------------------
 
 
 void	Response::invalidClient(void)
 {
-	OpenErrorFile(_code);
+	if (!isRedirect())
+		OpenErrorFile(_code);
 	setHeaderBlocks();
 	generateHeader();
 

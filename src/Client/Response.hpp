@@ -8,6 +8,7 @@
 class Response
 {
 private:
+    serverListen    _listen;
     std::string     _body;
     std::string     _header;
     Request         _request;
@@ -62,6 +63,7 @@ public:
 	std::string					getErrorPage(int code);
     std::string                 getFullURI();
 
+    bool                        isRedirect(void);
     bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);
     void                        setData(Request &, ServerConfig *, location *location);
@@ -70,7 +72,7 @@ public:
 	void						OpenErrorFile(int code);
 	void					    initErrorCode(void);
     void                        generate();
-    void                        generate2();
+    void                        generate2(serverListen &);
     Response();
     ~Response();
 
