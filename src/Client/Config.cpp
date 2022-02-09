@@ -4,6 +4,38 @@ Config::Config()
 {
 }
 
+
+int	isFile(std::string path)
+{
+	struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+			return (-1);
+		else if (s.st_mode & S_IFREG)
+			return (0);
+	}
+	else
+		return (-1);
+	return (-1);
+}
+
+int	isDir(std::string path)
+{
+	struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+			return (0);
+		else if (s.st_mode & S_IFREG)
+			return (-1);
+	}
+	else
+		return (-1);
+	return (-1);
+}
 int			Config::calcLen(std::string &s1, std::string &s2)
 {
 	unsigned long	len = 0;
@@ -18,27 +50,60 @@ int			Config::calcLen(std::string &s1, std::string &s2)
 
 location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 {
-	int     max = 0;
-	int		len = 0;
-	location            *tmp;
+	unsigned int	tryLen = URI.size();
+	std::string		tryLocation;
+	location		*tmp;
+	std::string		suffix;
+	std::string		suffix1;
 	std::vector<location *>::iterator   it;
-	std::map<int, location *>	compare;
+	std::vector<location *> step_1;
+	suffix = URI.substr(URI.rfind(".") + 1, URI.size() - URI.rfind("."));
+
+	while (tryLen)
+	{
+		it = arr.begin();
+		while (it != arr.end())
+		{
+			tmp = *it;
+			tryLocation = URI.substr(0, tryLen);
+			if (tmp->location == tryLocation)
+				step_1.push_back(tmp);
+			it++;
+		}
+		if (!step_1.empty())
+			break;
+		tryLen = URI.rfind("/", tryLen - 1);
+	}
+	if (!step_1.empty())
+	{
+		it = step_1.begin();
+		tmp = *it;
+		if (tmp->location == URI || tmp->location.size() > 1)
+			return (tmp);
+	}
 
 	it = arr.begin();
 	while (it != arr.end())
 	{
 		tmp = *it;
-		if (tmp->location == URI)
-			return (tmp);
-		len = calcLen(tmp->location, URI);
-		if (compare.find(len) == compare.end())
-			compare[len] = tmp;
-		if (max < len)
-			max = len;
+		if (tmp->location[0] == '*')
+		{
+			suffix1 = tmp->location.substr(2);
+			if (suffix1 == suffix)
+				return (tmp);
+		}
 		it++;
 	}
-	return (compare[max]);
+	it = arr.begin();
+	while (it != arr.end())
+	{
+		tmp = *it;
+		if (tmp->location == "/")
+			return (tmp);
+		it++;
+	}
 	
+	return (NULL);
 }
 
 ServerConfig    *Config::getConfig(std::vector<ServerConfig *> &arr, Request &request, serverListen &data)
