@@ -294,17 +294,23 @@ int	Request::parseRequest(void)
 void    Request::copyFromMap()
 {
 	std::map<std::string, std::string>::iterator it;
-	int	pos;
+	int	pos = 0;
 	
 	//host
     it = _headerField.find("host");
 	if (it != _headerField.end())
+	{
 		_host = it->second;
-
+		pos = _host.find(":");
+		if (pos != -1)
+			_host = _host.substr(0, pos);
+	}
+	pos = 0;
 	//content-lenght
 	it = _headerField.find("content-length");
 	if (it != _headerField.end())
 		_contentLength = atoi(it->second.c_str());
+	pos = 0;
 	//chunked
 	it = _headerField.find("transfer-encoding");
 	if (it != _headerField.end())
@@ -313,6 +319,7 @@ void    Request::copyFromMap()
 		if ( pos != -1)
 			_chunked = true;
 	}
+	pos = 0;
 	//connection
 	it = _headerField.find("connection");
 	if (it != _headerField.end())
