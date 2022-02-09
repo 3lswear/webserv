@@ -96,18 +96,25 @@ void Server::readSocket(Client &client, int fd)
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
+		DBOUT << RED << "bytes_read = 0" << ENDL;
 		client.allRead = true;
+		throw std::logic_error("JOPA CLIENTU");
 		return;
 	}
+	/* else if (bytes_read == -1) */
+	/* 	throw std::logic_error("JOPA CLIENTU"); */
 	// buf[bytes_read + 1] = '\0';
+	DBOUT << stringBUF << ENDL;
 	stringBUF.erase(bytes_read, stringBUF.size());
+	/* DBOUT << "after erase" <<ENDL; */
+	/* DBOUT << stringBUF << ENDL; */
 	client.setRawData(stringBUF);
 	// client.setRawData(buf);
 	client.increaseRecvCounter(bytes_read);
 	status = client.parseRequest();
 	// client_map[fd].printClientInfo();
 
-	if ((bytes_read < BUFFSIZE) && client.allRecved())
+	if (client.allRecved())
 	{
 		client.allRead = true;
 	}
@@ -153,7 +160,7 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 	ev.data.fd = fd;
 
 	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
-	/* setNonBlock(fd); */
+	setNonBlock(fd);
 	DBOUT << YELLO
 		<< "add socket "
 		<< fd
@@ -263,13 +270,13 @@ void	Server::start(void)
 						assert( epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == 0);
 						DBOUT << GREEN << "rearmed to EPOLLOUT" << ENDL;
 					}
-					if (client_map[fd]->isEmpty())
-						delete_client(client_map, fd);
+					/* if (client_map[fd]->isEmpty()) */
+					/* 	delete_client(client_map, fd); */
 				}
 				else if (events & EPOLLOUT)
 				{
 					/* DBOUT << GREEN << "doing sendData" << ENDL; */
-					/* client_map[fd].printClientInfo(); */
+					client_map[fd]->printClientInfo();
 					sendData(*client_map[fd], fd);
 					if (client_map[fd]->allSended())
 					{

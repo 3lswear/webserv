@@ -185,18 +185,27 @@ void	Request::splitData(std::string	&data)
 	if (!_head_ok)
 	{
 		pos = str.find("\r\n\r\n");
+		/* if (pos == -1) */
+		/* { */
+		/* 	_ret = 400; */
+		/* 	return; */ 
+		/* } */
+		DBOUT << RED << "pos is " << pos << ENDL;
 		if (pos == -1)
 		{
-			_ret = 400;
-			return; 
+			_head += str;
 		}
-		_head = str.substr(0, pos) + "\n";
- 		_headerSize = _head.size() + 3;
-		data.erase(0, pos + 4);
-		_head_ok = true;
-		parseHeader();
-		if (_contentLength == 0 && !_chunked)
-			_body_ok = true;
+		else
+		{
+			_head += str.substr(0, pos) + "\n";
+			_headerSize = _head.size() + 3;
+			data.erase(0, pos + 4);
+			_head_ok = true;
+
+			parseHeader();
+			if (_contentLength == 0 && !_chunked)
+				_body_ok = true;
+		}
 	}
 	if (badCode(_ret))
 		return ;
@@ -336,6 +345,8 @@ bool    Request::badCode(int code)
 
 bool	Request::ok(void)
 {
+	DBOUT << "_head_ok " << _head_ok << ENDL;
+	DBOUT << "_body_ok " << _body_ok << ENDL;
 	return (_head_ok && _body_ok);
 }
 
