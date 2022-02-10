@@ -15,6 +15,7 @@ struct location
 	std::vector<std::string>	methods;
 	std::map<int, std::string>	redirect;
 	std::string					cgi_pass;
+	unsigned int				clientBodySize;
 };
 
 struct serverListen
@@ -37,6 +38,7 @@ private:
 	std::map<int, std::string>	_errorPages;
 	std::vector<location *>		_locations;
 
+	void	resetLocation(location *);
 public:
 	void	setServerName(std::string);
 	void	setHost(std::string);

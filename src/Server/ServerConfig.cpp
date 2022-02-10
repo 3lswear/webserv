@@ -3,12 +3,17 @@
 ServerConfig::ServerConfig()
 {
 	ret = 0;
+	_clientBodySize = 0;
+	_port = 0;
 }
 
 ServerConfig::ServerConfig(TOMLMap *map)
 {
 	ret = 0;
 	server = map;
+	_clientBodySize = 0;
+	_port = 0;
+
 	fillFields();
 }
 
@@ -133,6 +138,13 @@ int	ServerConfig::putPort(toml_node *node)
 	_port = node->getNum();
 	return (0);
 }
+
+void	ServerConfig::resetLocation(location *tmp)
+{
+	tmp->autoindex = false;
+	tmp->uploadAccept = false;
+	tmp->clientBodySize = 0;
+}
 int	ServerConfig::putLocation(toml_node *node)
 {
 	if (node->get_type() != toml_node::MAPARRAY)
@@ -152,6 +164,7 @@ int	ServerConfig::putLocation(toml_node *node)
 		map = *it;
 		it1 = map->begin();
 		tmp = new location;
+		resetLocation(tmp);
 		while (it1 != map->end())
 		{
 			if (it1->first == "location")
@@ -189,6 +202,12 @@ int	ServerConfig::putLocation(toml_node *node)
 				if (it1->second->get_type() != toml_node::STRING)
 					return (1);
 				tmp->cgi_pass = *it1->second->getString();	
+			}
+			else if (it1->first == "body_size_limit")
+			{
+				if (node->get_type() != toml_node::NUM)
+					return (1);
+				tmp->clientBodySize = it1->second->getNum();
 			}
 			else if (it1->first == "directory_file")
 			{
@@ -288,6 +307,7 @@ void	ServerConfig::printFields(void)
 		std::cout << YELLOW << "autoindex " << BLUE << (*it)->autoindex <<std::endl;
 		std::cout << YELLOW << "uploadAccept " << BLUE << (*it)->uploadAccept <<std::endl;
 		std::cout << YELLOW << "cgi_pass " << BLUE << (*it)->cgi_pass <<std::endl;
+		std::cout << YELLOW << "client_body_size " << BLUE << (*it)->clientBodySize <<std::endl;
 		std::cout << YELLOW << "methods " << std::endl;
 		it2 = (*it)->methods.begin();
 		while (it2 != (*it)->methods.end())
