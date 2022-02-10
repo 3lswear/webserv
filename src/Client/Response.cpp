@@ -197,7 +197,6 @@ std::string		Response::getTime(void)
 
 std::string	Response::getFullURI(void)
 {
-
 	std::string	tmp;
 	std::string	ret = "";
 	int	len = _location->location.size();
@@ -210,8 +209,11 @@ std::string	Response::getFullURI(void)
 	}
 	else
 	{
+		DBOUT << "location" << _location->location << ENDL;
 		tmp	= _request.getURI().substr(len);
+		DBOUT << "tmp1 " << RED << tmp << ENDL;
 		tmp = _location->root + tmp;
+		DBOUT << "tmp2" << RED << tmp << ENDL;
 	}
 	if (_request.isDir(tmp) ==  0)
 	{
@@ -320,11 +322,13 @@ void	Response::generate2(serverListen &l)
 		_fullURI = getFullURI();
 		_method = _request.getMethod();
 		_maxBodySize = (_location->clientBodySize > 0) ? _location->clientBodySize : _config->getClientBodySize();
-		_code = (_request.getContentLength() > _maxBodySize) ? 413 : _code;
-		DBOUT << "max size" << _maxBodySize << ENDL;
-		DBOUT << "_location size" << _location->clientBodySize << ENDL;
-		DBOUT << "_config sieze" << _config->getClientBodySize() << ENDL;
-		DBOUT << "req size " << _request.getContentLength() << ENDL;
+		if (_maxBodySize > 0)
+			_code = (_request.getRecved() > _maxBodySize) ? 413 : _code;
+		DBOUT << BLUE <<  "max size" << _maxBodySize << ENDL;
+		DBOUT << BLUE <<  "_location size" << _location->clientBodySize << ENDL;
+		DBOUT << BLUE <<  "_config sieze" << _config->getClientBodySize() << ENDL;
+		DBOUT << BLUE <<  "req size " << _request.getContentLength() << ENDL;
+		DBOUT << BLUE <<  "recv size " << _request.getRecved() << ENDL;
 	}
 
 	DBOUT << "fullURI " << _fullURI << ENDL;

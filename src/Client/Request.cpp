@@ -196,7 +196,8 @@ void	Request::splitData(std::string	&data)
 			_head_ok = true;
 
 			parseHeader();
-			if (_contentLength == 0 && !_chunked)
+			if ((_contentLength == 0 && !_chunked) || (_method == "GET"
+				|| _method == "DELETE" || _method == "HEAD"))
 				_body_ok = true;
 		}
 	}

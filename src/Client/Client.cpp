@@ -217,6 +217,10 @@ void	Client::printClientInfo(void)
 	std::cout << GREEN << "request http versioin = " << _request.getVersion() << ZERO_C << std::endl;
 	std::cout << GREEN << "content-length = " << _request.getContentLength() << ZERO_C << std::endl;
 	std::cout << GREEN << "connection type = " << _request.getConnection() << ZERO_C << std::endl;
+	it = map.find("transfer-encoding");
+	if (it != map.end())
+		std::cout << GREEN << "transfer-encoding = " << it->second << ZERO_C << std::endl;
+
 
 	std::cout << BLUE << std::endl << "RESPONSE" << ZERO_C << std::endl << std::endl;
 	std::cout << GREEN << _response.getHeader() << ZERO_C << std::endl;
