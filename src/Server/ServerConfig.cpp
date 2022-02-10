@@ -3,7 +3,7 @@
 ServerConfig::ServerConfig()
 {
 	ret = 0;
-	_clientBodySize = 0;
+	_clientBodySize = -1;
 	_port = 0;
 }
 
@@ -11,7 +11,7 @@ ServerConfig::ServerConfig(TOMLMap *map)
 {
 	ret = 0;
 	server = map;
-	_clientBodySize = 0;
+	_clientBodySize = -1;
 	_port = 0;
 
 	fillFields();
@@ -143,7 +143,7 @@ void	ServerConfig::resetLocation(location *tmp)
 {
 	tmp->autoindex = false;
 	tmp->uploadAccept = false;
-	tmp->clientBodySize = 0;
+	tmp->clientBodySize = -1;
 }
 int	ServerConfig::putLocation(toml_node *node)
 {
@@ -165,75 +165,75 @@ int	ServerConfig::putLocation(toml_node *node)
 		it1 = map->begin();
 		tmp = new location;
 		resetLocation(tmp);
-		while (it1 != map->end())
+		for (;it1 != map->end(); it1++)
 		{
 			if (it1->first == "location")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					return (1);
+					continue;
 				tmp->location = *it1->second->getString();
 			}
 			else if (it1->first == "root")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					return (1);
+					continue ;
 				tmp->root = *it1->second->getString();
 			}
 			else if (it1->first == "autoindex")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
-					return (1);
+					continue ;
 				tmp->autoindex = it1->second->getBool();
 			}
 			else if (it1->first == "upload_accept")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
-					return (1);
+					continue ;
 				tmp->uploadAccept = it1->second->getBool();
 			}
 			else if (it1->first == "upload_dir")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					return (1);
+					continue ;
 				tmp->uploadDir = *it1->second->getString();	
 			}
 			else if (it1->first == "cgi_pass")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					return (1);
+					continue ;
 				tmp->cgi_pass = *it1->second->getString();	
 			}
 			else if (it1->first == "body_size_limit")
 			{
+				DBOUT << "BodySize in locaton" << ENDL;
 				if (node->get_type() != toml_node::NUM)
-					return (1);
+					continue;
 				tmp->clientBodySize = it1->second->getNum();
 			}
 			else if (it1->first == "directory_file")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					return (1);
+					continue ;
 				tmp->directoryFile = *it1->second->getString();	
 			}
 			else if (it1->first == "methods")
 			{
 				if (it1->second->get_type() != toml_node::ARRAY)
-					return (1);
+					continue ;
 				Array = *it1->second->getArray();
 				it2 = Array.begin();
 				while (it2 != Array.end())
 				{
 					if ((*it2)->get_type() != toml_node::STRING)
-						return (1);
+						continue ;
 					tmp->methods.push_back(*((*it2)->getString()));
 					++it2;
 				}
-
 			}
 			else if (it1->first == "redirect")
 			{
 				if (it1->second->get_type() != toml_node::ARRAY)
-					return (1);
+					continue ;
 				Array = *it1->second->getArray();
 				it2 = Array.begin();
 				str = *(*it2)->getString();
@@ -242,7 +242,6 @@ int	ServerConfig::putLocation(toml_node *node)
 			}
 			else
 				std::cout << RED << it1->first << ZERO_C << std::endl;
-			it1++;
 		}
 		_locations.push_back(tmp);
 		it++;
