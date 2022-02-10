@@ -2,9 +2,8 @@
 	name = "pohek1.org"
 	host = "127.0.0.1"
 	port = 8080
-	body_size_limit = 1000
+	body_size_limit = 10000000
 	[server.error_page]
-		404 = "www/errorFolder/error_404.html"
 		403 = "www/errorFolder/index2.html"
 	[[server.location]]
 		location = "/"
@@ -40,7 +39,7 @@
 	[[server.location]]
 		location = "/errorFolder"
 		root = "www/errorFolder"
-		methods = ["GET", "POST", "DELETE"]
+		methods = ["GET", "POST"]
 		autoindex = false
 	[[server.location]]
 		location = "*.php"

@@ -16,7 +16,7 @@
 		upload_dir = "www/tester/upload_here/"
 	[[server.location]]
 		location = "*.bla"
-		cgi_pass = "~/.local/bin/cgi-test"
+		cgi_pass = "/usr/bin/php-cgi"
 	[[server.location]]
 		location = "/post_body"
 		root = "www/tester/"
