@@ -3,6 +3,7 @@
 
 #include "webserv.hpp"
 #include "Request.hpp"
+#include "CgiHandle.hpp"
 #include "Autoindex.hpp"
 
 class Response
@@ -25,6 +26,7 @@ private:
 private:
     std::string     _contentType;
     unsigned int    _contentLength;
+    unsigned int    _maxBodySize;
     std::string     _server;
     std::string     _keepAlive;
     std::string     _date;
@@ -58,6 +60,7 @@ private:
     std::string                 getContentType(void);
 public:
     serverListen                getListen(void);
+    std::string	                getCgiPass(void);
     std::string                 getHeader(void);
     std::string                 getBody(void);
     static std::string			getReasonPhrase(std::string);

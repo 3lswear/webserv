@@ -49,7 +49,7 @@ void		Response::setHeaderBlocks(void)
 }
 void	Response::setContentType(void)
 {
-	if (_code == 204)
+	if (_code == 204 || !_contentType.empty())
 		return ;
 	else if (_request.badCode(_code))
 		_contentType = "text/html";
@@ -96,6 +96,11 @@ void	Response::setLocation(void)
 serverListen	Response::getListen()
 {
 	return (_listen);
+}
+
+std::string	Response::getCgiPass(void)
+{
+	return (_location->cgi_pass);
 }
 
 //-------------------------------------------------File---------------------------------------
@@ -259,8 +264,8 @@ bool	Response::allowedMethod(std::string &method)
 		DBOUT << BLUE << *it << ENDL;
 		it++;
 	}
-	DBOUT << "location " << _location->location << ENDL;
-	_code = 405;
+	if (_location->cgi_pass.empty())
+		_code = 405;
 	return (false);
 	
 }
@@ -314,11 +319,17 @@ void	Response::generate2(serverListen &l)
 		_hostPort.port = _config->getPort();
 		_fullURI = getFullURI();
 		_method = _request.getMethod();
+		_maxBodySize = (_location->clientBodySize > 0) ? _location->clientBodySize : _config->getClientBodySize();
+		_code = (_request.getContentLength() > _maxBodySize) ? 413 : _code;
+		DBOUT << "max size" << _maxBodySize << ENDL;
+		DBOUT << "_location size" << _location->clientBodySize << ENDL;
+		DBOUT << "_config sieze" << _config->getClientBodySize() << ENDL;
+		DBOUT << "req size " << _request.getContentLength() << ENDL;
 	}
 
 	DBOUT << "fullURI " << _fullURI << ENDL;
 	DBOUT << RED << "code is " << _code << ENDL;
-	if (_request.badCode(_code) || !allowedMethod(_method) || isRedirect())
+	if (_request.badCode(_code) || (!allowedMethod(_method) && _location->cgi_pass.empty()) || isRedirect())
 	{
 		invalidClient();
 		return;
@@ -360,18 +371,58 @@ void	Response::invalidClient(void)
 
 void	Response::methodGet(void)
 {
-	generateBody();
+	if (!_location->cgi_pass.empty())
+	{
+		CgiHandle cgi(_request, *this);
+
+		_body = cgi.executeCgi();
+		unsigned long	pos = _body.find("\r\n\r\n");
+		if (pos != std::string::npos)
+		{
+			std::string	tmp = _body.substr(0, pos);
+			unsigned long stat = tmp.find("Status: ");
+			unsigned long type = tmp.find("Content-type: ");
+			if (stat != std::string::npos)
+				_code = atoi(tmp.substr(stat + 8, 3).c_str());
+			if (type != std::string::npos)
+				_contentType = tmp.substr(type + 14, tmp.find("\r\n", type+14));
+			_body.erase(_body.begin(), _body.begin() + pos + 4);
+		}
+	}
+	else
+		generateBody();
 	setHeaderBlocks();
 	generateHeader();
 	std::cout << GREEN << "GET method called\n" << ZERO_C;
 }
 void	Response::methodPost(void)
 {
-	std::ofstream outfile(_fullURI.c_str(), std::ios::out | std::ios::binary);
+	if (!_location->cgi_pass.empty())
+	{
+		CgiHandle cgi(_request, *this);
 
-	outfile.write(_request.getBody().data(), _request.getBody().size());
-	outfile.close();
-	_code = 204;
+		_body = cgi.executeCgi();
+		unsigned long	pos = _body.find("\r\n\r\n");
+		if (pos != std::string::npos)
+		{
+			std::string	tmp = _body.substr(0, pos);
+			unsigned long stat = tmp.find("Status: ");
+			unsigned long type = tmp.find("Content-type: ");
+			if (stat != std::string::npos)
+				_code = atoi(tmp.substr(stat + 8, 3).c_str());
+			if (type != std::string::npos)
+				_contentType = tmp.substr(type + 14, tmp.find("\r\n", type+14));
+			_body.erase(_body.begin(), _body.begin() + pos + 4);
+		}
+	}
+	else
+	{
+		std::ofstream outfile(_fullURI.c_str(), std::ios::out | std::ios::binary);
+	
+		outfile.write(_request.getBody().data(), _request.getBody().size());
+		outfile.close();
+		_code = 204;
+	}
 	setHeaderBlocks();
 	generateHeader();
 	DBOUT << GREEN << "POST method called" << ENDL;
@@ -450,7 +501,7 @@ void  Response::initErrorCode(void)
 	_errorCode["410"]  = "Gone";
 	_errorCode["411"]  = "Length Required";
 	_errorCode["412"]  = "Precondition Failed";
-	_errorCode["413"]  = "Request Entity Too Large";
+	_errorCode["413"]  = "Payload Too Large";
 	_errorCode["414"]  = "Request-URI Too Long";
 	_errorCode["415"]  = "Unsupported Media Type";
 	_errorCode["416"]  = "Requested Range Not Satisfiable";

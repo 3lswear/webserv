@@ -29,7 +29,7 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <arpa/inet.h>
-
+#include <wait.h>
 
 #include <netinet/in.h>
 #include <fcntl.h>

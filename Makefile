@@ -15,7 +15,7 @@ CPPFLAGS += -MD -MP
 SRC = $(wildcard ./src/*.cpp)
 SRC += $(wildcard ./src/*/*.cpp)
 
-INCLUDES = ./includes/ -I src/Autoindex -I src/config -I src/Client -I src/Server
+INCLUDES = ./includes/ -I src/Autoindex -I src/config -I src/Client -I src/Server -I src/CGI
 
 OBJ = $(SRC:.cpp=.o)
 
