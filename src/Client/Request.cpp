@@ -337,8 +337,6 @@ bool    Request::badCode(int code)
 
 bool	Request::ok(void)
 {
-	DBOUT << "_head_ok " << _head_ok << ENDL;
-	DBOUT << "_body_ok " << _body_ok << ENDL;
 	return (_head_ok && _body_ok);
 }
 

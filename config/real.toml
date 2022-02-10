@@ -45,7 +45,6 @@
 	[[server.location]]
 		location = "*.php"
 		root = "www/script"
-		methods = ["GET"]
 		autoindex = false
 		cgi_pass = "/usr/bin/php-cgi"
 [[server]]
