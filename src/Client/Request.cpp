@@ -166,6 +166,8 @@ int								checkEnd(const std::string& str, const std::string& end)
 	size_t	i = str.size();
 	size_t	j = end.size();
 
+	if (i == 0)
+		return (1);
 	while (j > 0)
 	{
 		i--;
