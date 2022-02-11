@@ -131,7 +131,31 @@ namespace config
 		else if (c == '=')
 			token.type = ASSIGN;
 		else if (c == '\n')
+		{
 			token.type = NEWLINE;
+
+			std::streampos prev_pos;
+			file.get(c);
+			if (c != '\n')
+			{
+				file.seekg(-1, std::ios_base::cur);
+			}
+			else if (file.eof())
+			{
+				file.clear();
+				DBOUT << "cleared" <<ENDL;
+			}
+			else
+			{
+				DBOUT << "no" <<ENDL;
+			}
+
+			// while (c == '\n')
+			// 	file.get(c);
+			// if (c != '\n')
+			// 	file.seekg(-1, std::ios_base::cur);
+
+		}
 		else if (c == '-' || isdigit(c))
 		{
 			std::streampos prevCharPos;
