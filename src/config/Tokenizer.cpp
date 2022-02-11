@@ -38,12 +38,13 @@ namespace config
 		else
 			return (false);
 	}
-	Tokenizer::Tokenizer(std::string filename)
+	Tokenizer::Tokenizer(char *filename)
 	{
-		file.open(filename.c_str(), std::ios::in);
+		file.open(filename, std::ios::in);
 		if (!file.good())
 		{
 			std::cerr << "file didn't open" << std::endl;
+			throw std::logic_error("file didnt open");
 		}
 	}
 	bool Tokenizer::firstToken()

@@ -25,7 +25,7 @@
 namespace config
 {
 
-	TOMLParser::TOMLParser(const std::string filename) : tokenizer(filename)
+	TOMLParser::TOMLParser(char *filename) : tokenizer(filename)
 	{};
 
 	void TOMLParser::processMap(void)

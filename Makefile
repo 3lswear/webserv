@@ -41,6 +41,6 @@ re:
 	$(MAKE) all
 
 run: $(NAME)
-	ASAN_OPTIONS=detect_leaks=0 ./$(NAME)
+	ASAN_OPTIONS=detect_leaks=0 ./$(NAME) $(filter-out $@,$(MAKECMDGOALS))
 	
 .PHONY: all clean fclean re

@@ -49,7 +49,7 @@ namespace config
 			e_token last_token;
 
 		public:
-			Tokenizer(std::string filename);
+			Tokenizer(char *filename);
 			char getWithoutWhiteSpace();
 			struct s_token getToken();
 			bool hasMoreTokens();

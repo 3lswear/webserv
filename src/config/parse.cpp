@@ -38,9 +38,9 @@ namespace config
 	}
 }
 
-TOMLMap *parse(void)
+TOMLMap *parse(char *filename)
 {
-	std::string filename = "config/tester.toml";
+	// std::string fiцename = "config/simple.toml";
 	config::TOMLParser parser(filename);
 	TOMLMap *root = parser.parse();
 	/* config::display(root); */

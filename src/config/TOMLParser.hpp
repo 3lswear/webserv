@@ -23,7 +23,7 @@ namespace config
 					toml_node *map_node, toml_node::e_type type);
 
 		public:
-			TOMLParser(const std::string filename);
+			TOMLParser(char *filename);
 			TOMLMap *parse(void);
 
 			toml_node *parseMap(void);

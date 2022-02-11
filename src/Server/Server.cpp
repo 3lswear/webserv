@@ -34,9 +34,9 @@ void Server::print_epoll_events(unsigned int events)
 //----------------------------------------------Send--------------------------------------------------------------------------------------------
 
 //----------------------------------------------Configuration-----------------------------------------------------------------------------------
-void	Server::readConfig(void)
+void	Server::readConfig(char *filename)
 {
-	TOMLMap *root = parse();
+	TOMLMap *root = parse(filename);
 
 
 	/* TOMLMap *map; */
