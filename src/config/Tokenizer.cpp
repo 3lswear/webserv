@@ -134,26 +134,16 @@ namespace config
 		{
 			token.type = NEWLINE;
 
-			std::streampos prev_pos;
-			file.get(c);
-			if (c != '\n')
-			{
-				file.seekg(-1, std::ios_base::cur);
-			}
-			else if (file.eof())
+			do
+				file.get(c);
+			while (c == '\n' && !file.eof());
+			if (file.eof())
 			{
 				file.clear();
 				DBOUT << "cleared" <<ENDL;
 			}
-			else
-			{
-				DBOUT << "no" <<ENDL;
-			}
-
-			// while (c == '\n')
-			// 	file.get(c);
-			// if (c != '\n')
-			// 	file.seekg(-1, std::ios_base::cur);
+			else if (c != '\n')
+				file.seekg(-1, std::ios_base::cur);
 
 		}
 		else if (c == '-' || isdigit(c))
@@ -207,6 +197,8 @@ namespace config
 		}
 		else if (c == ',')
 			token.type = COMMA;
+		else if (c == '#')
+			token.type = COMMENT;
 		last_token = token.type;
 		return (token);
 	}
