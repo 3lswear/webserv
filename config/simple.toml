@@ -1,5 +1,5 @@
 [[server]]
-	name = "pohek1.org"
+	name = "serv1"
 	host = "127.0.0.1"
 	port = 8080
 	body_size_limit = 10
@@ -21,7 +21,7 @@
 		autoindex = false
 		directory_file = "oops.html"
 [[server]]
-	name = "pohek2.org"
+	name = "2222"
 	host = "10.0.0.1"
 	port = 8081
 	body_size_limit = 10
