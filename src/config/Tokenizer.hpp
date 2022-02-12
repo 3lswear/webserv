@@ -59,6 +59,37 @@ namespace config
 			void rollBackToken();
 			void set_last(e_token type);
 
+			class NoMoreTokens: public std::exception
+			{
+				public:
+					virtual const char *what() const throw()
+					{
+						return ("No more tokens!");
+					}
+			};
+			class InvalidToken: public std::exception
+			{
+				protected:
+					std::string *msg;
+
+				public:
+					InvalidToken(const std::string &token)
+					{
+
+						msg = new std::string("Invalid token: '" + token + "'");
+					}
+
+					virtual const char *what() const throw()
+					{
+						return (msg->c_str());
+					}
+
+					virtual ~InvalidToken() throw()
+					{
+						delete msg;
+					}
+			};
+
 	};
 
 	/* struct s_token Tokenizer::getKey(void) */

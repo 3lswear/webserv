@@ -178,6 +178,8 @@ namespace config
 				token.value += c;
 				file.get(c);
 			}
+			if (token.value != "false")
+				throw InvalidToken(token.value);
 			file.seekg(-1, std::ios_base::cur);
 
 		}
@@ -189,12 +191,20 @@ namespace config
 				token.value += c;
 				file.get(c);
 			}
+			if (token.value != "true")
+				throw InvalidToken(token.value);
 			file.seekg(-1, std::ios_base::cur);
 		}
 		else if (c == 'n')
 		{
 			token.type = NIL;
-			file.seekg(3, std::ios_base::cur);
+			while (std::isalpha(c))
+			{
+				token.value += c;
+				file.get(c);
+			}
+			if (token.value != "null")
+				throw InvalidToken(token.value);
 		}
 		else if (c == ',')
 			token.type = COMMA;
@@ -237,9 +247,7 @@ namespace config
 		{
 			file.get(c);
 			if ((c == ' ') && !file.good())
-			{
-				throw std::logic_error("No more tokens!");
-			}
+				throw NoMoreTokens();
 			else if (!file.good())
 				return (c);
 		}

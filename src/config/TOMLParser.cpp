@@ -35,7 +35,7 @@ namespace config
 		s_token current;
 
 		try { current = tokenizer.getToken(); }
-		catch (std::logic_error e)
+		catch (std::exception &e)
 		{
 			std::cerr << e.what() << std::endl;
 			return;
@@ -71,7 +71,7 @@ namespace config
 			{
 				s_token nextToken;
 				try { nextToken = tokenizer.getToken(); }
-				catch (std::logic_error e)
+				catch (std::exception &e)
 				{
 					std::cerr << e.what() << std::endl;
 					break;
@@ -158,7 +158,7 @@ namespace config
 		s_token current;
 
 		try { current = tokenizer.getToken(); }
-		catch (std::logic_error e)
+		catch (std::exception &e)
 		{
 			std::cerr << e.what() << std::endl;
 			return;
@@ -313,7 +313,7 @@ namespace config
 			{
 				s_token current;
 				try { current = tokenizer.getToken(); }
-				catch (std::logic_error e)
+				catch (std::exception &e)
 				{
 					std::cerr << e.what() << std::endl;
 					break;
