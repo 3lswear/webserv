@@ -2,6 +2,7 @@
 	name = "pohek1.org"
 	host = "127.0.0.1"
 	port = 8080
+	body_size_limit = 100000000
 	[[server.location]]
 		location = "/"
 		root = "www/tester/"

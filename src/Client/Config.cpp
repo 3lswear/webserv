@@ -57,6 +57,7 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 	std::string		suffix1;
 	std::vector<location *>::iterator   it;
 	std::vector<location *> step_1;
+	std::vector<location *> step_2;
 	suffix = URI.substr(URI.rfind(".") + 1, URI.size() - URI.rfind("."));
 
 	while (tryLen)
@@ -79,9 +80,8 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		it = step_1.begin();
 		tmp = *it;
 		if (tmp->location == URI || tmp->location.size() > 1)
-			return (tmp);
+			step_2.push_back(tmp);
 	}
-
 	it = arr.begin();
 	while (it != arr.end())
 	{
@@ -90,9 +90,22 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		{
 			suffix1 = tmp->location.substr(2);
 			if (suffix1 == suffix)
-				return (tmp);
+			{
+				step_2.push_back(tmp);
+				break;
+			}
 		}
 		it++;
+	}
+	if (step_2.size() == 1)
+		return (step_2[0]);
+	else if (step_2.size() == 2)
+	{
+		if(!step_2[1]->cgi_pass.empty())
+		{
+			step_2[0]->cgi_pass = step_2[1]->cgi_pass;
+		}
+		return (step_2[0]);
 	}
 	it = arr.begin();
 	while (it != arr.end())

@@ -67,7 +67,7 @@ public:
 	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
     std::string                 getFullURI();
-
+    unsigned    int             getMaxBodySize(void);
     bool                        isRedirect(void);
     bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);

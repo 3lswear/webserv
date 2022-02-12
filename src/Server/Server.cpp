@@ -69,8 +69,6 @@ void Server::sendData(Client &client, int fd)
 	else
 		send_len = BUFFSIZE;
 
-	/* DBOUT << YELLO << tmp << ENDL; */
-	/* DBOUT << GREEN << client.getCounter() << ENDL; */
 	DBOUT << "sent " << send_len << " to client " << fd << ENDL;
 
 
@@ -91,8 +89,8 @@ void Server::readSocket(Client &client, int fd)
 	// char buf[BUFFSIZE + 1];
 	std::string	stringBUF(BUFFSIZE, 0);
 
-	DBOUT << TURQ << "IN readSocket" << ENDL;
-	DBOUT << "client in readSocket "<< &client << ENDL;
+	// DBOUT << TURQ << "IN readSocket" << ENDL;
+	// DBOUT << "client in readSocket "<< &client << ENDL;
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
@@ -119,16 +117,16 @@ void Server::readSocket(Client &client, int fd)
 		client.allRead = true;
 	}
 
-	DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
-	DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
-	DBOUT << GREEN << "allRead " << client.allRead << ENDL;
-
-	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
+	// DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
+	// DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
+	// DBOUT << GREEN << "allRead " << client.allRead << ENDL;
+	// DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
 }
 
 int Server::delete_client(std::map<int,Client *> &client_map, int fd)
 {
 	int ret;
+	client_map[fd]->printClientInfo();
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	close(fd);
 	client_map[fd]->clear();
@@ -225,7 +223,7 @@ void	Server::start(void)
 	{
 
 		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		DBOUT << TURQ << "ready_num " << ready_num << ENDL;
+		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;F
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
@@ -276,7 +274,7 @@ void	Server::start(void)
 				else if (events & EPOLLOUT)
 				{
 					/* DBOUT << GREEN << "doing sendData" << ENDL; */
-					client_map[fd]->printClientInfo();
+					// client_map[fd]->printClientInfo();
 					sendData(*client_map[fd], fd);
 					if (client_map[fd]->allSended())
 					{

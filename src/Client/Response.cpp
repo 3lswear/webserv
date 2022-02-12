@@ -103,6 +103,10 @@ std::string	Response::getCgiPass(void)
 	return (_location->cgi_pass);
 }
 
+unsigned int Response::getMaxBodySize(void)
+{
+	return (_maxBodySize);
+}
 //-------------------------------------------------File---------------------------------------
 
 void Response::OpenResponseFile(const char *path)
