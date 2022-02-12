@@ -27,7 +27,9 @@ namespace config
 		OPEN_BRACKET,
 		CLOSE_BRACKET,
 		MAP_DECL,
-		MAPARRAY_DECL
+		MAPARRAY_DECL,
+		COMMENT,
+		NO_TOK
 	};
 
 	struct s_token

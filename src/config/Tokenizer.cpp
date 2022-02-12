@@ -40,6 +40,7 @@ namespace config
 	}
 	Tokenizer::Tokenizer(char *filename)
 	{
+		last_token = NO_TOK;
 		file.open(filename, std::ios::in);
 		if (!file.good())
 		{
@@ -50,7 +51,7 @@ namespace config
 	bool Tokenizer::firstToken()
 	{
 		// doesn't account for indent!
-		if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE))
+		if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE || last_token == NO_TOK))
 			return (true);
 		else
 			return (false);
@@ -198,10 +199,37 @@ namespace config
 		else if (c == ',')
 			token.type = COMMA;
 		else if (c == '#')
-			token.type = COMMENT;
+		{
+			// consume all comments
+			do
+				file.get(c);
+			while (c != '\n' || file.eof());
+			DBOUT << "getting comment token" << ENDL;
+			if (last_token == NO_TOK || last_token == NEWLINE)
+			{
+				DBOUT << "getting first token instead of comment" << ENDL;
+				struct s_token actual;
+				actual.type = NEWLINE;
+					while (actual.type == NEWLINE)
+						actual = getToken();
+					DBOUT
+						<< "actual token: '"
+						<< actual.value << "', type: "
+						<< actual.type
+						<< ENDL;
+				token = actual;
+			}
+			else
+				token.type = NEWLINE;
+
+		}
 		last_token = token.type;
+
+		DBOUT << YELLO << "GOT " << token.value << ", type: " << token.type << ENDL;
+
 		return (token);
 	}
+
 	char Tokenizer::getWithoutWhiteSpace(void)
 	{
 		char c = ' ';
