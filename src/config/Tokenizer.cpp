@@ -38,6 +38,15 @@ namespace config
 		else
 			return (false);
 	}
+
+	bool istomlmapdecl(char c)
+	{
+		if (isalnum(c) || c == '-' || c == '_' || c == '.')
+			return (true);
+		else
+			return (false);
+	}
+
 	Tokenizer::Tokenizer(char *filename)
 	{
 		last_token = NO_TOK;
@@ -99,7 +108,7 @@ namespace config
 			{
 				token.type = MAPARRAY_DECL;
 				file.get(c);
-				while (c != ']')
+				while (c != ']' && config::istomlmapdecl(c))
 				{
 					token.value += c;
 					file.get(c);
@@ -107,7 +116,7 @@ namespace config
 				if (c == ']')
 					file.get(c);
 				if (c != ']')
-					throw std::logic_error("error in MAPARRAY_DECL");
+					throw InvalidToken("[[" + token.value);
 			}
 			else
 			{
@@ -120,7 +129,8 @@ namespace config
 					file.get(c);
 				}
 				if (c != ']')
-					throw std::logic_error("malformed MAP_DECL");
+					// throw std::logic_error("malformed MAP_DECL");
+					throw InvalidToken(token.value);
 			}
 		}
 		else if (c == '[')
@@ -232,6 +242,16 @@ namespace config
 			else
 				token.type = NEWLINE;
 
+		}
+		else
+		{
+			while (!config::isspace(c) && (c != '\n'))
+			{
+				DBOUT << RED << "[" << c << "]" <<ENDL;
+				token.value += c;
+				file.get(c);
+			}
+			throw InvalidToken(token.value);
 		}
 		last_token = token.type;
 

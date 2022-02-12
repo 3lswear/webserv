@@ -43,6 +43,8 @@ namespace config
 
 	bool istomlkey(char c);
 
+	bool istomlmapdecl(char c);
+
 	class Tokenizer
 	{
 		private:
