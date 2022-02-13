@@ -43,11 +43,13 @@ namespace config
 		if (current.type == MAP_DECL)
 		{
 			if (tokenizer.getToken().type != NEWLINE)
-				throw std::logic_error("no newline after MAP_DECL");
+				throw ExpectedToken("newline", current.value);
+				// throw std::logic_error("no newline after MAP_DECL");
 			map_node = parseMap();
 		}
 		else
-			throw std::logic_error("unexpected token in processMap");
+			// throw std::logic_error("unexpected token in processMap");
+			throw UnexpectedToken("", current.value);
 
 		/* std::cout << current.value << std::endl; */
 
@@ -90,8 +92,11 @@ namespace config
 				}
 				std::string key = nextToken.value;
 				/* std::cerr << key << std::endl; */
+				DBOUT << RED << "key is " << key << ENDL;
 				if (tokenizer.getToken().type != ASSIGN)
-					throw std::logic_error("EXPECTED assign!");
+					throw ExpectedToken("assign", "after " + key);
+					// throw std::logic_error("EXPECTED assign! 1");
+				
 				nextToken = tokenizer.getToken();
 				switch (nextToken.type)
 				{
@@ -126,8 +131,9 @@ namespace config
 						}
 					default:
 						{
+							throw UnexpectedToken(nextToken.value, key);
 							/* throw std::logic_error("jopa in parseMap"); */
-							std::cerr << "Unknown token, marking as complete" << std::endl;
+							// std::cerr << "Unknown token, marking as complete" << std::endl;
 							completed = true;
 							break;
 						}
@@ -138,13 +144,14 @@ namespace config
 					break;
 				if (nextToken.type != NEWLINE)
 				{
-					throw std::logic_error("EXPECTED newline");
+					// throw std::logic_error("EXPECTED newline");
+					throw ExpectedToken("newline", "parsing Hash Table");
 				}
 			}
-			else
-			{
-				throw std::logic_error("parseMap: no more tokens");
-			}
+			// else
+			// {
+			// 	throw std::logic_error("parseMap: no more tokens");
+			// }
 		}
 		node->setObject(mapObject);
 		return (node);
@@ -257,7 +264,9 @@ namespace config
 						}
 					default:
 						{
-							throw std::logic_error("unkown token in parseArray");
+							// throw std::logic_error("unkown token in parseArray");
+							throw UnexpectedToken("entry " + current.value,
+									"in Array");
 						}
 
 				}
@@ -268,7 +277,8 @@ namespace config
 				else if (current.type == CLOSE_BRACKET)
 					completed = true;
 				else
-					throw std::invalid_argument("Unexpected token in array!");
+					throw UnexpectedToken(current.value, ", when expected COMMA, or CLOSE_BRACKET");
+					// throw std::invalid_argument("Unexpected token in array!");
 			}
 		}
 		result->setArr(array);
