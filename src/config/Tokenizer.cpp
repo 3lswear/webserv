@@ -68,16 +68,15 @@ namespace config
 
 	struct s_token Tokenizer::getToken(void)
 	{
-		char c;
 		struct s_token token;
 
 		if (file.eof())
 		{
-			std::cout << "Tokens exhausted" << std::endl;
-			throw std::logic_error("Tokens exhausted");
+			DBOUT << RED << "Tokens exhausted" << ENDL;
+			throw NoMoreTokens();
 		}
 		prev_pos = file.tellg();
-		c = getWithoutWhiteSpace();
+		char c = getWithoutWhiteSpace();
 
 		if (firstToken() && config::istomlkey(c))
 		{
