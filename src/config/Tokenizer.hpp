@@ -66,7 +66,7 @@ namespace config
 				public:
 					virtual const char *what() const throw()
 					{
-						return ("No more tokens!");
+						return ("Config may be incomplete, expected more tokens (check EOL)");
 					}
 			};
 			class InvalidToken: public std::exception
