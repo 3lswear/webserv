@@ -16,17 +16,17 @@
 class toml_node
 {
 
-	union u_value
+	struct u_value
 	{
-		std::string *str;
+		std::string str;
 		int integer;
 		bool boolean;
 		/* std::vector<toml_node *> *array; */ 
-		TOMLArray *array;
+		TOMLArray array;
 		/* std::map<std::string, toml_node *> *map; */
-		TOMLMap *map;
+		TOMLMap map;
 		/* std::vector<std::map<std::string, toml_node> > *map_array; */
-		TOMLMapArray *map_array;
+		TOMLMapArray map_array;
 	}	value;
 
 	public:

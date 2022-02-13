@@ -61,11 +61,11 @@ namespace config
 
 	}
 
-	toml_node *TOMLParser::parseMap(void)
+	toml_node TOMLParser::parseMap(void)
 	{
 		/* std::cerr << "Parsing map" << std::endl; */
-		toml_node *node = new toml_node;
-		TOMLMap *mapObject = new TOMLMap;
+		toml_node node;
+		TOMLMap mapObject;
 		bool completed = false;
 		while (!completed)
 		{
@@ -103,24 +103,24 @@ namespace config
 					case STRING:
 						{
 							tokenizer.rollBackToken();
-							(*mapObject)[key] = parseString();
+							mapObject[key] = parseString();
 							break;
 						}
 					case OPEN_BRACKET:
 						{
-							(*mapObject)[key] = parseArray();
+							mapObject[key] = parseArray();
 							break;
 						}
 					case NUMBER:
 						{
 							tokenizer.rollBackToken();
-							(*mapObject)[key] = parseNumber();
+							mapObject[key] = parseNumber();
 							break;
 						}
 					case BOOL:
 						{
 							tokenizer.rollBackToken();
-							(*mapObject)[key] = parseBool();
+							mapObject[key] = parseBool();
 							break;
 						}
 					case MAPARRAY_DECL:
@@ -153,7 +153,7 @@ namespace config
 			// 	throw std::logic_error("parseMap: no more tokens");
 			// }
 		}
-		node->setObject(mapObject);
+		node.setObject(mapObject);
 		return (node);
 	}
 

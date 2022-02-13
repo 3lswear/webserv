@@ -84,7 +84,7 @@ void toml_node::setNil(void)
 	type = NIL;
 }
 
-void toml_node::setObject(TOMLMap *obj)
+void toml_node::setObject(TOMLMap &obj)
 {
 	value.map = obj;
 	type = MAP;
