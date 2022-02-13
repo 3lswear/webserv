@@ -12,8 +12,8 @@ int	main(int argc, char **argv)
 	
 	 server.readConfig(argv[1]); 
 	 server.setupConfig();
-	 server.start();
-	server.end();
+	 // server.start();
+	 server.end();
 
 
 	return (0);
