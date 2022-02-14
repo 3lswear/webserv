@@ -38,18 +38,29 @@ namespace config
 		else
 			return (false);
 	}
-	Tokenizer::Tokenizer(std::string filename)
+
+	bool istomlmapdecl(char c)
 	{
-		file.open(filename.c_str(), std::ios::in);
+		if (isalnum(c) || c == '-' || c == '_' || c == '.')
+			return (true);
+		else
+			return (false);
+	}
+
+	Tokenizer::Tokenizer(char *filename)
+	{
+		last_token = NO_TOK;
+		file.open(filename, std::ios::in);
 		if (!file.good())
 		{
 			std::cerr << "file didn't open" << std::endl;
+			throw std::logic_error("file didnt open");
 		}
 	}
 	bool Tokenizer::firstToken()
 	{
 		// doesn't account for indent!
-		if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE))
+		if (file.tellg() == 0 || file.tellg() == 1 || (last_token == NEWLINE || last_token == NO_TOK))
 			return (true);
 		else
 			return (false);
@@ -57,16 +68,15 @@ namespace config
 
 	struct s_token Tokenizer::getToken(void)
 	{
-		char c;
 		struct s_token token;
 
 		if (file.eof())
 		{
-			std::cout << "Tokens exhausted" << std::endl;
-			throw std::logic_error("Tokens exhausted");
+			DBOUT << RED << "Tokens exhausted" << ENDL;
+			throw NoMoreTokens();
 		}
 		prev_pos = file.tellg();
-		c = getWithoutWhiteSpace();
+		char c = getWithoutWhiteSpace();
 
 		if (firstToken() && config::istomlkey(c))
 		{
@@ -97,7 +107,7 @@ namespace config
 			{
 				token.type = MAPARRAY_DECL;
 				file.get(c);
-				while (c != ']')
+				while (c != ']' && config::istomlmapdecl(c))
 				{
 					token.value += c;
 					file.get(c);
@@ -105,7 +115,7 @@ namespace config
 				if (c == ']')
 					file.get(c);
 				if (c != ']')
-					throw std::logic_error("error in MAPARRAY_DECL");
+					throw InvalidToken("[[" + token.value);
 			}
 			else
 			{
@@ -118,7 +128,8 @@ namespace config
 					file.get(c);
 				}
 				if (c != ']')
-					throw std::logic_error("malformed MAP_DECL");
+					// throw std::logic_error("malformed MAP_DECL");
+					throw InvalidToken(token.value);
 			}
 		}
 		else if (c == '[')
@@ -130,7 +141,21 @@ namespace config
 		else if (c == '=')
 			token.type = ASSIGN;
 		else if (c == '\n')
+		{
 			token.type = NEWLINE;
+
+			do
+				file.get(c);
+			while (c == '\n' && !file.eof());
+			if (file.eof())
+			{
+				file.clear();
+				DBOUT << "cleared" <<ENDL;
+			}
+			else if (c != '\n')
+				file.seekg(-1, std::ios_base::cur);
+
+		}
 		else if (c == '-' || isdigit(c))
 		{
 			std::streampos prevCharPos;
@@ -162,6 +187,8 @@ namespace config
 				token.value += c;
 				file.get(c);
 			}
+			if (token.value != "false")
+				throw InvalidToken(token.value);
 			file.seekg(-1, std::ios_base::cur);
 
 		}
@@ -173,18 +200,65 @@ namespace config
 				token.value += c;
 				file.get(c);
 			}
+			if (token.value != "true")
+				throw InvalidToken(token.value);
 			file.seekg(-1, std::ios_base::cur);
 		}
 		else if (c == 'n')
 		{
 			token.type = NIL;
-			file.seekg(3, std::ios_base::cur);
+			while (std::isalpha(c))
+			{
+				token.value += c;
+				file.get(c);
+			}
+			if (token.value != "null")
+				throw InvalidToken(token.value);
 		}
 		else if (c == ',')
 			token.type = COMMA;
+		else if (c == '#')
+		{
+			// consume all comments
+			do
+				file.get(c);
+			while (c != '\n' || file.eof());
+			DBOUT << "getting comment token" << ENDL;
+			if (last_token == NO_TOK || last_token == NEWLINE)
+			{
+				DBOUT << "getting first token instead of comment" << ENDL;
+				struct s_token actual;
+				actual.type = NEWLINE;
+					while (actual.type == NEWLINE)
+						actual = getToken();
+					DBOUT
+						<< "actual token: '"
+						<< actual.value << "', type: "
+						<< actual.type
+						<< ENDL;
+				token = actual;
+			}
+			else
+				token.type = NEWLINE;
+
+		}
+		else
+		{
+			while (!config::isspace(c) && (c != '\n'))
+			{
+				DBOUT << RED << "[" << c << "]" <<ENDL;
+				token.value += c;
+				file.get(c);
+			}
+			throw InvalidToken(token.value);
+		}
 		last_token = token.type;
+
+		DBOUT << YELLO << "GOT " << token.value << ", type: " << token.type << ENDL;
+
 		return (token);
 	}
+
 	char Tokenizer::getWithoutWhiteSpace(void)
 	{
 		char c = ' ';
@@ -192,9 +266,7 @@ namespace config
 		{
 			file.get(c);
 			if ((c == ' ') && !file.good())
-			{
-				throw std::logic_error("No more tokens!");
-			}
+				throw NoMoreTokens();
 			else if (!file.good())
 				return (c);
 		}

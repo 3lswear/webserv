@@ -34,10 +34,32 @@ void Server::print_epoll_events(unsigned int events)
 //----------------------------------------------Send--------------------------------------------------------------------------------------------
 
 //----------------------------------------------Configuration-----------------------------------------------------------------------------------
-void	Server::readConfig(void)
+void	Server::readConfig(char *filename)
 {
-	TOMLMap *root = parse();
+	TOMLMap *root = NULL;
+	try
+	{
+		root = parse(filename);
 
+	}
+	catch (config::Tokenizer::NoMoreTokens &e)
+	{
+		std::cerr << RED << "FATAL: ";
+		std::cerr << e.what() << RESET << std::endl;
+		// root->clear();
+		// delete root;
+		// clean_parsed(root);
+		return;
+	}
+	catch (config::Tokenizer::InvalidToken &e)
+	{
+		std::cerr << RED << "FATAL: ";
+		std::cerr << e.what() << RESET << std::endl;
+		// clean_parsed(root);
+		// root->clear();
+		delete root;
+		return;
+	}
 
 	/* TOMLMap *map; */
 	TOMLMap::iterator it1;
@@ -406,9 +428,9 @@ void Server::clean_parsed(TOMLMap *root)
 	DBOUT << ">>> cleaning up: <<<" << std::endl;
 	for (it = root->begin(); it != root->end(); ++it)
 	{
-		/* DBOUT << RED << it->first */
-		/* 	<< ": " << GREEN */
-		/* 	<< *(it->second->toString()); */
+		DBOUT << RED << it->first
+			<< ": " << GREEN
+			<< *(it->second->toString());
 
 		clean_generic(it->second);
 		/* delete it->second; */

@@ -56,7 +56,7 @@ class Server
 		Server();
 		Server(std::string path);
 
-		void readConfig(void);
+		void readConfig(char *filename);
 		void setupConfig(void);
 		void start(void);
 		void end(void);

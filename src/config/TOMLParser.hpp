@@ -23,7 +23,7 @@ namespace config
 					toml_node *map_node, toml_node::e_type type);
 
 		public:
-			TOMLParser(const std::string filename);
+			TOMLParser(char *filename);
 			TOMLMap *parse(void);
 
 			toml_node *parseMap(void);
@@ -41,8 +41,52 @@ namespace config
 
 			toml_node *parseNil(void);
 
-	};
+			class ExpectedToken: public std::exception
+			{
+				protected:
+					std::string *msg;
 
+				public:
+					ExpectedToken(const std::string &missing, const std::string context)
+					{
+						msg = new std::string("Config file: ");
+						*msg += ("Expected " + missing + " at " + context);
+					}
+
+					virtual const char *what() const throw()
+					{
+						return (msg->c_str());
+					}
+
+					virtual ~ExpectedToken() throw()
+					{
+						delete msg;
+					}
+			};
+			class UnexpectedToken: public std::exception
+			{
+				protected:
+					std::string *msg;
+
+				public:
+					UnexpectedToken(const std::string &unexpected, const std::string context)
+					{
+						msg = new std::string("Config file: ");
+						*msg += ("Unexpected " + unexpected + " " + context);
+					}
+
+					virtual const char *what() const throw()
+					{
+						return (msg->c_str());
+					}
+
+					virtual ~UnexpectedToken() throw()
+					{
+						delete msg;
+					}
+
+			};
+	};
 	/* parse tha root ! */
 	/* TOMLMap *TOMLParser::parse(void); */
 }

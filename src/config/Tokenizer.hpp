@@ -27,7 +27,9 @@ namespace config
 		OPEN_BRACKET,
 		CLOSE_BRACKET,
 		MAP_DECL,
-		MAPARRAY_DECL
+		MAPARRAY_DECL,
+		COMMENT,
+		NO_TOK
 	};
 
 	struct s_token
@@ -41,6 +43,8 @@ namespace config
 
 	bool istomlkey(char c);
 
+	bool istomlmapdecl(char c);
+
 	class Tokenizer
 	{
 		private:
@@ -49,13 +53,44 @@ namespace config
 			e_token last_token;
 
 		public:
-			Tokenizer(std::string filename);
+			Tokenizer(char *filename);
 			char getWithoutWhiteSpace();
 			struct s_token getToken();
 			bool hasMoreTokens();
 			bool firstToken();
 			void rollBackToken();
 			void set_last(e_token type);
+
+			class NoMoreTokens: public std::exception
+			{
+				public:
+					virtual const char *what() const throw()
+					{
+						return ("Config may be incomplete, expected more tokens (check EOL)");
+					}
+			};
+			class InvalidToken: public std::exception
+			{
+				protected:
+					std::string *msg;
+
+				public:
+					InvalidToken(const std::string &token)
+					{
+
+						msg = new std::string("Invalid token: '" + token + "'");
+					}
+
+					virtual const char *what() const throw()
+					{
+						return (msg->c_str());
+					}
+
+					virtual ~InvalidToken() throw()
+					{
+						delete msg;
+					}
+			};
 
 	};
 
