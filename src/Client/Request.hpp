@@ -14,8 +14,8 @@ private:
 	int			_ret;
 	int			_row;
 	int			_lifeTime;
-	unsigned int			_contentLength;
-	unsigned int			_received;		
+	ssize_t					_contentLength;
+	ssize_t					_received;		
 	unsigned int 			_headerSize;
 
 	std::string _URI;
@@ -48,9 +48,9 @@ public:
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
 	int							getLifeTime(void);
-	unsigned int				getContentLength(void) const;
+	ssize_t						getContentLength(void) const;
 	unsigned int				getHeaderSize(void) const;
-	unsigned int				getRecved(void)const;
+	ssize_t						getRecved(void)const;
 	char						*getPointerBody(void)const;
 	
 	std::map<std::string, std::string>	getClientFields(void);

@@ -33,7 +33,7 @@ int							&ServerConfig::getPort(void)
 	return (_port);
 }
 
-int							&ServerConfig::getClientBodySize(void)
+ssize_t							&ServerConfig::getClientBodySize(void)
 {
 	return (_clientBodySize);
 }
@@ -206,7 +206,7 @@ int	ServerConfig::putLocation(toml_node *node)
 			else if (it1->first == "body_size_limit")
 			{
 				DBOUT << "BodySize in locaton" << ENDL;
-				if (node->get_type() != toml_node::NUM)
+				if (it1->second->get_type() != toml_node::NUM)
 					continue;
 				tmp->clientBodySize = it1->second->getNum();
 			}
@@ -241,7 +241,7 @@ int	ServerConfig::putLocation(toml_node *node)
 				tmp->redirect.insert(std::make_pair(atoi(str.c_str()), *(*it2)->getString()));
 			}
 			else
-				std::cout << RED << it1->first << ZERO_C << std::endl;
+				std::cerr << RED << "Warning: unknown parameter: "<< it1->first << ZERO_C << std::endl;
 		}
 		_locations.push_back(tmp);
 		it++;

@@ -15,7 +15,7 @@ struct location
 	std::vector<std::string>	methods;
 	std::map<int, std::string>	redirect;
 	std::string					cgi_pass;
-	unsigned int				clientBodySize;
+	ssize_t						clientBodySize;
 };
 
 struct serverListen
@@ -33,7 +33,7 @@ private:
 	std::string	_serverName;
 	std::string _host;
 	int			_port;
-	int			_clientBodySize;
+	ssize_t			_clientBodySize;
 
 	std::map<int, std::string>	_errorPages;
 	std::vector<location *>		_locations;
@@ -51,7 +51,7 @@ public:
 	std::string					&getServerName(void);
 	std::string					&getHost(void);
 	int							&getPort(void);
-	int							&getClientBodySize(void);
+	ssize_t						&getClientBodySize(void);
 	std::vector<location *>		&getLocations(void);
 	std::map<int, std::string>	&getErrorPages(void);
 	TOMLMap						*getRoot(void);

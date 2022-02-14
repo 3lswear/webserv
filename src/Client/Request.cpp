@@ -89,7 +89,7 @@ bool						Request::getChunked(void)
 	return (_chunked);
 }
 
-unsigned int Request::getContentLength(void) const
+ssize_t	Request::getContentLength(void) const
 {
 	return (_contentLength);
 }
@@ -97,7 +97,7 @@ unsigned int Request::getHeaderSize(void) const
 {
 	return (_headerSize);
 }
-unsigned int Request::getRecved(void) const
+ssize_t Request::getRecved(void) const
 {
 	return (_received);
 }
@@ -127,6 +127,25 @@ void	Request::increaseRecvCounter(unsigned int n)
 {
 	_received += n;
 }
+
+
+std::string urlDecode(std::string &url) {
+    std::string ret;
+    char ch;
+    size_t i, ii;
+    for (i=0; i < url.length(); i++) {
+        if (size_t(url[i])==37) {
+            sscanf(url.substr(i+1,2).c_str(), "%lx", &ii);
+            ch=static_cast<char>(ii);
+            ret+=ch;
+            i=i+2;
+        } else {
+            ret+=url[i];
+        }
+    }
+    return (ret);
+}
+
 void	Request::parseURI(std::string str)
 {
 	std::string	tmp;
@@ -141,6 +160,10 @@ void	Request::parseURI(std::string str)
 	}
 	else
 		_URI = str;
+	std::string sIn = _URI;
+	
+	_URI = urlDecode(sIn);
+
 	_fullURI = HOME + _URI;
 }
 

@@ -153,7 +153,7 @@ void    CgiHandle::initEnvVariables()
 		_variable["AUTH TYPE"] = it->second;
 	else
 		_variable["AUTH TYPE"] = "";
-	_variable["CONTENT_LENGTH"] = toString(_request.getContentLength());
+	_variable["CONTENT_LENGTH"] = toString(_request.getBody().size());
 	it = _request.getClientFields().find("content-type");
 	_variable["CONTENT_TYPE"] = "";
 	_variable["GATEWAY_INTERFACE"] = std::string("CGI/1.1");

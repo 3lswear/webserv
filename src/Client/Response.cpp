@@ -103,7 +103,7 @@ std::string	Response::getCgiPass(void)
 	return (_location->cgi_pass);
 }
 
-unsigned int Response::getMaxBodySize(void)
+ssize_t	Response::getMaxBodySize(void)
 {
 	return (_maxBodySize);
 }

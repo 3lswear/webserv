@@ -25,8 +25,8 @@ private:
 
 private:
     std::string     _contentType;
-    unsigned int    _contentLength;
-    unsigned int    _maxBodySize;
+    ssize_t         _contentLength;
+    ssize_t         _maxBodySize;
     std::string     _server;
     std::string     _keepAlive;
     std::string     _date;
@@ -67,7 +67,7 @@ public:
 	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
     std::string                 getFullURI();
-    unsigned    int             getMaxBodySize(void);
+    ssize_t             getMaxBodySize(void);
     bool                        isRedirect(void);
     bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);
