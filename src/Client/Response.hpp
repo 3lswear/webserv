@@ -20,7 +20,6 @@ private:
     std::map<int, std::string>  _errorPages;
     bool                        _Autoindex;
     serverListen                _hostPort;
-    std::string                 _fullURI;
     std::string                 _method;
 
 private:
@@ -73,6 +72,7 @@ public:
     void                        setData(Request, ServerConfig *);
     void                        setData(Request &, ServerConfig *, location *location);
 public:
+    std::string                 _fullURI;
 	void						OpenResponseFile(const char *path);
 	void						OpenErrorFile(int code);
 	void					    initErrorCode(void);

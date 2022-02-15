@@ -36,6 +36,21 @@ int	isDir(std::string path)
 		return (-1);
 	return (-1);
 }
+
+void	copyLocation(location *dest, location *src)
+{
+	dest->autoindex = src->autoindex;
+	dest->cgi_pass = src->cgi_pass;
+	dest->clientBodySize = src->clientBodySize;
+	dest->directoryFile = src->directoryFile;
+	dest->location = src->location;
+	dest->methods = src->methods;
+	dest->redirect = src->redirect;
+	dest->root = src->root;
+	dest->uploadAccept = src->uploadAccept;
+	dest->uploadDir = src->uploadDir;
+}
+
 int			Config::calcLen(std::string &s1, std::string &s2)
 {
 	unsigned long	len = 0;
@@ -68,7 +83,12 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 			tmp = *it;
 			tryLocation = URI.substr(0, tryLen);
 			if (tmp->location == tryLocation)
+			{
+				tmp = new location;
+				copyLocation(tmp, *it);
 				step_1.push_back(tmp);
+				break;
+			}
 			it++;
 		}
 		if (!step_1.empty())
@@ -91,6 +111,8 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 			suffix1 = tmp->location.substr(2);
 			if (suffix1 == suffix)
 			{
+				tmp = new location;
+				copyLocation(tmp, *it);
 				step_2.push_back(tmp);
 				break;
 			}
@@ -104,6 +126,7 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		if(!step_2[1]->cgi_pass.empty())
 		{
 			step_2[0]->cgi_pass = step_2[1]->cgi_pass;
+			delete step_2[1];
 		}
 		return (step_2[0]);
 	}

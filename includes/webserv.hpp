@@ -30,6 +30,7 @@
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <wait.h>
+#include <exception>
 
 #include <netinet/in.h>
 #include <fcntl.h>

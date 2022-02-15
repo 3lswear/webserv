@@ -81,8 +81,9 @@ std::string CgiHandle::executeCgi()
 	int			sO;
 	int			byte_read = 1;
 	std::string body;
+	std::string &reqBody = _request.getBody();
 
-	argv[0] = const_cast<char *>(_response.getCgiPass().data());
+	argv[0] = const_cast<char *>(_response._fullURI.data());
 	argv[1] = NULL;
 	try
 	{
@@ -92,7 +93,6 @@ std::string CgiHandle::executeCgi()
 	{
 		std::cerr << RED << e.what()  << RESET << '\n';
 	}
-	printenv(env);
 	sI = dup(STDIN_FILENO);
 	sO = dup(STDOUT_FILENO);
 
@@ -100,9 +100,7 @@ std::string CgiHandle::executeCgi()
 	FILE *fOt = tmpfile();
 	long	fdin = fileno(fIn);
 	long	fdOut = fileno(fOt);
-	DBOUT <<  BLUE << "in CGI exe" << ENDL;
-	// DBOUT << "BODY[\n" << _request.getBody() << "\n]" << ENDL;
-	write(fdin, _request.getBody().data(), _request.getBody().size());
+	write(fdin, reqBody.data(), reqBody.size());
 	lseek(fdin, 0, SEEK_SET);
 	pid = fork();
 	if (pid == -1)
@@ -115,7 +113,7 @@ std::string CgiHandle::executeCgi()
 		dup2(fdOut, STDOUT_FILENO);
 		execve(_response.getCgiPass().c_str(), argv, env);
 		std::cerr << RED << "Execve error." << RESET << ENDL;
-		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15);
+		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15); 	
 	}
 	else
 	{
@@ -124,9 +122,10 @@ std::string CgiHandle::executeCgi()
 		waitpid(-1, NULL, 0);
 		lseek(fdOut, 0, SEEK_SET);
 
+		byte_read = 1;
 		while (byte_read)
 		{
-			bzero(buffer, BUFFSIZE);
+			memset(buffer, 0, BUFFSIZE + 1);
 			byte_read = read(fdOut, buffer, BUFFSIZE);
 			body.append(buffer, byte_read);
 		}
@@ -147,7 +146,7 @@ void    CgiHandle::initEnvVariables()
 {
 	std::map<std::string, std::string>::iterator    it;
 	std::map<std::string, std::string> tmp1 =  _request.getClientFields();
-	_scriptName = _response.getFullURI().substr(_response.getFullURI().rfind("/"));
+	_scriptName = _response._fullURI.substr(_response._fullURI.rfind("/"));
 	it = tmp1.find("content_type");
 	if (it != tmp1.end())
 		_variable["AUTH TYPE"] = it->second;
@@ -158,10 +157,10 @@ void    CgiHandle::initEnvVariables()
 	_variable["CONTENT_TYPE"] = "";
 	_variable["GATEWAY_INTERFACE"] = std::string("CGI/1.1");
 
-	_variable["SCRIPT_NAME"] = _response.getFullURI();
-	_variable["SCRIPT_FILENAME"] = _response.getFullURI();
+	_variable["SCRIPT_NAME"] = _response._fullURI;
+	_variable["SCRIPT_FILENAME"] = _response._fullURI;
 
-	_variable["PATH_TRANSLATED"] = _response.getFullURI();
+	_variable["PATH_TRANSLATED"] = _request.getURI();
 	_variable["REQUEST_URI"] = _request.getURI();
 	_variable["PATH_INFO"] = _request.getURI();
 	
@@ -184,7 +183,7 @@ void    CgiHandle::initEnvVariables()
 		tmp = getEnvFormat(it->first);
 		_variable["HTTP_" + tmp] = it->second;
 	}
-	printSSmap(_variable);
+	// printSSmap(_variable);
 }
 
 CgiHandle::~CgiHandle()

@@ -107,11 +107,11 @@ ssize_t	Response::getMaxBodySize(void)
 {
 	return (_maxBodySize);
 }
+
 //-------------------------------------------------File---------------------------------------
 
 void Response::OpenResponseFile(const char *path)
 {
-	DBOUT << "in OPEN RESPONSE FILE " << path << ENDL;
 	std::stringstream	ss;
 	std::ifstream		file(path, std::ifstream::in);
 
@@ -213,11 +213,8 @@ std::string	Response::getFullURI(void)
 	}
 	else
 	{
-		DBOUT << "location" << _location->location << ENDL;
 		tmp	= _request.getURI().substr(len);
-		DBOUT << "tmp1 " << RED << tmp << ENDL;
 		tmp = _location->root + tmp;
-		DBOUT << "tmp2" << RED << tmp << ENDL;
 	}
 	if (_request.isDir(tmp) ==  0)
 	{
@@ -327,16 +324,9 @@ void	Response::generate2(serverListen &l)
 		_method = _request.getMethod();
 		_maxBodySize = (_location->clientBodySize > 0) ? _location->clientBodySize : _config->getClientBodySize();
 		if (_maxBodySize > 0)
-			_code = (_request.getRecved() > _maxBodySize) ? 413 : _code;
-		DBOUT << BLUE <<  "max size" << _maxBodySize << ENDL;
-		DBOUT << BLUE <<  "_location size" << _location->clientBodySize << ENDL;
-		DBOUT << BLUE <<  "_config sieze" << _config->getClientBodySize() << ENDL;
-		DBOUT << BLUE <<  "req size " << _request.getContentLength() << ENDL;
-		DBOUT << BLUE <<  "recv size " << _request.getRecved() << ENDL;
+			_code = (_request.getBody().size() > (unsigned long)_maxBodySize) ? 413 : _code;
 	}
 
-	DBOUT << "fullURI " << _fullURI << ENDL;
-	DBOUT << RED << "code is " << _code << ENDL;
 	if (_request.badCode(_code) || (!allowedMethod(_method) && _location->cgi_pass.empty()) || isRedirect())
 	{
 		invalidClient();
@@ -384,6 +374,7 @@ void	Response::methodGet(void)
 		CgiHandle cgi(_request, *this);
 
 		_body = cgi.executeCgi();
+
 		unsigned long	pos = _body.find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{
@@ -410,6 +401,7 @@ void	Response::methodPost(void)
 		CgiHandle cgi(_request, *this);
 
 		_body = cgi.executeCgi();
+		DBOUT << "CGI SIZE BODY " << _body.size() << ENDL;
 		unsigned long	pos = _body.find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{
@@ -558,4 +550,5 @@ std::string	Response::getErrorPage(int code)
 
 Response::~Response()
 {
+	delete _location;
 }

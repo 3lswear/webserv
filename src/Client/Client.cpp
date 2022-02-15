@@ -162,9 +162,6 @@ std::string	Client::generateRespons(void)
 	_to_send_char = new char[len + 1];
 	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
 
-	// DBOUT << "len = " << len << ENDL;
-	// DBOUT << "strlen = " << strlen(_to_send_char) << ENDL;
-	// DBOUT << "content_lenth = " << _request.getContentLength() << ENDL;
 	return (_toSend);
 }
 
