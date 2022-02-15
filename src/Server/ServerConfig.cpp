@@ -90,18 +90,42 @@ void	ServerConfig::setRoot(TOMLMap * data)
 
 
 //--------------------------------------------------Parse-Config---------------------------------------
-
+std::string	ServerConfig::getTypestr(toml_node::e_type type)
+{
+	if (type == toml_node::NUM)
+		return ("NUM");
+	else if (type == toml_node::ARRAY)
+		return ("ARRAY");
+	else if (type == toml_node::BOOL)
+		return ("BOOL");
+	else if (type == toml_node::STRING)
+		return ("STRING");
+	else if (type == toml_node::MAP)
+		return ("MAP");
+	else if (type == toml_node::MAPARRAY)
+		return ("MAPARRAY");
+	else
+		return ("UNKNOWN");
+}
+std::string ServerConfig::getWrongTypeErrorMSG(std::string field, toml_node::e_type expected, toml_node::e_type received)
+{
+	std::string out = "Wrong type specified in " + field + " field, expected "
+		+ getTypestr(expected) + ", but received " + getTypestr(received) + "!";
+	return (out);
+}
 int	ServerConfig::putBodySizeLimit(toml_node *node)
 {
 	if (node->get_type() != toml_node::NUM)
-		return (1);
+		throw ConfigException(getWrongTypeErrorMSG("body_size_limit", toml_node::NUM, node->get_type()));
 	_clientBodySize = node->getNum();
+	if (_clientBodySize < 0)
+		throw ConfigException("Invalid body_size_limit specified!");
 	return (0);
 }
 int	ServerConfig::putErrorPage(toml_node *node)
 {
 	if (node->get_type() != toml_node::MAP)
-		return (1);
+		throw ConfigException(getWrongTypeErrorMSG("error_page", toml_node::MAP, node->get_type()));
 	TOMLMap	*map = node->getMap();
 	TOMLMap::iterator it;
 	std::string s;
@@ -110,7 +134,7 @@ int	ServerConfig::putErrorPage(toml_node *node)
 	while (it != map->end())
 	{
 		if (it->second->get_type() != toml_node::STRING)
-			return (1);
+			throw ConfigException(getWrongTypeErrorMSG("error_page path", toml_node::STRING, node->get_type()));
 		s = it->first;
 		_errorPages[atoi(s.c_str())] = *it->second->getString();
 		++it;
@@ -120,22 +144,27 @@ int	ServerConfig::putErrorPage(toml_node *node)
 int	ServerConfig::putHost(toml_node *node)
 {
 	if (node->get_type() != toml_node::STRING)
-		return (1);
+		throw ConfigException(getWrongTypeErrorMSG("host", toml_node::STRING, node->get_type()));
 	_host = *node->getString();
+	int	ret = inet_addr(_host.c_str());
+	if (ret == -1)
+		throw ConfigException("Invalid host specified!");
 	return (0);
 }
 int	ServerConfig::putName(toml_node *node)
 {
 	if (node->get_type() != toml_node::STRING)
-		return (1);
+		throw ConfigException(getWrongTypeErrorMSG("server_name", toml_node::STRING, node->get_type()));
 	_serverName = *node->getString();
 	return (0);
 }
 int	ServerConfig::putPort(toml_node *node)
 {
 	if (node->get_type() != toml_node::NUM)
-		return (1);
+		throw ConfigException(getWrongTypeErrorMSG("server_name", toml_node::NUM, node->get_type()));
 	_port = node->getNum();
+	if (_port < 0 || _port > 65536)
+		throw ConfigException("Invalid port specified!");
 	return (0);
 }
 
@@ -170,62 +199,61 @@ int	ServerConfig::putLocation(toml_node *node)
 			if (it1->first == "location")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					continue;
+					throw ConfigException(getWrongTypeErrorMSG("location", toml_node::STRING, it1->second->get_type()));
 				tmp->location = *it1->second->getString();
 			}
 			else if (it1->first == "root")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("root", toml_node::STRING, it1->second->get_type()));
 				tmp->root = *it1->second->getString();
 			}
 			else if (it1->first == "autoindex")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("autoindex", toml_node::BOOL, it1->second->get_type()));
 				tmp->autoindex = it1->second->getBool();
 			}
 			else if (it1->first == "upload_accept")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("upload_accept", toml_node::BOOL, it1->second->get_type()));
 				tmp->uploadAccept = it1->second->getBool();
 			}
 			else if (it1->first == "upload_dir")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("upload_dir", toml_node::STRING, it1->second->get_type()));
 				tmp->uploadDir = *it1->second->getString();	
 			}
 			else if (it1->first == "cgi_pass")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("cgi_pass", toml_node::STRING, it1->second->get_type()));
 				tmp->cgi_pass = *it1->second->getString();	
 			}
 			else if (it1->first == "body_size_limit")
 			{
-				DBOUT << "BodySize in locaton" << ENDL;
 				if (it1->second->get_type() != toml_node::NUM)
-					continue;
+					throw ConfigException(getWrongTypeErrorMSG("body_size_limit", toml_node::NUM, it1->second->get_type()));
 				tmp->clientBodySize = it1->second->getNum();
 			}
 			else if (it1->first == "directory_file")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("directory_file", toml_node::STRING, it1->second->get_type()));
 				tmp->directoryFile = *it1->second->getString();	
 			}
 			else if (it1->first == "methods")
 			{
 				if (it1->second->get_type() != toml_node::ARRAY)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("methods", toml_node::ARRAY, it1->second->get_type()));
 				Array = *it1->second->getArray();
 				it2 = Array.begin();
 				while (it2 != Array.end())
 				{
 					if ((*it2)->get_type() != toml_node::STRING)
-						continue ;
+						throw ConfigException(getWrongTypeErrorMSG("methods elem", toml_node::STRING, (*it2)->get_type()));
 					tmp->methods.push_back(*((*it2)->getString()));
 					++it2;
 				}
@@ -233,11 +261,17 @@ int	ServerConfig::putLocation(toml_node *node)
 			else if (it1->first == "redirect")
 			{
 				if (it1->second->get_type() != toml_node::ARRAY)
-					continue ;
+					throw ConfigException(getWrongTypeErrorMSG("redirect", toml_node::ARRAY, it1->second->get_type()));
 				Array = *it1->second->getArray();
+				if (Array.size() != 2)
+					throw ConfigException("The redirect field specified the wrong number of arguments!");
 				it2 = Array.begin();
+				if ((*it2)->get_type() != toml_node::STRING)
+					throw ConfigException(getWrongTypeErrorMSG("redirect elem", toml_node::STRING, (*it2)->get_type()));
 				str = *(*it2)->getString();
 				++it2;
+				if ((*it2)->get_type() != toml_node::STRING)
+					throw ConfigException(getWrongTypeErrorMSG("redirect elem", toml_node::STRING, (*it2)->get_type()));
 				tmp->redirect.insert(std::make_pair(atoi(str.c_str()), *(*it2)->getString()));
 			}
 			else
@@ -278,6 +312,58 @@ void	ServerConfig::fillFields(void)
 	{
 		ret = identify(block);
 		++block;
+	}
+	checkConfig();
+}
+
+bool	ServerConfig::checkFileAndDir(location *loc)
+{
+	std::string	root = loc->root;
+	std::string	upload_dir = loc->uploadDir;
+	std::string	directory_file = loc->directoryFile;
+	DIR *dir;
+	if (!root.empty())
+	{
+    	dir = opendir(root.c_str());
+		if (dir == NULL)
+			throw ConfigException("Directory " + root + " " + strerror(errno) + "!");
+		closedir(dir);
+	}
+	if (!upload_dir.empty())
+	{
+		dir = opendir(upload_dir.c_str());
+		if (dir == NULL)
+			throw ConfigException("Directory " + upload_dir + " " + strerror(errno) + "!");
+		closedir(dir);
+	}
+	if (!directory_file.empty())
+	{
+		directory_file = root + "/" + directory_file;
+		std::ofstream	file(directory_file.c_str(), std::ios::out | std::ios::binary);
+		if (!file.is_open())
+			throw ConfigException("File " + directory_file + " " + strerror(errno) + "!");
+		file.close();
+	}
+	return (true);
+}
+
+void	ServerConfig::checkConfig(void)
+{
+	if (_host.empty())
+		throw	ConfigException("Host field not set!");
+	else if (_port == 0)
+		throw	ConfigException("Port field not set!");
+	std::vector<location *>::iterator	it;
+
+	it = _locations.begin();
+	location *tmp;
+	while (it != _locations.end())
+	{
+		tmp = *it;
+		if (tmp->location.empty())
+			throw	ConfigException("Location field not set!");
+		checkFileAndDir(tmp);
+		it++;
 	}
 }
 

@@ -2,8 +2,9 @@
 #define SERVERCONFIG_HPP
 
 #include "webserv.hpp"
+#include "ConfigException.hpp"
 #include "parse.hpp"
-
+ 
 struct location
 {
 	std::string					location;
@@ -47,6 +48,7 @@ public:
 	void	setErrorPages(std::map<int, std::string>);
 	void	setLocations(std::vector<location *>);
 	void	setRoot(TOMLMap *);
+	void	checkConfig(void);
 
 	std::string					&getServerName(void);
 	std::string					&getHost(void);
@@ -67,11 +69,15 @@ private:
 	int	putName(toml_node *);
 	int	putPort(toml_node *);
 	int	putLocation(toml_node *);
+	std::string	getTypestr(toml_node::e_type);
+	std::string getWrongTypeErrorMSG(std::string field, toml_node::e_type expected, toml_node::e_type received);
+	bool		checkFileAndDir(location *);
 
 public:
 	void	fillFields(void);
 	void	printFields(void);
-	
+
+
 	~ServerConfig();
 };
 

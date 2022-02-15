@@ -1,6 +1,7 @@
 #include "webserv.hpp"
 #include "parse.hpp"
 #include "Server.hpp"
+#include "ConfigException.hpp"
 
 
 int	main(int argc, char **argv)
@@ -19,10 +20,10 @@ int	main(int argc, char **argv)
 			server.readConfig(path);
 		server.start();
 	}
-	catch(const std::exception& e)
+	catch(const ConfigException& e)
 	{
-		std::cerr << RED << e.what() << '\n' << ENDL;
-	}
 		server.end();
+		std::cerr << RED << e.getMessage() << '\n' << ENDL;
+	}
 	
 }
