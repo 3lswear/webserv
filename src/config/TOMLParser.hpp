@@ -6,6 +6,7 @@
 #include "Tokenizer.hpp"
 #include "TOMLNode.hpp"
 #include <string>
+#include <memory>
 
 namespace config
 {
@@ -13,7 +14,8 @@ namespace config
 	{
 		private:
 			std::fstream file;
-			TOMLMap *root; //root of TOML tree
+			std::auto_ptr<TOMLMap> root;
+			// TOMLMap *root; //root of TOML tree
 			/* toml_node *current; //node currently being parsed */
 			Tokenizer tokenizer;
 
@@ -26,7 +28,8 @@ namespace config
 			TOMLParser(char *filename);
 			TOMLMap *parse(void);
 
-			toml_node *parseMap(void);
+			// toml_node *parseMap(void);
+			std::auto_ptr<toml_node> parseMap(void);
 			void processMap(void);
 
 			void processMapArray(void);

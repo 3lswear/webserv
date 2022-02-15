@@ -37,7 +37,7 @@ namespace config
 		try { current = tokenizer.getToken(); }
 		catch (Tokenizer::NoMoreTokens &e)
 		{
-			std::cerr << e.what() << std::endl;
+			DBOUT << "got no more tokens" << ENDL;
 			return;
 		}
 		if (current.type == MAP_DECL)
@@ -45,7 +45,7 @@ namespace config
 			if (tokenizer.getToken().type != NEWLINE)
 				throw ExpectedToken("newline", current.value);
 				// throw std::logic_error("no newline after MAP_DECL");
-			map_node = parseMap();
+			map_node = parseMap().release();
 		}
 		else
 			// throw std::logic_error("unexpected token in processMap");
@@ -57,15 +57,14 @@ namespace config
 
 		full_name = split_name(current.value);
 		
-		put_to_subtable(root, full_name, map_node, toml_node::MAP);
+		put_to_subtable(root.get(), full_name, map_node, toml_node::MAP);
 
 	}
 
-	toml_node *TOMLParser::parseMap(void)
+	std::auto_ptr<toml_node> TOMLParser::parseMap(void)
 	{
 		/* std::cerr << "Parsing map" << std::endl; */
-		toml_node *node = new toml_node;
-		TOMLMap *mapObject = new TOMLMap;
+		std::auto_ptr<TOMLMap> mapObject(new TOMLMap);
 		bool completed = false;
 		while (!completed)
 		{
@@ -75,7 +74,7 @@ namespace config
 				try { nextToken = tokenizer.getToken(); }
 				catch (Tokenizer::NoMoreTokens &e)
 				{
-					std::cerr << e.what() << std::endl;
+					DBOUT << "got no more tokens" << ENDL;
 					break;
 				}
 				if (nextToken.type == MAPARRAY_DECL)
@@ -153,7 +152,10 @@ namespace config
 			// 	throw std::logic_error("parseMap: no more tokens");
 			// }
 		}
-		node->setObject(mapObject);
+
+		// toml_node *node = new toml_node;
+		std::auto_ptr<toml_node> node(new toml_node);
+		node->setObject(mapObject.release());
 		return (node);
 	}
 
@@ -161,13 +163,14 @@ namespace config
 	{
 
 		/* std::cerr << "Parsing MapArray" << std::endl; */
-		toml_node *map_node;
+		// toml_node *map_node;
+		std::auto_ptr<toml_node> map_node;
 		s_token current;
 
 		try { current = tokenizer.getToken(); }
 		catch (Tokenizer::NoMoreTokens &e)
 		{
-			std::cerr << e.what() << std::endl;
+			DBOUT << "got no more tokens" << ENDL;
 			return;
 		}
 		if (current.type == MAPARRAY_DECL)
@@ -185,19 +188,19 @@ namespace config
 
 		full_name = split_name(current.value);
 
-		put_to_subtable(root, full_name, map_node, toml_node::MAPARRAY);
+		put_to_subtable(root.get(), full_name, map_node.release(), toml_node::MAPARRAY);
 
 	}
 
 	toml_node *TOMLParser::parseString(void)
 	{
-		/* toml_node *node; */
-		toml_node *node = new toml_node;
 		std::string *sValue;
 
 		/* std::cerr << "Parsing string" << std::endl; */
 		s_token token = tokenizer.getToken();
 		sValue = new std::string(token.value);
+
+		toml_node *node = new toml_node;
 		node->setString(sValue);
 
 		return (node);
@@ -205,12 +208,13 @@ namespace config
 
 	toml_node *TOMLParser::parseNumber(void)
 	{
-		toml_node *node = new toml_node;
 		int value;
 
 		/* std::cerr << "Parsing number" << std::endl; */
 		s_token token = tokenizer.getToken();
 		value = std::atoi(token.value.c_str());
+
+		toml_node *node = new toml_node;
 		node->setNumber(value);
 
 		return (node);
@@ -287,7 +291,6 @@ namespace config
 
 	toml_node *TOMLParser::parseBool(void)
 	{
-		toml_node *node = new toml_node;
 		bool value;
 
 		/* std::cerr << "Parsing bool" << std::endl; */
@@ -298,6 +301,8 @@ namespace config
 			value = false;
 		else
 			throw std::invalid_argument("Unexpected bool value");
+
+		toml_node *node = new toml_node;
 		node->setBool(value);
 
 		return (node);
@@ -315,7 +320,9 @@ namespace config
 	TOMLMap *TOMLParser::parse(void)
 	{
 		/* std::cerr << "Parsing ROOT" << std::endl; */
-		root = new TOMLMap;
+		// root = new TOMLMap;
+		// std::auto_ptr<TOMLMap> root(new TOMLMap);
+		root.reset(new TOMLMap);
 		bool completed = false;
 		while (!completed)
 		{
@@ -325,7 +332,7 @@ namespace config
 				try { current = tokenizer.getToken(); }
 				catch (Tokenizer::NoMoreTokens &e)
 				{
-					std::cerr << e.what() << std::endl;
+					DBOUT << "got no more tokens" << ENDL;
 					break;
 				}
 				if (current.type == MAPARRAY_DECL)
@@ -402,7 +409,7 @@ namespace config
 				break;
 			}
 		}
-		return (root);
+		return (root.release());
 	}
 
 	std::vector<std::string> TOMLParser::split_name(std::string name)

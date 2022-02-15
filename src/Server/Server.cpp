@@ -37,6 +37,7 @@ void Server::print_epoll_events(unsigned int events)
 void	Server::readConfig(char *filename)
 {
 	TOMLMap *root = NULL;
+		// root = parse(filename);
 	try
 	{
 		root = parse(filename);
@@ -49,7 +50,7 @@ void	Server::readConfig(char *filename)
 		// root->clear();
 		// delete root;
 		// clean_parsed(root);
-		return;
+		exit(-1);
 	}
 	catch (config::Tokenizer::InvalidToken &e)
 	{
@@ -58,7 +59,7 @@ void	Server::readConfig(char *filename)
 		// clean_parsed(root);
 		// root->clear();
 		delete root;
-		return;
+		exit(-1);
 	}
 
 	/* TOMLMap *map; */
@@ -148,7 +149,7 @@ void Server::readSocket(Client &client, int fd)
 	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
 }
 
-int Server::delete_client(std::map<int,Client *> &client_map, int fd)
+int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 {
 	int ret;
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
@@ -430,9 +431,9 @@ void Server::clean_parsed(TOMLMap *root)
 	DBOUT << ">>> cleaning up: <<<" << std::endl;
 	for (it = root->begin(); it != root->end(); ++it)
 	{
-		DBOUT << RED << it->first
-			<< ": " << GREEN
-			<< *(it->second->toString());
+		// DBOUT << RED << it->first
+		// 	<< ": " << GREEN
+		// 	<< *(it->second->toString());
 
 		clean_generic(it->second);
 		/* delete it->second; */
