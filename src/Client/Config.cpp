@@ -135,7 +135,11 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 	{
 		tmp = *it;
 		if (tmp->location == "/")
+		{
+			tmp = new location;
+			copyLocation(tmp, *it);
 			return (tmp);
+		}
 		it++;
 	}
 	

@@ -228,6 +228,8 @@ std::string	Response::getFullURI(void)
 	else
 		ret = tmp;
 
+	DBOUT << PINK << "location " << _location->location << ENDL;
+	DBOUT << PINK << "fullURI " << ret << ENDL;
 	return (ret);
 }
 
@@ -414,14 +416,6 @@ void	Response::methodPost(void)
 				_contentType = tmp.substr(type + 14, tmp.find("\r\n", type+14));
 			_body.erase(_body.begin(), _body.begin() + pos + 4);
 		}
-	}
-	else
-	{
-		std::ofstream outfile(_fullURI.c_str(), std::ios::out | std::ios::binary);
-	
-		outfile.write(_request.getBody().data(), _request.getBody().size());
-		outfile.close();
-		_code = 204;
 	}
 	setHeaderBlocks();
 	generateHeader();
