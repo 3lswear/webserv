@@ -13,7 +13,7 @@ Request::Request()
 	_received = 0;
 	_headerSize = 0;
 	_lifeTime = 5;
-
+	_body = new std::string;
 }
 
 Request::Request(char *str)
@@ -28,6 +28,8 @@ Request::Request(char *str)
 	_contentLength = 0;
 	_headerSize = 0;
 	_lifeTime = 5;
+	_body = new std::string;
+
 }
 
 //-------------------------------------------------Get/Set---------------------------------------
@@ -36,7 +38,7 @@ std::string					&Request::getURI(void)
 {
     return (_URI);
 }
-std::string					&Request::getBody(void)
+std::string					*Request::getBody(void)
 {
     return (_body);
 }
@@ -230,13 +232,13 @@ void	Request::splitData(std::string	&data)
 		return ;
 	else if (_chunked)
 	{
-		_body.insert(_body.end(), str.begin(), str.end());
-		if (checkEnd(_body, "0\r\n\r\n") == 0)
+		_body->insert(_body->end(), str.begin(), str.end());
+		if (checkEnd(*_body, "0\r\n\r\n") == 0)
 			_body_ok = true;
 	}
 	else if (_head_ok && !_body_ok)
 	{
-		_body.insert(_body.end(), str.begin(), str.end());
+		_body->insert(_body->end(), str.begin(), str.end());
 		if ((_received - _headerSize) == _contentLength)
 		{
 			_body_ok = true;
@@ -244,7 +246,7 @@ void	Request::splitData(std::string	&data)
 	}
 	if (_head_ok && _body_ok && _chunked)
 	{
-		std::string	&tmp = _body;
+		std::string	&tmp = *_body;
 		std::string	subchunk = tmp.substr(0, 100);
 		std::string	newBody = "";
 		int			chunksize = strtol(subchunk.c_str(), NULL, 16);
@@ -258,7 +260,7 @@ void	Request::splitData(std::string	&data)
 			subchunk = tmp.substr(i, 100);
 			chunksize = strtol(subchunk.c_str(), NULL, 16);
 		}
-		_body = newBody;
+		*_body = newBody;
 	}
 }
 
@@ -403,7 +405,6 @@ void    Request::clear(void)
     _ret = 200;
     _row = 0;
     _URI = "";
-    _body = "";
     _host = "";
     _query = "";
     _method = "";

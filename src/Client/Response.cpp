@@ -6,18 +6,26 @@ Response::Response()
 {
 	initErrorCode();
 	_Autoindex = true;
+	_body = new std::string;
+	_header = new std::string;
 	_code = 200;
 }
 
 //-------------------------------------------------GET/SET---------------------------------------
 
+void		Response::freeData(void)
+{
+	delete _body;
+	delete _header;
+}
+
 std::string     Response::getHeader(void)
 {
-	return (_header);
+	return (*_header);
 }
 std::string     Response::getBody(void)
 {
-	return (_body);
+	return (*_body);
 }
 
 void            Response::setData(Request request, ServerConfig *config)
@@ -59,7 +67,7 @@ void	Response::setContentType(void)
 
 void	Response::setContentLength()
 {
-	_contentLength = _body.size();
+	_contentLength = _body->size();
 }
 
 void	Response::setServer(void)
@@ -118,7 +126,7 @@ void Response::OpenResponseFile(const char *path)
 	if (file.is_open())
 	{	
 		ss << file.rdbuf();
-		_body = ss.str();
+		*_body = ss.str();
 		file.close();
 	}
 	else
@@ -142,14 +150,14 @@ void Response::OpenErrorFile(int code)
 		if (file.is_open())
 		{	
 			ss << file.rdbuf();
-			_body = ss.str();
+			*_body = ss.str();
 			file.close();
 		}
 		else
-			_body = getErrorPage(code);
+			*_body = getErrorPage(code);
 	}
 	else
-		_body = getErrorPage(code);
+		*_body = getErrorPage(code);
 }
 
 std::string		Response::getContentType(void)
@@ -239,8 +247,8 @@ void	Response::generateBody(void)
 	{
 		if (_Autoindex)
 		{
-			_body = Autoindex::getPage(_request.getURI(), _fullURI, _request.getHost(), _listen.port);
-			if (_body.empty())
+			*_body = Autoindex::getPage(_request.getURI(), _fullURI, _request.getHost(), _listen.port);
+			if (_body->empty())
 				_code = 404;
 		}
 		else
@@ -292,7 +300,7 @@ void	Response::generateHeader(void)
 	if (!_locationSTR.empty())
 		ss << "Location: " << _locationSTR << "\r\n";
 	ss << "\r\n";
-	_header = ss.str();
+	*_header = ss.str();
 }
 
 void    Response::generate()
@@ -326,7 +334,7 @@ void	Response::generate2(serverListen &l)
 		_method = _request.getMethod();
 		_maxBodySize = (_location->clientBodySize > 0) ? _location->clientBodySize : _config->getClientBodySize();
 		if (_maxBodySize > 0)
-			_code = (_request.getBody().size() > (unsigned long)_maxBodySize) ? 413 : _code;
+			_code = (_request.getBody()->size() > (unsigned long)_maxBodySize) ? 413 : _code;
 	}
 
 	if (_request.badCode(_code) || (!allowedMethod(_method) && _location->cgi_pass.empty()) || isRedirect())
@@ -375,19 +383,19 @@ void	Response::methodGet(void)
 	{
 		CgiHandle cgi(_request, *this);
 
-		_body = cgi.executeCgi();
+		*_body = cgi.executeCgi();
 
-		unsigned long	pos = _body.find("\r\n\r\n");
+		unsigned long	pos = _body->find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{
-			std::string	tmp = _body.substr(0, pos);
+			std::string	tmp = _body->substr(0, pos);
 			unsigned long stat = tmp.find("Status: ");
 			unsigned long type = tmp.find("Content-type: ");
 			if (stat != std::string::npos)
 				_code = atoi(tmp.substr(stat + 8, 3).c_str());
 			if (type != std::string::npos)
 				_contentType = tmp.substr(type + 14, tmp.find("\r\n", type+14));
-			_body.erase(_body.begin(), _body.begin() + pos + 4);
+			_body->erase(_body->begin(), _body->begin() + pos + 4);
 		}
 	}
 	else
@@ -402,19 +410,19 @@ void	Response::methodPost(void)
 	{
 		CgiHandle cgi(_request, *this);
 
-		_body = cgi.executeCgi();
-		DBOUT << "CGI SIZE BODY " << _body.size() << ENDL;
-		unsigned long	pos = _body.find("\r\n\r\n");
+		*_body = cgi.executeCgi();
+		DBOUT << "CGI SIZE BODY " << _body->size() << ENDL;
+		unsigned long	pos = _body->find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{
-			std::string	tmp = _body.substr(0, pos);
+			std::string	tmp = _body->substr(0, pos);
 			unsigned long stat = tmp.find("Status: ");
 			unsigned long type = tmp.find("Content-type: ");
 			if (stat != std::string::npos)
 				_code = atoi(tmp.substr(stat + 8, 3).c_str());
 			if (type != std::string::npos)
 				_contentType = tmp.substr(type + 14, tmp.find("\r\n", type+14));
-			_body.erase(_body.begin(), _body.begin() + pos + 4);
+			_body->erase(_body->begin(), _body->begin() + pos + 4);
 		}
 	}
 	else
@@ -434,7 +442,7 @@ void	Response::methodPut(void)
 		_code = 403;
 	else
 	{
-		file.write(_request.getBody().data(), _request.getBody().size());
+		file.write(_request.getBody()->data(), _request.getBody()->size());
 	}
 	file.close();
 	setHeaderBlocks();

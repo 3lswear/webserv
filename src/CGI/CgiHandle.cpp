@@ -81,7 +81,6 @@ std::string CgiHandle::executeCgi()
 	int			sO;
 	int			byte_read = 1;
 	std::string body;
-	std::string &reqBody = _request.getBody();
 
 	argv[0] = const_cast<char *>(_response._fullURI.data());
 	argv[1] = NULL;
@@ -100,7 +99,7 @@ std::string CgiHandle::executeCgi()
 	FILE *fOt = tmpfile();
 	long	fdin = fileno(fIn);
 	long	fdOut = fileno(fOt);
-	write(fdin, reqBody.data(), reqBody.size());
+	write(fdin, _request.getBody()->data(), _request.getBody()->size());
 	lseek(fdin, 0, SEEK_SET);
 	pid = fork();
 	if (pid == -1)
@@ -152,7 +151,7 @@ void    CgiHandle::initEnvVariables()
 		_variable["AUTH TYPE"] = it->second;
 	else
 		_variable["AUTH TYPE"] = "";
-	_variable["CONTENT_LENGTH"] = toString(_request.getBody().size());
+	_variable["CONTENT_LENGTH"] = toString(_request.getBody()->size());
 	it = _request.getClientFields().find("content-type");
 	_variable["CONTENT_TYPE"] = "";
 	_variable["GATEWAY_INTERFACE"] = std::string("CGI/1.1");

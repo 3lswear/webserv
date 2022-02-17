@@ -10,8 +10,8 @@ class Response
 {
 private:
     serverListen    _listen;
-    std::string     _body;
-    std::string     _header;
+    std::string     *_body;
+    std::string     *_header;
     Request         _request;
     ServerConfig    *_config;
     location        *_location;
@@ -78,6 +78,7 @@ public:
 	void					    initErrorCode(void);
     void                        generate();
     void                        generate2(serverListen &);
+    void                        freeData(void);
     Response();
     ~Response();
 

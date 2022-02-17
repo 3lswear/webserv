@@ -26,7 +26,7 @@ private:
 	std::string	_stringBUF;
 	std::string	_bodyToSend;
 	std::string	_headerToSend;
-	std::string	_toSend;
+	std::string	*_toSend;
 	char *_to_send_char;
 	std::map<std::string, std::string> _errorCode;
 

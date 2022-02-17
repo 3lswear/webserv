@@ -20,7 +20,7 @@ private:
 
 	std::string _URI;
 	std::string	_head;
-	std::string	_body;
+	std::string	*_body;
 	std::string	_host;
     std::string _query;
 	std::string _method;
@@ -37,7 +37,7 @@ private:
 	bool			_chunked;
 public:
 	std::string					&getURI(void);
-	std::string					&getBody(void);
+	std::string					*getBody(void);
 	std::string					&getHost(void);
 	std::string					&getQuery(void);
 	std::string					&getMethod(void);
