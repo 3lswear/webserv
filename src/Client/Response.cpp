@@ -417,6 +417,8 @@ void	Response::methodPost(void)
 			_body.erase(_body.begin(), _body.begin() + pos + 4);
 		}
 	}
+	else
+		_code = 204;
 	setHeaderBlocks();
 	generateHeader();
 	DBOUT << GREEN << "POST method called" << ENDL;

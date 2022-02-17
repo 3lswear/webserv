@@ -148,7 +148,7 @@ void Server::readSocket(Client &client, int fd)
 int Server::delete_client(std::map<int,Client *> &client_map, int fd)
 {
 	int ret;
-	client_map[fd]->printClientInfo();
+	// client_map[fd]->printClientInfo();
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	close(fd);
 	client_map[fd]->clear();
