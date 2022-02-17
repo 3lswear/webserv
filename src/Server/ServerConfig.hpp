@@ -72,6 +72,9 @@ private:
 	std::string	getTypestr(toml_node::e_type);
 	std::string getWrongTypeErrorMSG(std::string field, toml_node::e_type expected, toml_node::e_type received);
 	bool		checkFileAndDir(location *);
+	int			isFile(std::string path);
+	int			isDir(std::string path);
+
 
 public:
 	void	fillFields(void);

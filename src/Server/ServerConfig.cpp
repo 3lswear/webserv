@@ -316,33 +316,59 @@ void	ServerConfig::fillFields(void)
 	checkConfig();
 }
 
+int	ServerConfig::isFile(std::string path)
+{
+	struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+			return (-1);
+		else if (s.st_mode & S_IFREG)
+			return (0);
+	}
+	else
+		return (-1);
+	return (-1);
+}
+
+int	ServerConfig::isDir(std::string path)
+{
+	struct stat s;
+
+	if (stat(path.c_str(), &s) == 0)
+	{
+		if (s.st_mode & S_IFDIR)
+			return (0);
+		else if (s.st_mode & S_IFREG)
+			return (-1);
+	}
+	else
+		return (-1);
+	return (-1);
+}
+
 bool	ServerConfig::checkFileAndDir(location *loc)
 {
 	std::string	root = loc->root;
 	std::string	upload_dir = loc->uploadDir;
 	std::string	directory_file = loc->directoryFile;
-	DIR *dir;
+
 	if (!root.empty())
 	{
-    	dir = opendir(root.c_str());
-		if (dir == NULL)
-			throw ConfigException("Directory " + root + " " + strerror(errno) + "!");
-		closedir(dir);
+		if (isDir(root) != 0)
+			throw ConfigException("Directory " + root + " not found!");
 	}
 	if (!upload_dir.empty())
 	{
-		dir = opendir(upload_dir.c_str());
-		if (dir == NULL)
-			throw ConfigException("Directory " + upload_dir + " " + strerror(errno) + "!");
-		closedir(dir);
+		if (isDir(upload_dir) != 0)
+			throw ConfigException("Directory " + upload_dir + " not found!");
 	}
 	if (!directory_file.empty())
 	{
 		directory_file = root + "/" + directory_file;
-		std::ofstream	file(directory_file.c_str(), std::ios::out | std::ios::binary);
-		if (!file.is_open())
-			throw ConfigException("File " + directory_file + " " + strerror(errno) + "!");
-		file.close();
+		if (isFile(directory_file) != 0)
+			throw ConfigException("File " + directory_file +  " not found!");
 	}
 	return (true);
 }
