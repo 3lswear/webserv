@@ -2,9 +2,9 @@ NAME = webserv
 
 CXX = clang++
 
-SANFLAGS = -fsanitize=address
+# SANFLAGS = -fsanitize=address
 
-# SANFLAGS = -fsanitize=leak
+SANFLAGS = -fsanitize=leak
 
 DEBUGFLAGS = -g -fno-limit-debug-info
 

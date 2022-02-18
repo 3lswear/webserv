@@ -188,6 +188,12 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 		<< ENDL;
 }
 
+void	sigHandler(int sig)
+{
+	if (sig == SIGINT)
+		throw ConfigException("SIGINT called. Server shutdown!");
+}
+
 void	Server::start(void)
 {
 	/* Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
@@ -198,7 +204,8 @@ void	Server::start(void)
 
 	unsigned int client_events = EPOLLIN;
 	unsigned int server_events = EPOLLIN;
-	
+
+	std::signal(SIGINT, sigHandler);
 	_epoll_fd = epoll_create(1337);
 
 
@@ -301,6 +308,7 @@ void	Server::start(void)
 					if (client_map[fd]->allSended())
 					{
 						delete_client(client_map, fd);
+						// throw ConfigException("END!");
 					}
 				}
 			}
@@ -428,9 +436,9 @@ void Server::clean_parsed(TOMLMap *root)
 	DBOUT << ">>> cleaning up: <<<" << std::endl;
 	for (it = root->begin(); it != root->end(); ++it)
 	{
-		DBOUT << RED << it->first
-			<< ": " << GREEN
-			<< *(it->second->toString());
+		// DBOUT << RED << it->first
+		// 	<< ": " << GREEN
+		// 	<< *(it->second->toString());
 
 		clean_generic(it->second);
 		/* delete it->second; */
