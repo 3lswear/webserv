@@ -184,8 +184,10 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	_to_send_char = new char[len + 1];
 	std::memcpy(_to_send_char, _toSend->c_str(), len + 1);
 
-	delete	_request.getBody();
+	
 	delete _toSend;
+	if (_request.getBody() != NULL)
+		_request.freeData();
 	_response.freeData();
 	return (_headerToSend);
 }

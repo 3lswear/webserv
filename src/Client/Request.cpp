@@ -13,7 +13,7 @@ Request::Request()
 	_received = 0;
 	_headerSize = 0;
 	_lifeTime = 5;
-	_body = new std::string;
+	_body = NULL;
 }
 
 Request::Request(char *str)
@@ -28,11 +28,16 @@ Request::Request(char *str)
 	_contentLength = 0;
 	_headerSize = 0;
 	_lifeTime = 5;
-	_body = new std::string;
+	_body = NULL;
 
 }
 
 //-------------------------------------------------Get/Set---------------------------------------
+
+void						Request::freeData(void)
+{
+	delete _body;
+}
 
 std::string					&Request::getURI(void)
 {
@@ -226,11 +231,13 @@ void	Request::splitData(std::string	&data)
 			if ((_contentLength == 0 && !_chunked) || (_method == "GET"
 				|| _method == "DELETE" || _method == "HEAD"))
 				_body_ok = true;
+			else
+				_body = new std::string;
 		}
 	}
 	if (badCode(_ret))
 		return ;
-	else if (_chunked)
+	else if (_chunked && !_body_ok)
 	{
 		_body->insert(_body->end(), str.begin(), str.end());
 		if (checkEnd(*_body, "0\r\n\r\n") == 0)

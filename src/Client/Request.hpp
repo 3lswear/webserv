@@ -81,6 +81,7 @@ public:
 	void						copyFromMap(void);
 	void						clear(void);
 	void						splitData(std::string	&);
+	void						freeData(void);
 
 	void						increaseRecvCounter(unsigned int n);
 	~Request();

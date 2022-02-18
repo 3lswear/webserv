@@ -333,7 +333,7 @@ void	Response::generate2(serverListen &l)
 		_fullURI = getFullURI();
 		_method = _request.getMethod();
 		_maxBodySize = (_location->clientBodySize > 0) ? _location->clientBodySize : _config->getClientBodySize();
-		if (_maxBodySize > 0)
+		if (_maxBodySize > 0 && _request.getBody() != NULL)
 			_code = (_request.getBody()->size() > (unsigned long)_maxBodySize) ? 413 : _code;
 	}
 
