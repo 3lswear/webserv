@@ -37,11 +37,12 @@ void Server::print_epoll_events(unsigned int events)
 //----------------------------------------------Configuration-----------------------------------------------------------------------------------
 void	Server::readConfig(char *filename)
 {
-	TOMLMap *root = NULL;
-		// root = parse(filename);
+	// TOMLMap *root = NULL;
+	// root = parse(filename);
+	config::TOMLParser parser(filename);
 	try
 	{
-		root = parse(filename);
+		parser.parse();
 
 	}
 	catch (std::domain_error &e)
@@ -71,7 +72,7 @@ void	Server::readConfig(char *filename)
 	TOMLMapArray::iterator	it;
 
 
-	arr = root->find("server")->second->getMapArray();
+	arr = parser.root->find("server")->second->getMapArray();
 	it = arr->begin();
 
 	while (it != arr->end())
