@@ -33,8 +33,6 @@ class Server
 		void readSocket(Client &client, int fd);
 		int delete_client(std::map<int,Client *> &map, int fd);
 
-		static void clean_generic(toml_node *node);
-		static void clean_parsed(TOMLMap *root);
 
 		enum e_req_status
 		{
