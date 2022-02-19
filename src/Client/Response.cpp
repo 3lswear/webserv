@@ -6,8 +6,8 @@ Response::Response()
 {
 	initErrorCode();
 	_Autoindex = true;
-	_body = new std::string;
-	_header = new std::string;
+	_body = NULL;
+	_header = NULL;
 	_code = 200;
 }
 
@@ -15,7 +15,8 @@ Response::Response()
 
 void		Response::freeData(void)
 {
-	delete _body;
+	if (_body != NULL)
+		delete _body;
 	delete _header;
 }
 
@@ -290,6 +291,7 @@ bool	Response::allowedMethod(std::string &method)
 }
 void	Response::generateHeader(void)
 {
+	_header = new std::string;
 	std::stringstream ss;
 	std::string tmp;
 
@@ -298,8 +300,8 @@ void	Response::generateHeader(void)
 		ss << "Content-Type: " << _contentType << "\r\n";
 	ss << "Content-Length: " << _contentLength << "\r\n";
 	ss << "Server: " << _server << "\r\n";
-	if (!_keepAlive.empty())
-		ss << "Keep-Alive: " <<_keepAlive << "\r\n";
+	// if (!_keepAlive.empty())
+	// 	ss << "Keep-Alive: " <<_keepAlive << "\r\n";
 	ss << "Date: " << _date << "\r\n";
 	if (!_cacheControl.empty())
 		ss << "Cache-Control: " << _cacheControl << "\r\n";
@@ -374,6 +376,7 @@ bool	Response::isRedirect()
 
 void	Response::invalidClient(void)
 {
+	_body = new std::string;
 	if (!isRedirect())
 		OpenErrorFile(_code);
 	setHeaderBlocks();
@@ -385,6 +388,7 @@ void	Response::invalidClient(void)
 
 void	Response::methodGet(void)
 {
+	_body = new std::string;
 	if (!_location->cgi_pass.empty())
 	{
 		CgiHandle cgi(_request, *this);
@@ -408,12 +412,13 @@ void	Response::methodGet(void)
 		generateBody();
 	setHeaderBlocks();
 	generateHeader();
-	std::cout << GREEN << "GET method called\n" << ZERO_C;
+	DBOUT << GREEN << "GET method called\n" << ZERO_C;
 }
 void	Response::methodPost(void)
 {
 	if (!_location->cgi_pass.empty())
 	{
+		_body = new std::string;
 		CgiHandle cgi(_request, *this);
 
 		*_body = cgi.executeCgi();

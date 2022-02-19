@@ -176,7 +176,7 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	_response.generate2(connected_to);
 
 	_toSend = new std::string;
-	*_toSend = _response.getHeader() + _response.getBody();
+	*_toSend = (_response.getBody().empty()) ? _response.getHeader() : _response.getHeader() + _response.getBody();
 
 
 	len = _toSend->size();
@@ -184,7 +184,10 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	_to_send_char = new char[len + 1];
 	std::memcpy(_to_send_char, _toSend->c_str(), len + 1);
 
-	
+	std::cout << PINK << "\n[["<< YELLOW << "Request header\n{" << ENDL;
+	std::cout << BLUE << _request.getHeader() << YELLOW << "},\n" << ENDL;
+	std::cout << GREEN << "Response Header\n{" << ENDL;
+	std::cout << BLUE << _response.getHeader() <<  GREEN << "}" << PINK << "]]\n"<< ENDL;
 	delete _toSend;
 	if (_request.getBody() != NULL)
 		_request.freeData();
