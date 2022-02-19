@@ -31,7 +31,8 @@ namespace config
 	void TOMLParser::processMap(void)
 	{
 		/* std::cerr << "Processing map" << std::endl; */
-		toml_node *map_node;
+		// toml_node *map_node;
+		std::auto_ptr<toml_node> map_node(new toml_node);
 		s_token current;
 
 		try { current = tokenizer.getToken(); }
@@ -45,7 +46,7 @@ namespace config
 			if (tokenizer.getToken().type != NEWLINE)
 				throw ExpectedToken("newline", current.value);
 				// throw std::logic_error("no newline after MAP_DECL");
-			map_node = parseMap().release();
+			map_node.reset(parseMap());
 		}
 		else
 			// throw std::logic_error("unexpected token in processMap");
@@ -57,105 +58,107 @@ namespace config
 
 		full_name = split_name(current.value);
 		
-		put_to_subtable(root.get(), full_name, map_node, toml_node::MAP);
+		put_to_subtable(root, full_name, map_node.release(), toml_node::MAP);;
 
 	}
 
-	std::auto_ptr<toml_node> TOMLParser::parseMap(void)
+	toml_node *TOMLParser::parseMap(void)
 	{
 		/* std::cerr << "Parsing map" << std::endl; */
-		std::auto_ptr<TOMLMap> mapObject(new TOMLMap);
+		// std::auto_ptr<TOMLMap> mapObject(new TOMLMap);
+		toml_node *node = new toml_node;
+		TOMLMap *mapObject = new TOMLMap;
 		bool completed = false;
-		while (!completed)
+		try
 		{
-			if (tokenizer.hasMoreTokens())
+			while (!completed)
 			{
-				s_token nextToken;
-				try { nextToken = tokenizer.getToken(); }
-				catch (Tokenizer::NoMoreTokens &e)
+				if (tokenizer.hasMoreTokens())
 				{
-					DBOUT << "got no more tokens" << ENDL;
-					break;
-				}
-				if (nextToken.type == MAPARRAY_DECL)
-				{
-					tokenizer.rollBackToken();
-					tokenizer.set_last(NEWLINE);
-					break;
-				}
-				else if (nextToken.type == MAP_DECL)
-				{
-					tokenizer.rollBackToken();
-					tokenizer.set_last(NEWLINE);
-					break;
-				}
-				std::string key = nextToken.value;
-				/* std::cerr << key << std::endl; */
-				DBOUT << RED << "key is " << key << ENDL;
-				if (tokenizer.getToken().type != ASSIGN)
-					throw ExpectedToken("assign", "after " + key);
+					s_token nextToken;
+					try { nextToken = tokenizer.getToken(); }
+					catch (Tokenizer::NoMoreTokens &e)
+					{
+						DBOUT << "got no more tokens" << ENDL;
+						completed = 1;
+						break;
+					}
+
+					if (nextToken.type == MAPARRAY_DECL)
+					{
+						tokenizer.rollBackToken();
+						tokenizer.set_last(NEWLINE);
+						break;
+					}
+					else if (nextToken.type == MAP_DECL)
+					{
+						tokenizer.rollBackToken();
+						tokenizer.set_last(NEWLINE);
+						break;
+					}
+
+					std::string key = nextToken.value;
+					/* std::cerr << key << std::endl; */
+					if (tokenizer.getToken().type != ASSIGN)
+						throw ExpectedToken("assign", "after " + key);
 					// throw std::logic_error("EXPECTED assign! 1");
-				
-				nextToken = tokenizer.getToken();
-				switch (nextToken.type)
-				{
-					case STRING:
+
+					nextToken = tokenizer.getToken();
+					switch (nextToken.type)
+					{
+						case STRING:
 						{
 							tokenizer.rollBackToken();
 							(*mapObject)[key] = parseString();
 							break;
 						}
-					case OPEN_BRACKET:
+						case OPEN_BRACKET:
 						{
 							(*mapObject)[key] = parseArray();
 							break;
 						}
-					case NUMBER:
+						case NUMBER:
 						{
 							tokenizer.rollBackToken();
 							(*mapObject)[key] = parseNumber();
 							break;
 						}
-					case BOOL:
+						case BOOL:
 						{
 							tokenizer.rollBackToken();
 							(*mapObject)[key] = parseBool();
 							break;
 						}
-					case MAPARRAY_DECL:
+						case MAPARRAY_DECL:
 						{
 							/* std::cerr << "reached MAPARRAY_DECL in parseMap" << std::endl; */
 							completed = true;
 							break;
 						}
-					default:
-						{
+						default:
 							throw UnexpectedToken(nextToken.value, key);
-							/* throw std::logic_error("jopa in parseMap"); */
-							// std::cerr << "Unknown token, marking as complete" << std::endl;
-							completed = true;
-							break;
-						}
-				}
-				if (tokenizer.hasMoreTokens())
-					nextToken = tokenizer.getToken();
-				else
-					break;
-				if (nextToken.type != NEWLINE)
-				{
-					// throw std::logic_error("EXPECTED newline");
-					throw ExpectedToken("newline", "parsing Hash Table");
+					}
+					if (tokenizer.hasMoreTokens())
+						nextToken = tokenizer.getToken();
+					else
+						break;
+					if (nextToken.type != NEWLINE)
+					{
+						// throw std::logic_error("EXPECTED newline");
+						throw ExpectedToken("newline", "parsing Hash Table");
+					}
 				}
 			}
-			// else
-			// {
-			// 	throw std::logic_error("parseMap: no more tokens");
-			// }
 		}
+		catch (std::domain_error &e)
+		{
+			DBOUT << "CAUGHT in parse MAP!!!" <<ENDL;
 
-		// toml_node *node = new toml_node;
-		std::auto_ptr<toml_node> node(new toml_node);
-		node->setObject(mapObject.release());
+			node->setObject(mapObject);
+			config::clean_generic(node);
+			throw;
+		}
+		node->setObject(mapObject);
 		return (node);
 	}
 
@@ -164,7 +167,7 @@ namespace config
 
 		/* std::cerr << "Parsing MapArray" << std::endl; */
 		// toml_node *map_node;
-		std::auto_ptr<toml_node> map_node;
+		std::auto_ptr<toml_node> map_node(new toml_node);
 		s_token current;
 
 		try { current = tokenizer.getToken(); }
@@ -177,10 +180,20 @@ namespace config
 		{
 			if (tokenizer.getToken().type != NEWLINE)
 				throw std::logic_error("no newline after map_array declaration");
-			map_node = parseMap();
+			try
+			{
+				map_node.reset(parseMap());
+			}
+			catch (std::exception &e)
+			{
+				// DBOUT << "map_node is " << map_node->getMap() << ENDL;
+
+				// for (TOMLMap::iterator it = map->begin();)
+				throw;
+			}
 		}
 		else
-			throw std::logic_error("unexpected token in processMapArray");
+			throw std::logic_error("unexpected token in process Map Array");
 
 		/* std::cout << current.value << std::endl; */
 
@@ -188,20 +201,20 @@ namespace config
 
 		full_name = split_name(current.value);
 
-		put_to_subtable(root.get(), full_name, map_node.release(), toml_node::MAPARRAY);
+		put_to_subtable(root, full_name, map_node.release(), toml_node::MAPARRAY);
 
 	}
 
 	toml_node *TOMLParser::parseString(void)
 	{
-		std::string *sValue;
+		std::string *string;
 
 		/* std::cerr << "Parsing string" << std::endl; */
 		s_token token = tokenizer.getToken();
-		sValue = new std::string(token.value);
+		string = new std::string(token.value);
 
 		toml_node *node = new toml_node;
-		node->setString(sValue);
+		node->setString(string);
 
 		return (node);
 	}
@@ -223,26 +236,29 @@ namespace config
 	toml_node *TOMLParser::parseArray(void)
 	{
 		/* std::cerr << "Parsing array" << std::endl; */
-		toml_node *node;
 		toml_node *result = new toml_node;
 		TOMLArray *array = new TOMLArray;
+		toml_node *node;
 		bool completed = false;
 		s_token current;
 
+		try
+		{
+
 		while (!completed)
 		{
-			if (!tokenizer.hasMoreTokens())
-				throw std::logic_error("No more tokens");
-			else
-			{
+			// if (!tokenizer.hasMoreTokens())
+			// 	throw std::logic_error("No more tokens");
+			// else
+			// {
 				current = tokenizer.getToken();
 				switch (current.type)
 				{
-					case OPEN_BRACKET:
-						{
-							node = parseArray();
-							break;
-						}
+					// case OPEN_BRACKET:
+					// 	{
+					// 		node = parseArray();
+					// 		break;
+					// 	}
 					case STRING:
 						{
 							tokenizer.rollBackToken();
@@ -283,7 +299,15 @@ namespace config
 				else
 					throw UnexpectedToken(current.value, ", when expected COMMA, or CLOSE_BRACKET");
 					// throw std::invalid_argument("Unexpected token in array!");
-			}
+			// }
+		}
+		}
+		catch (std::domain_error &e)
+		{
+			DBOUT << "CAUGHT in parse Array" << ENDL;
+			result->setArr(array);
+			config::clean_generic(result);
+			throw;
 		}
 		result->setArr(array);
 		return (result);
@@ -317,12 +341,10 @@ namespace config
 	}
 
 	/* parse tha root ! */
-	TOMLMap *TOMLParser::parse(void)
+	void TOMLParser::parse(void)
 	{
 		/* std::cerr << "Parsing ROOT" << std::endl; */
-		// root = new TOMLMap;
-		// std::auto_ptr<TOMLMap> root(new TOMLMap);
-		root.reset(new TOMLMap);
+		root = new TOMLMap;
 		bool completed = false;
 		while (!completed)
 		{
@@ -337,7 +359,6 @@ namespace config
 				}
 				if (current.type == MAPARRAY_DECL)
 				{
-					/* processMapArray(); */
 					tokenizer.set_last(NEWLINE);
 					tokenizer.rollBackToken();
 					processMapArray();
@@ -347,9 +368,6 @@ namespace config
 					/* std::cerr << "MAP_DECL value: " << current.value << std::endl; */
 					tokenizer.set_last(NEWLINE);
 					tokenizer.rollBackToken();
-					/* if (tokenizer.getToken().type != NEWLINE) */
-					/* 	throw std::logic_error("no newline after MAP_DECL"); */
-					/* (*mapObject)[nextToken.value] = parseMap(); */
 					processMap();
 					continue;
 				}
@@ -387,7 +405,6 @@ namespace config
 							}
 						default:
 							{
-								/* throw std::logic_error("jopa in parseMap"); */
 								std::cerr << "Unknown token, marking as complete" << std::endl;
 								completed = true;
 								break;
@@ -409,7 +426,6 @@ namespace config
 				break;
 			}
 		}
-		return (root.release());
 	}
 
 	std::vector<std::string> TOMLParser::split_name(std::string name)
