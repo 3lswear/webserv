@@ -132,6 +132,7 @@ void Server::readSocket(Client &client, int fd)
 	// client.setRawData(buf);
 	client.increaseRecvCounter(bytes_read);
 	status = client.parseRequest();
+	(void)status; //JOPA !!!!!
 	// client_map[fd].printClientInfo();
 
 	if (client.allRecved())
