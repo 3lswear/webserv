@@ -93,11 +93,13 @@ namespace config
 			token.value = "";
 			/* TODO: maybe do-while? */
 			file.get(c);
-			while (c != '"')
+			while (c != '"' && c != '\n')
 			{
 				token.value += c;
 				file.get(c);
 			}
+			if (c == '\n')
+				throw InvalidToken(token.value);
 		}
 		else if (c == '[' && firstToken())
 		{
