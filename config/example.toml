@@ -4,10 +4,6 @@
 	port = 8080
 	body_size_limit = 10
 	[server.error_page]
-		404 = "/var/www/html/error_404.html"
-		405 = "/var/www/html/error_405.html"
-	# error_404 = "error_404.html"
-	[server.error_page]
 		400 = "error_400.html"
 		401 = "error_401.html"
 	[[server.location]]
