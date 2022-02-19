@@ -256,8 +256,6 @@ namespace config
 		}
 		last_token = token.type;
 
-		DBOUT << YELLO << "GOT " << token.value << ", type: " << token.type << ENDL;
-
 		return (token);
 	}
 
