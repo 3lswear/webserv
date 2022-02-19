@@ -10,7 +10,7 @@ DEBUGFLAGS = -g -fno-limit-debug-info
 
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(DEBUGFLAGS) $(SANFLAGS) -DDEBUG
 
-CPPFLAGS += -MD -MP
+CPPFLAGS += -MMD -MP
 
 SRC = $(wildcard ./src/*.cpp)
 SRC += $(wildcard ./src/*/*.cpp)
@@ -24,7 +24,6 @@ all: $(NAME)
 $(OBJ): %.o: %.cpp $(SRC) Makefile
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -I $(INCLUDES) -o $@
 
--include $(SRC:%.cpp=%.d)
 
 $(NAME): $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OBJ) -o $(NAME)
@@ -42,5 +41,7 @@ re:
 
 run: $(NAME)
 	ASAN_OPTIONS=detect_leaks=0 ./$(NAME) $(filter-out $@,$(MAKECMDGOALS))
+
+-include $(OBJ:%.o=%.d)
 	
 .PHONY: all clean fclean re
