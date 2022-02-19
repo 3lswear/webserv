@@ -65,70 +65,63 @@ namespace config
 		switch (node->type)
 		{
 			case toml_node::STRING:
-				{
-					DBOUT << "cleaning string" << ENDL;
-					delete node->getString();
-				}
-				break;
+			{
+				// DBOUT << "cleaning string" << ENDL;
+				delete node->getString();
+			}
+			break;
 			case toml_node::MAPARRAY:
+			{
+				// DBOUT << "cleaning MAPARRAY" << ENDL;
+				TOMLMapArray *map_array = node->getMapArray();
+				for (TOMLMapArray::iterator it = map_array->begin();
+						it != map_array->end(); ++it)
 				{
-					DBOUT << "cleaning MAPARRAY" << ENDL;
-					TOMLMapArray *map_array = node->getMapArray();
-					for (TOMLMapArray::iterator it = map_array->begin();
-							it != map_array->end(); ++it)
+					// DBOUT << "cleaning a MAP of MAPARRAY" << ENDL;
+					TOMLMap *map = *it;
+					TOMLMap::iterator map_it = map->begin();
+					for (map_it = map->begin();
+							map_it != map->end(); ++map_it)
 					{
-						DBOUT << "cleaning a MAP of MAPARRAY" << ENDL;
-						TOMLMap *map = *it;
-						TOMLMap::iterator map_it = map->begin();
-						for (map_it = map->begin();
-								map_it != map->end(); ++map_it)
-						{
-							DBOUT << "cleaning a MAP item " << map_it->first << ENDL;
-							config::clean_generic(map_it->second);
-							/* map->erase(map_it); */
-						}
-						map->clear();
-						delete map;
-					}
-					map_array->clear();
-					delete map_array;
-					DBOUT << "end cleaning MAPARRAY" << ENDL;
-				}
-				break;
-			case toml_node::MAP:
-				{
-					DBOUT << "cleaning MAP" << ENDL;
-					TOMLMap *map = node->getMap();
-					for (TOMLMap::iterator it = map->begin(); it != map->end(); ++it)
-					{
-						DBOUT << "key is " << it->first << ENDL;
-						config::clean_generic(it->second);
-						/* map->erase(it); */
+						// DBOUT << "cleaning a MAP item " << map_it->first << ENDL;
+						config::clean_generic(map_it->second);
 					}
 					map->clear();
 					delete map;
 				}
-				break;
+				map_array->clear();
+				delete map_array;
+				// DBOUT << "end cleaning MAPARRAY" << ENDL;
+			}
+			break;
+			case toml_node::MAP:
+			{
+				// DBOUT << "cleaning MAP" << ENDL;
+				TOMLMap *map = node->getMap();
+				for (TOMLMap::iterator it = map->begin(); it != map->end(); ++it)
+					config::clean_generic(it->second);
+				map->clear();
+				delete map;
+			}
+			break;
 
 			case toml_node::ARRAY:
-				{
-					DBOUT << "cleaning ARRAY" << ENDL;
-					TOMLArray *arr = node->getArray();
-					for (TOMLArray::iterator it = arr->begin();
-							it != arr->end(); ++it)
-					{
-						config::clean_generic(*it);
-					}
-					arr->clear();
-					delete arr;
-					DBOUT << "end cleaning MAP" << ENDL;
-				}
-				break;
+			{
+				DBOUT << "cleaning ARRAY" << ENDL;
+				TOMLArray *arr = node->getArray();
+				for (TOMLArray::iterator it = arr->begin();
+						it != arr->end(); ++it)
+					config::clean_generic(*it);
+				arr->clear();
+				delete arr;
+				DBOUT << "end cleaning MAP" << ENDL;
+			}
+			break;
 
 			default:
-				{
-					DBOUT << "Cleaning type " << node->type << " not implemented :)" << ENDL;
-				}
+			{
+				// DBOUT << "Cleaning type " << node->type << " not implemented :)" << ENDL;
+			}
 		}
 		delete node;
 
