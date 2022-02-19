@@ -50,13 +50,15 @@ void	Server::readConfig(char *filename)
 		// root->clear();
 		// delete root;
 		// clean_parsed(root);
+		config::clean_parsed(parser.root);
+		// delete parser.root;
 		exit(-1);
 	}
 	catch (config::Tokenizer::InvalidToken &e)
 	{
 		std::cerr << RED << "FATAL: ";
 		std::cerr << e.what() << RESET << std::endl;
-		// clean_parsed(root);
+		config::clean_parsed(parser.root);
 		// root->clear();
 		delete root;
 		exit(-1);
@@ -77,7 +79,7 @@ void	Server::readConfig(char *filename)
 		++it;
 	}
 
-	clean_parsed(root);
+	config::clean_parsed(parser.root);
 }
 
 void Server::sendData(Client &client, int fd)
@@ -350,100 +352,6 @@ void	Server::checkError(int fd, std::string str)
 		DBOUT << GREEN << "Server SUCCESS: " << str << ENDL;
 }
 
-void Server::clean_generic(toml_node *node)
-{
-	switch (node->type)
-	{
-		case toml_node::STRING:
-		{
-			DBOUT << "cleaning string" << ENDL;
-			delete node->getString();
-		}
-		break;
-		case toml_node::MAPARRAY:
-		{
-			DBOUT << "cleaning MAPARRAY" << ENDL;
-			TOMLMapArray *map_array = node->getMapArray();
-			for (TOMLMapArray::iterator it = map_array->begin();
-					it != map_array->end(); ++it)
-			{
-				DBOUT << "cleaning a MAP of MAPARRAY" << ENDL;
-				TOMLMap *map = *it;
-				TOMLMap::iterator map_it = map->begin();
-				for (map_it = map->begin();
-						map_it != map->end(); ++map_it)
-				{
-					DBOUT << "cleaning a MAP item " << map_it->first << ENDL;
-					clean_generic(map_it->second);
-					/* map->erase(map_it); */
-				}
-				map->clear();
-				delete map;
-			}
-			map_array->clear();
-			delete map_array;
-			DBOUT << "end cleaning MAPARRAY" << ENDL;
-		}
-		break;
-		case toml_node::MAP:
-		{
-			DBOUT << "cleaning MAP" << ENDL;
-			TOMLMap *map = node->getMap();
-			for (TOMLMap::iterator it = map->begin(); it != map->end(); ++it)
-			{
-				DBOUT << "key is " << it->first << ENDL;
-				clean_generic(it->second);
-				/* map->erase(it); */
-			}
-			map->clear();
-			delete map;
-		}
-		break;
-
-		case toml_node::ARRAY:
-		{
-			DBOUT << "cleaning ARRAY" << ENDL;
-			TOMLArray *arr = node->getArray();
-			for (TOMLArray::iterator it = arr->begin();
-					it != arr->end(); ++it)
-			{
-				clean_generic(*it);
-			}
-			arr->clear();
-			delete arr;
-			DBOUT << "end cleaning MAP" << ENDL;
-		}
-		break;
-
-		default:
-		{
-			DBOUT << "Cleaning type " << node->type << " not implemented :)" << ENDL;
-		}
-	}
-	delete node;
-
-}
-
-void Server::clean_parsed(TOMLMap *root)
-{
-	TOMLMap::iterator it;
-
-	DBOUT << ">>> cleaning up: <<<" << std::endl;
-	for (it = root->begin(); it != root->end(); ++it)
-	{
-		// DBOUT << RED << it->first
-		// 	<< ": " << GREEN
-		// 	<< *(it->second->toString());
-
-		clean_generic(it->second);
-		/* delete it->second; */
-		std::cout << ", " << std::endl;
-	}
-	DBOUT << YELLO << "end of clean" << ENDL;
-	root->clear();
-	delete root;
-	root = NULL;
-}
 
 Server::~Server()
 {
