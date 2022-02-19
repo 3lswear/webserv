@@ -4,6 +4,7 @@ clang++
 -Isrc/Autoindex/
 -Isrc/Server/
 -Isrc/config/
+-Isrc/CGI/
 -Wall
 -Wextra
 -Werror
