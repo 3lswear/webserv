@@ -217,11 +217,15 @@ std::string	Response::getFullURI(void)
 		int	pos = 0;
 		pos = _request.getURI().rfind("/");
 		tmp = _request.getURI().substr(pos);
+		if (!_location->uploadDir.empty())
+			_upload_dir = _location->uploadDir + tmp;
 		tmp = _location->root + tmp;
 	}
 	else
 	{
 		tmp	= _request.getURI().substr(len);
+		if (!_location->uploadDir.empty())
+			_upload_dir = _location->uploadDir + tmp;
 		tmp = _location->root + tmp;
 	}
 	if (_request.isDir(tmp) ==  0)
@@ -235,9 +239,11 @@ std::string	Response::getFullURI(void)
 	}
 	else
 		ret = tmp;
-
+	if (_upload_dir.empty())
+		_upload_dir = ret;
 	DBOUT << PINK << "location " << _location->location << ENDL;
 	DBOUT << PINK << "fullURI " << ret << ENDL;
+	DBOUT << PINK << "upload dir " << _upload_dir << ENDL;
 	return (ret);
 }
 
@@ -274,11 +280,11 @@ bool	Response::allowedMethod(std::string &method)
 	{
 		if (*it == method)
 			return (true);
-		DBOUT << BLUE << *it << ENDL;
 		it++;
 	}
-	if (_location->cgi_pass.empty())
-		_code = 405;
+	if (!_location->cgi_pass.empty() && (method == "GET" || method == "POST"))
+		return (true);
+	_code = 405;
 	return (false);
 	
 }
@@ -337,7 +343,7 @@ void	Response::generate2(serverListen &l)
 			_code = (_request.getBody()->size() > (unsigned long)_maxBodySize) ? 413 : _code;
 	}
 
-	if (_request.badCode(_code) || (!allowedMethod(_method) && _location->cgi_pass.empty()) || isRedirect())
+	if (_request.badCode(_code) || !allowedMethod(_method) || isRedirect())
 	{
 		invalidClient();
 		return;
@@ -435,16 +441,16 @@ void	Response::methodPost(void)
 void	Response::methodPut(void)
 {
 	_code = 201;
-	if (_request.isFile(_fullURI) == 0)
+	if (_request.isFile(_upload_dir) == 0)
 		_code = 204;
-	std::ofstream	file(_fullURI.c_str(), std::ios::out | std::ios::binary);
+	std::ofstream	file(_upload_dir.c_str(), std::ios::out | std::ios::binary);
 	if (!file.is_open())
 		_code = 403;
 	else
 	{
 		file.write(_request.getBody()->data(), _request.getBody()->size());
+		file.close();
 	}
-	file.close();
 	setHeaderBlocks();
 	generateHeader();
 	DBOUT << GREEN << "PUT method called" << ENDL;

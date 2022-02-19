@@ -33,6 +33,7 @@ private:
     std::string     _locationSTR;
     std::string     _contentLanguage;
     std::string     _transferEncoding;
+    std::string     _upload_dir;
 
     void            setHeaderBlocks(void);
     void            setContentType(void);
