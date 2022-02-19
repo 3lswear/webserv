@@ -6,8 +6,8 @@ Response::Response()
 {
 	initErrorCode();
 	_Autoindex = true;
-	_body = new std::string;
-	_header = new std::string;
+	_body = NULL;
+	_header = NULL;
 	_code = 200;
 }
 
@@ -15,7 +15,8 @@ Response::Response()
 
 void		Response::freeData(void)
 {
-	delete _body;
+	if (_body != NULL)
+		delete _body;
 	delete _header;
 }
 
@@ -23,9 +24,9 @@ std::string     Response::getHeader(void)
 {
 	return (*_header);
 }
-std::string     Response::getBody(void)
+std::string     *Response::getBody(void)
 {
-	return (*_body);
+	return (_body);
 }
 
 void            Response::setData(Request request, ServerConfig *config)
@@ -35,12 +36,21 @@ void            Response::setData(Request request, ServerConfig *config)
 	_config = config;
 }
 
-void            Response::setData(Request &request, ServerConfig *config, location *loc)
+void            Response::setData(Request &request, ServerConfig *config, std::vector<location *> &loc)
 {
 	_request = request;
 	_code = request.getCode();
 	_config = config;
-	_location = loc;
+	if (loc.empty())
+		_code = 404;
+	else
+	{
+		_location = loc[0];
+		if (loc.size() == 2)
+			_cgi_Pass = loc[1]->cgi_pass;
+		else
+			_cgi_Pass = _location->cgi_pass;
+	}
 }
 
 void		Response::setHeaderBlocks(void)
@@ -67,7 +77,10 @@ void	Response::setContentType(void)
 
 void	Response::setContentLength()
 {
-	_contentLength = _body->size();
+	if (_body != NULL)
+		_contentLength = _body->size();
+	else
+		_contentLength = 0;
 }
 
 void	Response::setServer(void)
@@ -108,7 +121,7 @@ serverListen	Response::getListen()
 
 std::string	Response::getCgiPass(void)
 {
-	return (_location->cgi_pass);
+	return (_cgi_Pass);
 }
 
 ssize_t	Response::getMaxBodySize(void)
@@ -282,7 +295,7 @@ bool	Response::allowedMethod(std::string &method)
 			return (true);
 		it++;
 	}
-	if (!_location->cgi_pass.empty() && (method == "GET" || method == "POST"))
+	if (!_cgi_Pass.empty() && (method == "GET" || method == "POST"))
 		return (true);
 	_code = 405;
 	return (false);
@@ -290,6 +303,7 @@ bool	Response::allowedMethod(std::string &method)
 }
 void	Response::generateHeader(void)
 {
+	_header = new std::string;
 	std::stringstream ss;
 	std::string tmp;
 
@@ -298,8 +312,8 @@ void	Response::generateHeader(void)
 		ss << "Content-Type: " << _contentType << "\r\n";
 	ss << "Content-Length: " << _contentLength << "\r\n";
 	ss << "Server: " << _server << "\r\n";
-	if (!_keepAlive.empty())
-		ss << "Keep-Alive: " <<_keepAlive << "\r\n";
+	// if (!_keepAlive.empty())
+	// 	ss << "Keep-Alive: " <<_keepAlive << "\r\n";
 	ss << "Date: " << _date << "\r\n";
 	if (!_cacheControl.empty())
 		ss << "Cache-Control: " << _cacheControl << "\r\n";
@@ -328,7 +342,7 @@ void	Response::generate2(serverListen &l)
 	{
 		_code = 404;
 	}
-	else
+	else if (!_request.badCode(_code))
 	{
 		_listen	= l;
 		_errorPages = _config->getErrorPages();
@@ -342,7 +356,6 @@ void	Response::generate2(serverListen &l)
 		if (_maxBodySize > 0 && _request.getBody() != NULL)
 			_code = (_request.getBody()->size() > (unsigned long)_maxBodySize) ? 413 : _code;
 	}
-
 	if (_request.badCode(_code) || !allowedMethod(_method) || isRedirect())
 	{
 		invalidClient();
@@ -374,6 +387,7 @@ bool	Response::isRedirect()
 
 void	Response::invalidClient(void)
 {
+	_body = new std::string;
 	if (!isRedirect())
 		OpenErrorFile(_code);
 	setHeaderBlocks();
@@ -385,7 +399,8 @@ void	Response::invalidClient(void)
 
 void	Response::methodGet(void)
 {
-	if (!_location->cgi_pass.empty())
+	_body = new std::string;
+	if (!_cgi_Pass.empty())
 	{
 		CgiHandle cgi(_request, *this);
 
@@ -408,12 +423,13 @@ void	Response::methodGet(void)
 		generateBody();
 	setHeaderBlocks();
 	generateHeader();
-	std::cout << GREEN << "GET method called\n" << ZERO_C;
+	DBOUT << GREEN << "GET method called\n" << ZERO_C;
 }
 void	Response::methodPost(void)
 {
-	if (!_location->cgi_pass.empty())
+	if (!_cgi_Pass.empty())
 	{
+		_body = new std::string;
 		CgiHandle cgi(_request, *this);
 
 		*_body = cgi.executeCgi();
@@ -560,5 +576,5 @@ std::string	Response::getErrorPage(int code)
 
 Response::~Response()
 {
-	delete _location;
+
 }

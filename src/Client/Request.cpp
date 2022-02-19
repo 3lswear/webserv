@@ -108,6 +108,10 @@ ssize_t Request::getRecved(void) const
 {
 	return (_received);
 }
+std::string		&Request::getHeader(void)
+{
+	return _head;
+}
 void                        Request::setData(char *str)
 {
     this->_data = str;
@@ -226,7 +230,6 @@ void	Request::splitData(std::string	&data)
 			str = _head.substr(_headerSize);
 			_head = tmp;
 			_head_ok = true;
-
 			parseHeader();
 			if ((_contentLength == 0 && !_chunked) || (_method == "GET"
 				|| _method == "DELETE" || _method == "HEAD"))

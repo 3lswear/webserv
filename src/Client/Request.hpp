@@ -82,6 +82,7 @@ public:
 	void						clear(void);
 	void						splitData(std::string	&);
 	void						freeData(void);
+	std::string					&getHeader(void);
 
 	void						increaseRecvCounter(unsigned int n);
 	~Request();

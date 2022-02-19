@@ -132,7 +132,7 @@ void Server::readSocket(Client &client, int fd)
 	// client.setRawData(buf);
 	client.increaseRecvCounter(bytes_read);
 	status = client.parseRequest();
-	(void)status; //JOPA !!!!!
+	(void)status;
 	// client_map[fd].printClientInfo();
 
 	if (client.allRecved())
@@ -253,7 +253,7 @@ void	Server::start(void)
 	{
 
 		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;F
+		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");

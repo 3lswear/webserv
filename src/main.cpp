@@ -23,7 +23,7 @@ int	main(int argc, char **argv)
 	catch(const ConfigException& e)
 	{
 		server.end();
-		std::cerr << RED << e.getMessage() << '\n' << ENDL;
+		std::cerr << RED << "\n" << e.getMessage() << '\n' << ENDL;
 	}
 	
 }

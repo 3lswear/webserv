@@ -383,6 +383,8 @@ void	ServerConfig::checkConfig(void)
 
 	it = _locations.begin();
 	location *tmp;
+	if (it == _locations.end())
+		throw	ConfigException("Required routing settings are missing!");
 	while (it != _locations.end())
 	{
 		tmp = *it;
@@ -402,43 +404,43 @@ void	ServerConfig::printFields(void)
 
 	it1 = _errorPages.begin();
 	it = _locations.begin();
-	std::cout << RED << "-------------------------Server-Start----------------------------------\n" << ZERO_C;
-	std::cout << GREEN << "name" << " " << BLUE << _serverName << std::endl;
-	std::cout << GREEN << "host" << " " << BLUE << _host << std::endl;
-	std::cout << GREEN << "port" << " " << BLUE << _port << std::endl;
-	std::cout << GREEN << "client_body_size" <<  " " << BLUE << _clientBodySize << std::endl;
-	std::cout << GREEN << "location" << std::endl;
+	DBOUT << RED << "-------------------------Server-Start----------------------------------\n" << ZERO_C;
+	DBOUT << GREEN << "name" << " " << BLUE << _serverName << std::endl;
+	DBOUT << GREEN << "host" << " " << BLUE << _host << std::endl;
+	DBOUT << GREEN << "port" << " " << BLUE << _port << std::endl;
+	DBOUT << GREEN << "client_body_size" <<  " " << BLUE << _clientBodySize << std::endl;
+	DBOUT << GREEN << "location" << std::endl;
 	while (it != _locations.end())
 	{
-		std::cout << PINK << "------------------------------------------------\n";
-		std::cout << YELLOW << "location " << BLUE << (*it)->location <<std::endl;
-		std::cout << YELLOW << "root " << BLUE << (*it)->root <<std::endl;
-		std::cout << YELLOW << "directoryFile " << BLUE << (*it)->directoryFile <<std::endl;
-		std::cout << YELLOW << "uploadDir " << BLUE << (*it)->uploadDir <<std::endl;
-		std::cout << YELLOW << "autoindex " << BLUE << (*it)->autoindex <<std::endl;
-		std::cout << YELLOW << "uploadAccept " << BLUE << (*it)->uploadAccept <<std::endl;
-		std::cout << YELLOW << "cgi_pass " << BLUE << (*it)->cgi_pass <<std::endl;
-		std::cout << YELLOW << "client_body_size " << BLUE << (*it)->clientBodySize <<std::endl;
-		std::cout << YELLOW << "methods " << std::endl;
+		DBOUT << PINK << "------------------------------------------------\n";
+		DBOUT << YELLOW << "location " << BLUE << (*it)->location <<std::endl;
+		DBOUT << YELLOW << "root " << BLUE << (*it)->root <<std::endl;
+		DBOUT << YELLOW << "directoryFile " << BLUE << (*it)->directoryFile <<std::endl;
+		DBOUT << YELLOW << "uploadDir " << BLUE << (*it)->uploadDir <<std::endl;
+		DBOUT << YELLOW << "autoindex " << BLUE << (*it)->autoindex <<std::endl;
+		DBOUT << YELLOW << "uploadAccept " << BLUE << (*it)->uploadAccept <<std::endl;
+		DBOUT << YELLOW << "cgi_pass " << BLUE << (*it)->cgi_pass <<std::endl;
+		DBOUT << YELLOW << "client_body_size " << BLUE << (*it)->clientBodySize <<std::endl;
+		DBOUT << YELLOW << "methods " << std::endl;
 		it2 = (*it)->methods.begin();
 		while (it2 != (*it)->methods.end())
 		{
-			std::cout << BLUE << *it2 << " ";
+			DBOUT << BLUE << *it2 << " ";
 			it2++;
 		}
-		std::cout << std::endl;
+		DBOUT << std::endl;
 		it3 = (*it)->redirect.begin();
-		std::cout << YELLOW << "redirection" << RED << " " << it3->first << " "  << BLUE << it3->second << std::endl;
+		DBOUT << YELLOW << "redirection" << RED << " " << it3->first << " "  << BLUE << it3->second << std::endl;
 		++it;
-		std::cout << PINK << "------------------------------------------------\n";
+		DBOUT << PINK << "------------------------------------------------\n";
 	}
-	std::cout << GREEN << "error pages" << std::endl;
+	DBOUT << GREEN << "error pages" << std::endl;
 	while (it1 != _errorPages.end())
 	{
-		std::cout << YELLOW << it1->first << " "  << BLUE << it1->second << std::endl;
+		DBOUT << YELLOW << it1->first << " "  << BLUE << it1->second << std::endl;
 		++it1;
 	}
-	std::cout << RED << "-------------------------Server-End------------------------------------\n" << ZERO_C;
+	DBOUT << RED << "-------------------------Server-End------------------------------------\n" << ZERO_C;
 }
 
 ServerConfig::~ServerConfig()
