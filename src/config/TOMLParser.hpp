@@ -7,6 +7,7 @@
 #include "TOMLNode.hpp"
 #include <string>
 #include <memory>
+#include <stdexcept>
 
 namespace config
 {
@@ -14,8 +15,6 @@ namespace config
 	{
 		private:
 			std::fstream file;
-			std::auto_ptr<TOMLMap> root;
-			// TOMLMap *root; //root of TOML tree
 			/* toml_node *current; //node currently being parsed */
 			Tokenizer tokenizer;
 
@@ -26,10 +25,12 @@ namespace config
 
 		public:
 			TOMLParser(char *filename);
-			TOMLMap *parse(void);
+			void	parse(void);
 
-			// toml_node *parseMap(void);
-			std::auto_ptr<toml_node> parseMap(void);
+			TOMLMap *root; //root of TOML tree
+
+			toml_node *parseMap(void);
+			// TOMLMap *parseMap(void);
 			void processMap(void);
 
 			void processMapArray(void);
@@ -44,48 +45,48 @@ namespace config
 
 			toml_node *parseNil(void);
 
-			class ExpectedToken: public std::exception
+			class ExpectedToken: public std::domain_error
 			{
 				protected:
-					std::string *msg;
+					std::string msg;
 
 				public:
-					ExpectedToken(const std::string &missing, const std::string context)
+					ExpectedToken(const std::string &missing, const std::string context): std::domain_error("ExpectedToken")
 					{
-						msg = new std::string("Config file: ");
-						*msg += ("Expected " + missing + " at " + context);
+						msg = std::string("Config file: ");
+						msg += ("Expected " + missing + " at " + context);
 					}
 
 					virtual const char *what() const throw()
 					{
-						return (msg->c_str());
+						return (msg.c_str());
 					}
 
 					virtual ~ExpectedToken() throw()
 					{
-						delete msg;
+						// delete msg;
 					}
 			};
-			class UnexpectedToken: public std::exception
+			class UnexpectedToken: public std::domain_error
 			{
 				protected:
-					std::string *msg;
+					std::string msg;
 
 				public:
-					UnexpectedToken(const std::string &unexpected, const std::string context)
+					UnexpectedToken(const std::string &unexpected, const std::string context): std::domain_error("ExpectedToken")
 					{
-						msg = new std::string("Config file: ");
-						*msg += ("Unexpected " + unexpected + " " + context);
+						msg = std::string("Config file: ");
+						msg += ("Unexpected " + unexpected + " " + context);
 					}
 
 					virtual const char *what() const throw()
 					{
-						return (msg->c_str());
+						return (msg.c_str());
 					}
 
 					virtual ~UnexpectedToken() throw()
 					{
-						delete msg;
+						// delete msg;
 					}
 
 			};

@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <map>
+// #include "parse.hpp"
 
 #define THREAD_NUM 100
 #define MAX_EVENTS
@@ -43,26 +44,26 @@ void	Server::readConfig(char *filename)
 		root = parse(filename);
 
 	}
-	catch (config::Tokenizer::NoMoreTokens &e)
+	catch (std::domain_error &e)
 	{
 		std::cerr << RED << "FATAL: ";
 		std::cerr << e.what() << RESET << std::endl;
 		// root->clear();
-		// delete root;
-		// clean_parsed(root);
 		config::clean_parsed(parser.root);
 		// delete parser.root;
-		exit(-1);
+		// exit(-1);
+		return;
+
 	}
-	catch (config::Tokenizer::InvalidToken &e)
-	{
-		std::cerr << RED << "FATAL: ";
-		std::cerr << e.what() << RESET << std::endl;
-		config::clean_parsed(parser.root);
-		// root->clear();
-		delete root;
-		exit(-1);
-	}
+	// catch (config::Tokenizer::InvalidToken &e)
+	// {
+	// 	std::cerr << RED << "FATAL: ";
+	// 	std::cerr << e.what() << RESET << std::endl;
+	// 	config::clean_parsed(parser.root);
+	// 	// root->clear();
+	// 	// delete parser.root;
+	// 	exit(-1);
+	// }
 
 	/* TOMLMap *map; */
 	TOMLMap::iterator it1;
@@ -81,6 +82,8 @@ void	Server::readConfig(char *filename)
 
 	config::clean_parsed(parser.root);
 }
+
+
 
 void Server::sendData(Client &client, int fd)
 {

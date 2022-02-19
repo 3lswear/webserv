@@ -61,34 +61,58 @@ namespace config
 			void rollBackToken();
 			void set_last(e_token type);
 
-			class NoMoreTokens: public std::exception
+			class NoMoreTokens: public std::domain_error
 			{
 				public:
+					NoMoreTokens(void): std::domain_error("NoMoreTokens")
+					{}
 					virtual const char *what() const throw()
 					{
 						return ("Config may be incomplete, expected more tokens (check EOL)");
 					}
 			};
-			class InvalidToken: public std::exception
+			class InvalidToken: public std::domain_error
 			{
 				protected:
-					std::string *msg;
+					std::string msg;
 
 				public:
-					InvalidToken(const std::string &token)
+					InvalidToken(const std::string &token): std::domain_error("InvalidToken")
 					{
 
-						msg = new std::string("Invalid token: '" + token + "'");
+						msg = std::string("Invalid token: '" + token + "'");
 					}
 
 					virtual const char *what() const throw()
 					{
-						return (msg->c_str());
+						return (msg.c_str());
 					}
 
 					virtual ~InvalidToken() throw()
 					{
-						delete msg;
+						// delete msg;
+					}
+			};
+			class SyntaxErrNear: public std::domain_error
+			{
+				protected:
+					std::string msg;
+
+				public:
+					SyntaxErrNear(const std::string &near): std::domain_error("InvalidToken")
+					{
+
+						msg = std::string("Syntax error near: " + near);
+					}
+
+					virtual const char *what() const throw()
+					{
+						return (msg.c_str());
+					}
+
+					virtual ~SyntaxErrNear() throw()
+					{
+						// delete msg;
 					}
 			};
 
