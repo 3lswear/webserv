@@ -2,8 +2,9 @@
 #define SERVERCONFIG_HPP
 
 #include "webserv.hpp"
+#include "ConfigException.hpp"
 #include "parse.hpp"
-
+ 
 struct location
 {
 	std::string					location;
@@ -15,7 +16,7 @@ struct location
 	std::vector<std::string>	methods;
 	std::map<int, std::string>	redirect;
 	std::string					cgi_pass;
-	unsigned int				clientBodySize;
+	ssize_t						clientBodySize;
 };
 
 struct serverListen
@@ -33,7 +34,7 @@ private:
 	std::string	_serverName;
 	std::string _host;
 	int			_port;
-	int			_clientBodySize;
+	ssize_t			_clientBodySize;
 
 	std::map<int, std::string>	_errorPages;
 	std::vector<location *>		_locations;
@@ -47,11 +48,12 @@ public:
 	void	setErrorPages(std::map<int, std::string>);
 	void	setLocations(std::vector<location *>);
 	void	setRoot(TOMLMap *);
+	void	checkConfig(void);
 
 	std::string					&getServerName(void);
 	std::string					&getHost(void);
 	int							&getPort(void);
-	int							&getClientBodySize(void);
+	ssize_t						&getClientBodySize(void);
 	std::vector<location *>		&getLocations(void);
 	std::map<int, std::string>	&getErrorPages(void);
 	TOMLMap						*getRoot(void);
@@ -67,11 +69,18 @@ private:
 	int	putName(toml_node *);
 	int	putPort(toml_node *);
 	int	putLocation(toml_node *);
+	std::string	getTypestr(toml_node::e_type);
+	std::string getWrongTypeErrorMSG(std::string field, toml_node::e_type expected, toml_node::e_type received);
+	bool		checkFileAndDir(location *);
+	int			isFile(std::string path);
+	int			isDir(std::string path);
+
 
 public:
 	void	fillFields(void);
 	void	printFields(void);
-	
+
+
 	~ServerConfig();
 };
 

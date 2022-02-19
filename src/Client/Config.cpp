@@ -36,6 +36,21 @@ int	isDir(std::string path)
 		return (-1);
 	return (-1);
 }
+
+void	copyLocation(location *dest, location *src)
+{
+	dest->autoindex = src->autoindex;
+	dest->cgi_pass = src->cgi_pass;
+	dest->clientBodySize = src->clientBodySize;
+	dest->directoryFile = src->directoryFile;
+	dest->location = src->location;
+	dest->methods = src->methods;
+	dest->redirect = src->redirect;
+	dest->root = src->root;
+	dest->uploadAccept = src->uploadAccept;
+	dest->uploadDir = src->uploadDir;
+}
+
 int			Config::calcLen(std::string &s1, std::string &s2)
 {
 	unsigned long	len = 0;
@@ -48,7 +63,7 @@ int			Config::calcLen(std::string &s1, std::string &s2)
 	return (len);
 }
 
-location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
+std::vector<location *> Config::getLocation(std::vector<location *> &arr, std::string &URI)
 {
 	unsigned int	tryLen = URI.size();
 	std::string		tryLocation;
@@ -57,6 +72,7 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 	std::string		suffix1;
 	std::vector<location *>::iterator   it;
 	std::vector<location *> step_1;
+	std::vector<location *> step_2;
 	suffix = URI.substr(URI.rfind(".") + 1, URI.size() - URI.rfind("."));
 
 	while (tryLen)
@@ -79,7 +95,7 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		it = step_1.begin();
 		tmp = *it;
 		if (tmp->location == URI || tmp->location.size() > 1)
-			return (tmp);
+			step_2.push_back(tmp);
 	}
 
 	it = arr.begin();
@@ -90,20 +106,22 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		{
 			suffix1 = tmp->location.substr(2);
 			if (suffix1 == suffix)
-				return (tmp);
+				step_2.push_back(tmp);
 		}
 		it++;
 	}
-	it = arr.begin();
-	while (it != arr.end())
+	if (step_2.empty())
 	{
-		tmp = *it;
-		if (tmp->location == "/")
-			return (tmp);
-		it++;
+		it = arr.begin();
+		while (it != arr.end())
+		{
+			tmp = *it;
+			if (tmp->location == "/")
+				step_2.push_back(tmp);
+			it++;
+		}
 	}
-	
-	return (NULL);
+	return (step_2);
 }
 
 ServerConfig    *Config::getConfig(std::vector<ServerConfig *> &arr, Request &request, serverListen &data)

@@ -14,13 +14,13 @@ private:
 	int			_ret;
 	int			_row;
 	int			_lifeTime;
-	unsigned int			_contentLength;
-	unsigned int			_received;		
+	ssize_t					_contentLength;
+	ssize_t					_received;		
 	unsigned int 			_headerSize;
 
 	std::string _URI;
 	std::string	_head;
-	std::string	_body;
+	std::string	*_body;
 	std::string	_host;
     std::string _query;
 	std::string _method;
@@ -37,7 +37,7 @@ private:
 	bool			_chunked;
 public:
 	std::string					&getURI(void);
-	std::string					&getBody(void);
+	std::string					*getBody(void);
 	std::string					&getHost(void);
 	std::string					&getQuery(void);
 	std::string					&getMethod(void);
@@ -48,9 +48,9 @@ public:
 	ServerConfig				*getConfig(void);
 	int							getCode(void);
 	int							getLifeTime(void);
-	unsigned int				getContentLength(void) const;
+	ssize_t						getContentLength(void) const;
 	unsigned int				getHeaderSize(void) const;
-	unsigned int				getRecved(void)const;
+	ssize_t						getRecved(void)const;
 	char						*getPointerBody(void)const;
 	
 	std::map<std::string, std::string>	getClientFields(void);
@@ -81,6 +81,8 @@ public:
 	void						copyFromMap(void);
 	void						clear(void);
 	void						splitData(std::string	&);
+	void						freeData(void);
+	std::string					&getHeader(void);
 
 	void						increaseRecvCounter(unsigned int n);
 	~Request();

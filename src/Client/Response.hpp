@@ -10,8 +10,8 @@ class Response
 {
 private:
     serverListen    _listen;
-    std::string     _body;
-    std::string     _header;
+    std::string     *_body;
+    std::string     *_header;
     Request         _request;
     ServerConfig    *_config;
     location        *_location;
@@ -20,13 +20,12 @@ private:
     std::map<int, std::string>  _errorPages;
     bool                        _Autoindex;
     serverListen                _hostPort;
-    std::string                 _fullURI;
     std::string                 _method;
 
 private:
     std::string     _contentType;
-    unsigned int    _contentLength;
-    unsigned int    _maxBodySize;
+    ssize_t         _contentLength;
+    ssize_t         _maxBodySize;
     std::string     _server;
     std::string     _keepAlive;
     std::string     _date;
@@ -34,6 +33,8 @@ private:
     std::string     _locationSTR;
     std::string     _contentLanguage;
     std::string     _transferEncoding;
+    std::string     _upload_dir;
+    std::string     _cgi_Pass;
 
     void            setHeaderBlocks(void);
     void            setContentType(void);
@@ -62,22 +63,24 @@ public:
     serverListen                getListen(void);
     std::string	                getCgiPass(void);
     std::string                 getHeader(void);
-    std::string                 getBody(void);
+    std::string                 *getBody(void);
     static std::string			getReasonPhrase(std::string);
 	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
     std::string                 getFullURI();
-
+    ssize_t             getMaxBodySize(void);
     bool                        isRedirect(void);
     bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);
-    void                        setData(Request &, ServerConfig *, location *location);
+    void                        setData(Request &, ServerConfig *, std::vector<location *> &);
 public:
+    std::string                 _fullURI;
 	void						OpenResponseFile(const char *path);
 	void						OpenErrorFile(int code);
 	void					    initErrorCode(void);
     void                        generate();
     void                        generate2(serverListen &);
+    void                        freeData(void);
     Response();
     ~Response();
 

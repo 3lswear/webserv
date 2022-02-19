@@ -3,7 +3,6 @@
 #include <cassert>
 #include <cstdio>
 #include <map>
-// #include "parse.hpp"
 
 #define THREAD_NUM 100
 #define MAX_EVENTS
@@ -40,22 +39,21 @@ void	Server::readConfig(char *filename)
 	// TOMLMap *root = NULL;
 	// root = parse(filename);
 	config::TOMLParser parser(filename);
-	try
-	{
 		parser.parse();
+		_root = parser.root;
+		DBOUT << RED << "PARSED !!!" << ENDL;
 
-	}
-	catch (std::domain_error &e)
-	{
-		std::cerr << RED << "FATAL: ";
-		std::cerr << e.what() << RESET << std::endl;
-		// root->clear();
-		config::clean_parsed(parser.root);
-		// delete parser.root;
-		// exit(-1);
-		return;
-
-	}
+	// catch (std::domain_error &e)
+	// {
+	// 	std::cerr << RED << "FATAL: ";
+	// 	std::cerr << e.what() << RESET << std::endl;
+	// 	// root->clear();
+	// 	// config::clean_parsed(parser.root);
+	// 	// delete parser.root;
+	// 	// exit(-1);
+	// 	return;
+    //
+	// }
 	// catch (config::Tokenizer::InvalidToken &e)
 	// {
 	// 	std::cerr << RED << "FATAL: ";
@@ -81,10 +79,8 @@ void	Server::readConfig(char *filename)
 		++it;
 	}
 
-	config::clean_parsed(parser.root);
+	DBOUT << RED << "GONNA CLEAN_PARSED" << ENDL;
 }
-
-
 
 void Server::sendData(Client &client, int fd)
 {
@@ -141,6 +137,7 @@ void Server::readSocket(Client &client, int fd)
 	// client.setRawData(buf);
 	client.increaseRecvCounter(bytes_read);
 	status = client.parseRequest();
+	(void)status;
 	// client_map[fd].printClientInfo();
 
 	if (client.allRecved())
@@ -197,6 +194,12 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 		<< ENDL;
 }
 
+void	sigHandler(int sig)
+{
+	if (sig == SIGINT)
+		throw ConfigException("SIGINT called. Server shutdown!");
+}
+
 void	Server::start(void)
 {
 	/* Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
@@ -207,7 +210,8 @@ void	Server::start(void)
 
 	unsigned int client_events = EPOLLIN;
 	unsigned int server_events = EPOLLIN;
-	
+
+	std::signal(SIGINT, sigHandler);
 	_epoll_fd = epoll_create(1337);
 
 
@@ -254,7 +258,7 @@ void	Server::start(void)
 	{
 
 		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		DBOUT << TURQ << "ready_num " << ready_num << ENDL;
+		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
@@ -324,6 +328,23 @@ void	Server::start(void)
 
 void	Server::end(void)
 {
+}
+
+//----------------------------------------------Other------------------------------------------------------------------------------------------------
+void	Server::checkError(int fd, std::string str)
+{
+	if (fd < 0)
+	{
+		DBOUT << RED << "Server ERROR: " << str << ENDL;
+		exit(1);
+	}
+	else
+		DBOUT << GREEN << "Server SUCCESS: " << str << ENDL;
+}
+
+
+Server::~Server()
+{
 	std::vector<ServerConfig *>::iterator pri;
 	std::vector<location *>::iterator	loc;
 	std::vector< location *> l;
@@ -342,23 +363,8 @@ void	Server::end(void)
 		delete *pri;
 		pri++;
 	}
-}
-
-//----------------------------------------------Other------------------------------------------------------------------------------------------------
-void	Server::checkError(int fd, std::string str)
-{
-	if (fd < 0)
-	{
-		DBOUT << RED << "Server ERROR: " << str << ENDL;
-		exit(1);
-	}
-	else
-		DBOUT << GREEN << "Server SUCCESS: " << str << ENDL;
-}
 
 
-Server::~Server()
-{
-	
+	config::clean_parsed(_root);
 }
 

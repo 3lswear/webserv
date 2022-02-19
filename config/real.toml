@@ -1,18 +1,18 @@
 [[server]]
 	name = "pohek1.org"
-	host = "127.0.0.1"
-	port = 8080
-	body_size_limit = 10000000
+	host = "127.0.0.1" # check inet_addr()
+	port = 8080 	# check num, (0, 65536)
+	body_size_limit = 10000000 #(pofig and > 0)
 	[server.error_page]
-		403 = "www/errorFolder/index2.html"
+		"404" = "www/errorFolder/error_404.html" # throw exception if not string
 	[[server.location]]
-		location = "/"
-		root = "www/"
-		methods = ["GET", "POST", "DELETE"]
-		autoindex = true
+		location = "/" # mandatory
+		root = "www/"  # check valid
+		methods = ["GET", "POST", "DELETE"] 
+		autoindex = true #check if bool
 		directory_file = "index.html"
-		upload_accept = true
-		upload_dir = "/var/www/html/upload"
+		upload_accept = true #throw exception if not bool
+		upload_dir = "www/upload" # check valid
 	[[server.location]]
 		location = "/images"
 		root = "www/images"
@@ -20,7 +20,7 @@
 		autoindex = true
 	[[server.location]]
 		location = "/images/168.png"
-		redirect = ["301", "http://127.0.0.1:8080/168.png"]
+		redirect = ["301", "http://127.0.0.1:8080/168.png"] #throw exception if no array, or more 2 elem, or elem is not str
 	[[server.location]]
 		location = "/errorFolder/images/168.png"
 		redirect = ["301", "http://127.0.0.1:8080/168.png"]
@@ -33,19 +33,15 @@
 		root = "www/images/pngImg"
 		methods = ["GET"]
 	[[server.location]]
-		location = "*.ico"
-		root = "www/images/icoImg"
-		methods = ["GET"]
-	[[server.location]]
 		location = "/errorFolder"
 		root = "www/errorFolder"
 		methods = ["GET", "POST"]
-		autoindex = false
+		autoindex = true
 	[[server.location]]
 		location = "*.php"
 		root = "www/script"
 		autoindex = false
-		cgi_pass = "/usr/bin/php-cgi"
+		cgi_pass = "/usr/bin/php-cgi" #check valid
 [[server]]
 	name = "pohek2.org"
 	host = "127.0.0.1"
@@ -63,7 +59,7 @@
 		autoindex = true
 		directory_file = "index.html"
 		upload_accept = false
-		upload_dir = "/var/www/html/upload"
+		upload_dir = "www/upload"
 [[server]]
 	name = "localhost"
 	host = "127.0.0.1"
@@ -81,4 +77,4 @@
 		autoindex = true
 		directory_file = "index.html"
 		upload_accept = false
-		upload_dir = "/var/www/html/upload"
+		upload_dir = "www/upload"

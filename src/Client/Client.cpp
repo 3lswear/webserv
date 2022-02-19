@@ -111,7 +111,7 @@ bool Client::isChunked(void)
 // Возвращает истина, если отправлены все данные клиента.
 bool	Client::allSended(void)
 {
-	if (_toSend.size() <= _sended)
+	if (response_len <= _sended)
 		done = true;
 	return (done);
 }
@@ -135,59 +135,64 @@ void 	Client::increaseRecvCounter(unsigned int n)
 }
 
 //Генерирует response. Далее респонс можно получить через функцию getStrToSend()
-int	Client::sendResponse(int	fd)
-{
-	_response.setData(_request, _config);
-	_response.generate();
-	_headerToSend = _response.getHeader();
-	_bodyToSend = _response.getBody();
-	_ret = sendData(fd, _headerToSend + _bodyToSend);
+// int	Client::sendResponse(int	fd)
+// {
+// 	_response.setData(_request, _config);
+// 	_response.generate();
+// 	_headerToSend = _response.getHeader();
+// 	_bodyToSend = _response.getBody();
+// 	_ret = sendData(fd, _headerToSend + _bodyToSend);
 
-	return (_ret);
-}
+// 	return (_ret);
+// }
 
-std::string	Client::generateRespons(void)
-{
-	size_t len;
+// std::string	Client::generateRespons(void)
+// {
+// 	size_t len;
 
-	_response.setData(_request, _config);
-	_response.generate();
-	_headerToSend = _response.getHeader();
-	_bodyToSend = _response.getBody();
-	_toSend = _headerToSend + _bodyToSend;
+// 	_response.setData(_request, _config);
+// 	_response.generate();
+// 	_headerToSend = _response.getHeader();
+// 	_bodyToSend = _response.getBody();
+// 	*_toSend = _headerToSend + _bodyToSend;
 
 
-	len = _toSend.size();
-	response_len = len;
-	_to_send_char = new char[len + 1];
-	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
+// 	len = _toSend->size();
+// 	response_len = len;
+// 	_to_send_char = new char[len + 1];
+// 	std::memcpy(_to_send_char, _toSend->c_str(), len + 1);
 
-	// DBOUT << "len = " << len << ENDL;
-	// DBOUT << "strlen = " << strlen(_to_send_char) << ENDL;
-	// DBOUT << "content_lenth = " << _request.getContentLength() << ENDL;
-	return (_toSend);
-}
+// 	return (*_toSend);
+// }
 
 std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 {
 	size_t		len;
-	location	*tmp;
+	std::vector<location *> tmp;
 
 	_config	=	Config::getConfig(configs, _request, connected_to);
 	tmp 	=	Config::getLocation(_config->getLocations(), _request.getURI());
 	_response.setData(_request, _config, tmp);
 	_response.generate2(connected_to);
-	_headerToSend = _response.getHeader();
-	_bodyToSend = _response.getBody();
-	_toSend = _headerToSend + _bodyToSend;
+
+	_toSend = new std::string;
+	*_toSend = (_response.getBody() == NULL) ? _response.getHeader() : _response.getHeader() + *_response.getBody();
 
 
-	len = _toSend.size();
+	len = _toSend->size();
 	response_len = len;
 	_to_send_char = new char[len + 1];
-	std::memcpy(_to_send_char, _toSend.c_str(), len + 1);
+	std::memcpy(_to_send_char, _toSend->c_str(), len + 1);
 
-	return (_toSend);
+	std::cout << PINK << "\n[["<< YELLOW << "Request header\n{" << ENDL;
+	std::cout << BLUE << _request.getHeader() << YELLOW << "},\n" << ENDL;
+	std::cout << GREEN << "Response Header\n{" << ENDL;
+	std::cout << BLUE << _response.getHeader() <<  GREEN << "}" << PINK << "]]\n"<< ENDL;
+	delete _toSend;
+	if (_request.getBody() != NULL)
+		_request.freeData();
+	_response.freeData();
+	return (_headerToSend);
 }
 
 //-------------------------------------------------Error---------------------------------------
@@ -261,7 +266,6 @@ void	Client::clear(void)
 	_config = NULL;
 	_bodyToSend = "";
 	_headerToSend = "";
-	_toSend = "";
 	if (_to_send_char)
 		delete[] _to_send_char;
 }
