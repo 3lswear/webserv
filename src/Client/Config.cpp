@@ -63,7 +63,7 @@ int			Config::calcLen(std::string &s1, std::string &s2)
 	return (len);
 }
 
-location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
+std::vector<location *> Config::getLocation(std::vector<location *> &arr, std::string &URI)
 {
 	unsigned int	tryLen = URI.size();
 	std::string		tryLocation;
@@ -83,12 +83,7 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 			tmp = *it;
 			tryLocation = URI.substr(0, tryLen);
 			if (tmp->location == tryLocation)
-			{
-				tmp = new location;
-				copyLocation(tmp, *it);
 				step_1.push_back(tmp);
-				break;
-			}
 			it++;
 		}
 		if (!step_1.empty())
@@ -102,6 +97,7 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		if (tmp->location == URI || tmp->location.size() > 1)
 			step_2.push_back(tmp);
 	}
+
 	it = arr.begin();
 	while (it != arr.end())
 	{
@@ -110,40 +106,22 @@ location    *Config::getLocation(std::vector<location *> &arr, std::string &URI)
 		{
 			suffix1 = tmp->location.substr(2);
 			if (suffix1 == suffix)
-			{
-				tmp = new location;
-				copyLocation(tmp, *it);
 				step_2.push_back(tmp);
-				break;
-			}
 		}
 		it++;
 	}
-	if (step_2.size() == 1)
-		return (step_2[0]);
-	else if (step_2.size() == 2)
+	if (step_2.empty())
 	{
-		if(!step_2[1]->cgi_pass.empty())
+		it = arr.begin();
+		while (it != arr.end())
 		{
-			step_2[0]->cgi_pass = step_2[1]->cgi_pass;
-			delete step_2[1];
+			tmp = *it;
+			if (tmp->location == "/")
+				step_2.push_back(tmp);
+			it++;
 		}
-		return (step_2[0]);
 	}
-	it = arr.begin();
-	while (it != arr.end())
-	{
-		tmp = *it;
-		if (tmp->location == "/")
-		{
-			tmp = new location;
-			copyLocation(tmp, *it);
-			return (tmp);
-		}
-		it++;
-	}
-	
-	return (NULL);
+	return (step_2);
 }
 
 ServerConfig    *Config::getConfig(std::vector<ServerConfig *> &arr, Request &request, serverListen &data)

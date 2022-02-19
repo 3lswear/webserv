@@ -34,6 +34,7 @@ private:
     std::string     _contentLanguage;
     std::string     _transferEncoding;
     std::string     _upload_dir;
+    std::string     _cgi_Pass;
 
     void            setHeaderBlocks(void);
     void            setContentType(void);
@@ -62,7 +63,7 @@ public:
     serverListen                getListen(void);
     std::string	                getCgiPass(void);
     std::string                 getHeader(void);
-    std::string                 getBody(void);
+    std::string                 *getBody(void);
     static std::string			getReasonPhrase(std::string);
 	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
@@ -71,7 +72,7 @@ public:
     bool                        isRedirect(void);
     bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);
-    void                        setData(Request &, ServerConfig *, location *location);
+    void                        setData(Request &, ServerConfig *, std::vector<location *> &);
 public:
     std::string                 _fullURI;
 	void						OpenResponseFile(const char *path);

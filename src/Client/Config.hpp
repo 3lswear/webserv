@@ -16,7 +16,7 @@ public:
     ~Config();
 
     static  int             calcLen(std::string &, std::string &);
-    static  location        *getLocation(std::vector<location *> &, std::string &URI);
+    static  std::vector<location *> getLocation(std::vector<location *> &, std::string &URI);
     static  ServerConfig    *getConfig(std::vector<ServerConfig *> &, Request &request, serverListen &data);
 private:
 
