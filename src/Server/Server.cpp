@@ -16,8 +16,8 @@ Server::Server()
 void	Server::readConfig(char *filename)
 {
 	config::TOMLParser parser(filename);
-	parser.parse();
 	_root = parser.root;
+	parser.parse();
 	DBOUT << RED << "PARSED !!!" << ENDL;
 
 	TOMLMap::iterator it1;

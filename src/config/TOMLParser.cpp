@@ -26,7 +26,9 @@ namespace config
 {
 
 	TOMLParser::TOMLParser(char *filename) : tokenizer(filename)
-	{};
+	{
+		root = new TOMLMap;
+	}
 
 	void TOMLParser::processMap(void)
 	{
