@@ -54,8 +54,8 @@ class toml_node
 		void setObject(TOMLMap *obj);
 		void setMapArray(TOMLMapArray *map_array);
 
-		std::string *toString(void) const;
-		static std::string *TOMLMap_to_string(TOMLMap *map);
+		std::string toString(void) const;
+		static std::string TOMLMap_to_string(TOMLMap *map);
 };
 
 

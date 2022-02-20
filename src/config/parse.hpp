@@ -8,6 +8,5 @@
 #include "TOMLParser.hpp"
 
 TOMLMap *parse(char *filename);
-void display(TOMLMap *config);
 
 #endif

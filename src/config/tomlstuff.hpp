@@ -9,7 +9,7 @@ typedef std::vector<toml_node *> TOMLArray;
 
 namespace config
 {
-
+	void display(TOMLMap *config);
 	void clean_parsed(TOMLMap *root);
 	void clean_generic(toml_node *node);
 }

@@ -20,19 +20,18 @@
 /* } */
 namespace config
 {
-
 	void display(TOMLMap *root_map)
 	{
-		std::cout << ">>> printing config: <<<" << std::endl;
+		DBOUT << ">>> printing config: <<<" << std::endl;
 
 		TOMLMap::iterator it;
 
 		for (it = root_map->begin(); it != root_map->end(); ++it)
 		{
-			std::cout << it->first
+			DBOUT << it->first
 				<< ": "
-				<< *(it->second->toString());
-			std::cout << ", " << std::endl;
+				<< (it->second->toString());
+			DBOUT << ", " << std::endl;
 			/* << std::endl << "-------" << std::endl; */
 		}
 	}
@@ -42,6 +41,7 @@ namespace config
 		TOMLMap::iterator it;
 
 		DBOUT << ">>> cleaning up: <<<" << std::endl;
+		DBOUT << root << ENDL;
 		if (!root)
 			return;
 		for (it = root->begin(); it != root->end(); ++it)
@@ -52,7 +52,7 @@ namespace config
 
 			clean_generic(it->second);
 			/* delete it->second; */
-			std::cout << ", " << std::endl;
+			DBOUT << ", " << std::endl;
 		}
 		DBOUT << YELLO << "end of clean" << ENDL;
 		root->clear();

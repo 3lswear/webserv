@@ -97,32 +97,32 @@ void toml_node::setMapArray(TOMLMapArray *map_array)
 }
 
 
-std::string *toml_node::toString(void) const
+std::string toml_node::toString(void) const
 {
 	switch (type)
 	{
 		case STRING:
 			{
-				return (value.str);
+				return (*value.str);
 			}
 		case NUM:
 			{
 				std::stringstream ss;
 				ss << value.integer;
-				std::string *result = new std::string();
-				ss >> *result;
+				std::string result;
+				ss >> result;
 				return (result);
 			}
 		case ARRAY:
 			{
 				TOMLArray::iterator it;
-				std::string *result = new std::string("[ ");
+				std::string result("[ ");
 				for (it = value.array->begin(); it != value.array->end(); ++it)
 				{
-					*result += *((*it)->toString());
-					*result += ", ";
+					result += ((*it)->toString());
+					result += ", ";
 				}
-				*result += " ]";
+				result += " ]";
 				return (result);
 			}
 		case MAP:
@@ -132,41 +132,41 @@ std::string *toml_node::toString(void) const
 		case MAPARRAY:
 			{
 				std::stringstream ss;
-				std::string *result = new std::string();
+				std::string result;
 				TOMLMapArray::iterator it;
 				TOMLMapArray *map_array = value.map_array;
 
 				ss << "[\n";
 				for (it = map_array->begin(); it != map_array->end(); ++it)
 				{
-					ss << (*TOMLMap_to_string(*it));
+					ss << (TOMLMap_to_string(*it));
 					ss << ", " << std::endl;
 				}
 				ss << "]\n";
 
 
 				/* ss >> *result; */
-				*result = ss.str();
+				result = ss.str();
 				return (result);
 			}
 		case BOOL:
 			{
-				std::string *result;
+				std::string result;
 				if (value.boolean)
-					result = new std::string("true");
+					result = std::string("true");
 				else
-					result = new std::string("false");
+					result = std::string("false");
 				return (result);
 			}
 		default:
-			return ( new std::string("Not implemented :)"));
+			return (std::string("Not implemented :)"));
 	}
 }
 
-std::string *toml_node::TOMLMap_to_string(TOMLMap *map)
+std::string toml_node::TOMLMap_to_string(TOMLMap *map)
 {
 	std::stringstream ss;
-	std::string *result = new std::string();
+	std::string result;
 	TOMLMap::iterator it;
 
 	ss << "{\n";
@@ -174,13 +174,13 @@ std::string *toml_node::TOMLMap_to_string(TOMLMap *map)
 	{
 		ss << it->first
 			<< ": "
-			<< *(it->second->toString())
+			<< (it->second->toString())
 			<< std::endl;
 	}
 
 	ss << "}" << std::endl;
 
 	/* ss >> *result; */
-	*result = ss.str();
+	result = ss.str();
 	return (result);
 }
