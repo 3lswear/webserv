@@ -227,8 +227,10 @@ void	Server::run(void)
 				if (events & EPOLLIN)
 				{
 					readSocket(*client_map[fd], fd);
-					if (client_map[fd]->done || client_map[fd]->isEmpty())
+					if (client_map[fd]->done)
+					{
 						delete_client(client_map, fd);
+					}
 					else if (client_map[fd]->readyToSend())
 					{
 						client_map[fd]->generateRespons(_configs);
