@@ -45,6 +45,7 @@ namespace config
 
 			toml_node *parseNil(void);
 
+			// Expected + missing + context
 			class ExpectedToken: public std::domain_error
 			{
 				protected:
@@ -54,7 +55,7 @@ namespace config
 					ExpectedToken(const std::string &missing, const std::string context): std::domain_error("ExpectedToken")
 					{
 						msg = std::string("Config file: ");
-						msg += ("Expected " + missing + " at " + context);
+						msg += ("Expected " + missing + " " + context);
 					}
 
 					virtual const char *what() const throw()
@@ -63,10 +64,10 @@ namespace config
 					}
 
 					virtual ~ExpectedToken() throw()
-					{
-						// delete msg;
-					}
+					{}
 			};
+
+			// Unexpected + unexpected + context
 			class UnexpectedToken: public std::domain_error
 			{
 				protected:
@@ -85,9 +86,28 @@ namespace config
 					}
 
 					virtual ~UnexpectedToken() throw()
+					{}
+
+			};
+			class AlreadyExists: public std::domain_error
+			{
+				protected:
+					std::string msg;
+
+				public:
+					AlreadyExists(const std::string &token, const std::string context): std::domain_error("ExpectedToken")
 					{
-						// delete msg;
+						msg = std::string("Config file: ");
+						msg += (token + "already exists " + context);
 					}
+
+					virtual const char *what() const throw()
+					{
+						return (msg.c_str());
+					}
+
+					virtual ~AlreadyExists() throw()
+					{}
 
 			};
 	};
