@@ -7,64 +7,19 @@
 #define THREAD_NUM 100
 #define MAX_EVENTS
 
-//----------------------------------------------Constructors-----------------------------------------------------------------------------------
 Server::Server()
 {
 	bzero(_events, sizeof(_events));
 
 }
 
-Server::Server(std::string path)
-{
-	(void)path;
-}
-
-void Server::print_epoll_events(unsigned int events)
-{
-	DBOUT << "Epoll events: ";
-	if (events & EPOLLIN)
-		DBOUT << "EPOLLIN ";
-	if (events & EPOLLOUT)
-		DBOUT << "EPOLLOUT ";
-	if (events & EPOLLET)
-		DBOUT << "EPOLLET ";
-	DBOUT << ENDL;
-}
-
-//----------------------------------------------Send--------------------------------------------------------------------------------------------
-
-//----------------------------------------------Configuration-----------------------------------------------------------------------------------
 void	Server::readConfig(char *filename)
 {
-	// TOMLMap *root = NULL;
-	// root = parse(filename);
 	config::TOMLParser parser(filename);
-		parser.parse();
-		_root = parser.root;
-		DBOUT << RED << "PARSED !!!" << ENDL;
+	parser.parse();
+	_root = parser.root;
+	DBOUT << RED << "PARSED !!!" << ENDL;
 
-	// catch (std::domain_error &e)
-	// {
-	// 	std::cerr << RED << "FATAL: ";
-	// 	std::cerr << e.what() << RESET << std::endl;
-	// 	// root->clear();
-	// 	// config::clean_parsed(parser.root);
-	// 	// delete parser.root;
-	// 	// exit(-1);
-	// 	return;
-    //
-	// }
-	// catch (config::Tokenizer::InvalidToken &e)
-	// {
-	// 	std::cerr << RED << "FATAL: ";
-	// 	std::cerr << e.what() << RESET << std::endl;
-	// 	config::clean_parsed(parser.root);
-	// 	// root->clear();
-	// 	// delete parser.root;
-	// 	exit(-1);
-	// }
-
-	/* TOMLMap *map; */
 	TOMLMap::iterator it1;
 	TOMLMapArray	*arr;
 	TOMLMapArray::iterator	it;
@@ -79,12 +34,11 @@ void	Server::readConfig(char *filename)
 		++it;
 	}
 
-	DBOUT << RED << "GONNA CLEAN_PARSED" << ENDL;
+	DBOUT << RED << "done processing parsed data" << ENDL;
 }
 
 void Server::sendData(Client &client, int fd)
 {
-	/* std::string tmp = client.getStrToSend(); */
 	char *tmp = client.getStrToSend();
 	size_t size_diff = client.response_len - client.getCounter();
 	size_t send_len;
@@ -98,14 +52,12 @@ void Server::sendData(Client &client, int fd)
 	/* DBOUT << GREEN << client.getCounter() << ENDL; */
 	DBOUT << "sent " << send_len << " to client " << fd << ENDL;
 
-
 	if (send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL) < 0)
 	{
 		DBOUT << RED << "SEND FAILED !@!!!" << ENDL;
 		client.done = true;
 	}
 	client.increaseCounter();
-
 }
 
 void Server::readSocket(Client &client, int fd)
@@ -151,7 +103,7 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	close(fd);
 	client_map[fd]->clear();
-	delete (client_map[fd]);
+	// delete (client_map[fd]);
 	client_map.erase(fd);
 	DBOUT << RED <<
 		"deleting client "
@@ -160,53 +112,9 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 	return (ret);
 }
 
-void	Server::setupConfig(void)
+void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 {
-	this->_ip = "127.0.0.1";
-	this->_port = 8080;
-}
-
-
-void	Server::setNonBlock(int fd)
-{
-	fcntl(fd, F_SETFL, O_NONBLOCK);
-}
-
-void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
-{
-	struct epoll_event	ev;
-	ev.events = ep_events;
-	ev.data.fd = fd;
-
-	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
-	setNonBlock(fd);
-	DBOUT << YELLO
-		<< "add socket "
-		<< fd
-		<< " to epoll_list"
-		<< ENDL;
-}
-
-void	sigHandler(int sig)
-{
-	if (sig == SIGINT)
-		throw ConfigException("SIGINT called. Server shutdown!");
-}
-
-void	Server::start(void)
-{
-	/* Socket server_sock(AF_INET, SOCK_STREAM, 0, _port, "127.0.0.1"); */
-	std::map<int, Client*> client_map;
-	std::map<int, Socket> configurations_map;
-	int fd;
-	int ready_num = 0;
-
-	unsigned int client_events = EPOLLIN;
 	unsigned int server_events = EPOLLIN;
-
-	std::signal(SIGINT, sigHandler);
-	_epoll_fd = epoll_create(1337);
-
 
 	for (std::vector<ServerConfig *>::iterator it = _configs.begin();
 			it != _configs.end(); ++it)
@@ -221,7 +129,7 @@ void	Server::start(void)
 			DBOUT << YELLO << "adding server_sock..." << ENDL;
 			add_to_epoll_list(server_sock.getSocketFd(), server_events);
 
-			DBOUT << GREEN
+			std::cerr << GREEN
 				<< config->getServerName()
 				<< " started on "
 				<< config->getHost()
@@ -231,7 +139,7 @@ void	Server::start(void)
 		}
 		else
 		{
-			DBOUT << RED
+			std::cerr << RED
 				<< config->getServerName()
 				<< " failed to bind to "
 				<< config->getHost()
@@ -239,25 +147,57 @@ void	Server::start(void)
 				<< config->getPort()
 				<< ENDL;
 		}
-
 	}
-	/* checkError(server_sock.init(MAX_CLIENT), "Socket init"); */
-	/* setNonBlock(server_sock.getSocketFd()); */
+	if (configurations_map.empty())
+		throw std::domain_error("No servers were set up. Exiting.");
+}
+
+void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
+{
+	struct epoll_event	ev;
+	ev.events = ep_events;
+	ev.data.fd = fd;
+
+	assert(epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fd, &ev) == 0);
+	setNonBlock(fd);
+	DBOUT << GREEN
+		<< "add socket "
+		<< fd
+		<< " to epoll_list"
+		<< ENDL;
+}
+
+void	sigHandler(int sig)
+{
+	if (sig == SIGINT)
+		throw ConfigException("SIGINT called. Server shutdown!");
+}
+
+void	Server::run(void)
+{
+	std::map<int, Client*> client_map;
+	std::map<int, Socket> configurations_map;
+
+	unsigned int client_events = EPOLLIN;
+
+	std::signal(SIGINT, sigHandler);
+
+	_epoll_fd = epoll_create(1337);
 	setNonBlock(_epoll_fd);
 
-	/* DBOUT << YELLO << "adding server_sock..." << ENDL; */
-	/* add_to_epoll_list(server_sock.getSocketFd(), server_events); */
+	setup_server_socks(configurations_map);
+
 	while (1)
 	{
 
-		ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
+		int ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
 		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
 		for (int i = 0; i < ready_num; i++)
 		{
-			fd = _events[i].data.fd;
+			int fd = _events[i].data.fd;
 			unsigned int events = _events[i].events;
 			std::map<int, Socket>::iterator sock_it;
 
@@ -267,7 +207,6 @@ void	Server::start(void)
 			if ((events & EPOLLIN)
 					&& (sock_it = configurations_map.find(fd)) != configurations_map.end())
 			{
-				 /* = configurations_map.find(fd); */
 				int client_sock = accept(fd,
 						(sock_it->second).getSockaddr(), (sock_it->second).getSocklen());
 				if (client_sock > 0)
@@ -285,7 +224,9 @@ void	Server::start(void)
 				if (events & EPOLLIN)
 				{
 					readSocket(*client_map[fd], fd);
-					if (client_map[fd]->readyToSend())
+					if (client_map[fd]->done || client_map[fd]->isEmpty())
+						delete_client(client_map, fd);
+					else if (client_map[fd]->readyToSend())
 					{
 						client_map[fd]->generateRespons(_configs);
 
@@ -296,13 +237,11 @@ void	Server::start(void)
 						assert( epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == 0);
 						DBOUT << GREEN << "rearmed to EPOLLOUT" << ENDL;
 					}
-					/* if (client_map[fd]->isEmpty()) */
-					/* 	delete_client(client_map, fd); */
 				}
 				else if (events & EPOLLOUT)
 				{
 					/* DBOUT << GREEN << "doing sendData" << ENDL; */
-					client_map[fd]->printClientInfo();
+					// client_map[fd]->printClientInfo();
 					sendData(*client_map[fd], fd);
 					if (client_map[fd]->allSended())
 					{
@@ -317,24 +256,24 @@ void	Server::start(void)
 	DBOUT << RED << "end;" << ENDL;
 }
 
-
-
-void	Server::end(void)
-{
-}
-
 //----------------------------------------------Other------------------------------------------------------------------------------------------------
-void	Server::checkError(int fd, std::string str)
+
+void	Server::setNonBlock(int fd)
 {
-	if (fd < 0)
-	{
-		DBOUT << RED << "Server ERROR: " << str << ENDL;
-		exit(1);
-	}
-	else
-		DBOUT << GREEN << "Server SUCCESS: " << str << ENDL;
+	fcntl(fd, F_SETFL, O_NONBLOCK);
 }
 
+void Server::print_epoll_events(unsigned int events)
+{
+	DBOUT << "Epoll events: ";
+	if (events & EPOLLIN)
+		DBOUT << "EPOLLIN ";
+	if (events & EPOLLOUT)
+		DBOUT << "EPOLLOUT ";
+	if (events & EPOLLET)
+		DBOUT << "EPOLLET ";
+	DBOUT << ENDL;
+}
 
 Server::~Server()
 {
@@ -356,7 +295,6 @@ Server::~Server()
 		delete *pri;
 		pri++;
 	}
-
 
 	config::clean_parsed(_root);
 }

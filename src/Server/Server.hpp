@@ -54,12 +54,10 @@ class Server
 
 	public:
 		Server();
-		Server(std::string path);
 
 		void readConfig(char *filename);
-		void setupConfig(void);
-		void start(void);
-		void end(void);
+		void setup_server_socks(std::map<int, Socket> &configurations_map);
+		void run(void);
 		~Server();
 };
 

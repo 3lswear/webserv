@@ -17,7 +17,7 @@ int	main(int argc, char **argv)
 			server.readConfig(argv[1]);
 		else
 			server.readConfig(path);
-		server.start();
+		server.run();
 	}
 	catch(const ConfigException& e)
 	{
