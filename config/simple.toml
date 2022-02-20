@@ -1,17 +1,22 @@
+# hi
+#another comment
 [[server]]
-	name = "serv1"
+	name = "serv1" # lol stupid name
 	host = "127.0.0.1"
 	port = 8080
 	body_size_limit = 10
 	[server.error_page]
 		404 = "error_404.html"
+
+
 	[[server.location]]
 		location = "/"
 		root = "/var/www/html/jopa.html"
 		redirect = ["301", "http://localhost/secret"]
-		methods = ["GET", "POST"]
+		methods = ["GET", "POST" ]
 		autoindex = true
 		directory_file = "its_a_directory.html"
+
 		upload_accept = true
 		upload_dir = "/var/www/html/upload"
 	[[server.location]]
@@ -23,6 +28,7 @@
 [[server]]
 	name = "2222"
 	host = "10.0.0.1"
+
 	port = 8081
 	body_size_limit = 10
 	[server.error_page]
@@ -35,6 +41,6 @@
 		root = "/var/www/html/jopa.html"
 		methods = ["GET", "POST"]
 		autoindex = true
-		directory_file = "its_a_directory.html"
-		upload_accept = false
+		# directory_file = "its_a_directory.html"
+		upload_accept = true
 		upload_dir = "/var/www/html/upload"
