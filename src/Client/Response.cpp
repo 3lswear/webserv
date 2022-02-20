@@ -118,7 +118,16 @@ void	Response::setCacheControl(void)
 void	Response::setLocation(void)
 {
 	if (_code == 301)
-		_locationSTR = _location->redirect[_code];
+	{
+		_redirect_location = _location->redirect[_code];
+		unsigned long  pos = _redirect_location.rfind("$request_file");
+		if (pos != std::string::npos)
+		{
+			_redirect_location.erase(pos);
+			_redirect_location += _request_file;
+		}
+		_locationSTR = _redirect_location;
+	}
 }
 
 serverListen	Response::getListen()
@@ -237,6 +246,7 @@ std::string	Response::getFullURI(void)
 		int	pos = 0;
 		pos = _request.getURI().rfind("/");
 		tmp = _request.getURI().substr(pos);
+		_request_file = tmp;
 		if (!_location->uploadDir.empty())
 			_upload_dir = _location->uploadDir + tmp;
 		tmp = _location->root + tmp;
@@ -244,6 +254,7 @@ std::string	Response::getFullURI(void)
 	else
 	{
 		tmp	= _request.getURI().substr(len);
+		_request_file = tmp;
 		if (!_location->uploadDir.empty())
 			_upload_dir = _location->uploadDir + tmp;
 		tmp = _location->root + tmp;
@@ -380,6 +391,8 @@ void	Response::generate2(serverListen &l)
 
 bool	Response::isRedirect()
 {
+	if (_location == NULL)
+		return (false);
 	if (!_location->redirect.empty())
 	{
 		_code = 301;
@@ -464,6 +477,12 @@ void	Response::methodPost(void)
 void	Response::methodPut(void)
 {
 	_code = 201;
+	if (!_location->uploadAccept)
+	{
+		_code = 403;
+		invalidClient();
+		return;
+	}
 	if (_request.isFile(_upload_dir) == 0)
 		_code = 204;
 	std::ofstream	file(_upload_dir.c_str(), std::ios::out | std::ios::binary);
