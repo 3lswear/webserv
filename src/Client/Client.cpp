@@ -189,8 +189,7 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	std::cout << GREEN << "Response Header\n{" << ENDL;
 	std::cout << BLUE << _response.getHeader() <<  GREEN << "}" << PINK << "]]\n"<< ENDL;
 	delete _toSend;
-	if (_request.getBody() != NULL)
-		_request.freeData();
+	_request.freeData();
 	_response.freeData();
 	return (_headerToSend);
 }
@@ -267,7 +266,12 @@ void	Client::clear(void)
 	_bodyToSend = "";
 	_headerToSend = "";
 	if (_to_send_char)
+	{
 		delete[] _to_send_char;
+		_to_send_char = NULL;
+	}
+	_request.freeData();
+	_response.freeData();
 }
 
 Client::~Client()

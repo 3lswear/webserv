@@ -36,7 +36,11 @@ Request::Request(char *str)
 
 void						Request::freeData(void)
 {
-	delete _body;
+	if (_body != NULL)
+	{
+		delete _body;
+		_body = NULL;
+	}
 }
 
 std::string					&Request::getURI(void)
