@@ -110,46 +110,39 @@ void Server::sendData(Client &client, int fd)
 
 void Server::readSocket(Client &client, int fd)
 {
-
 	int status;
 	int bytes_read;
-	// char buf[BUFFSIZE + 1];
 	std::string	stringBUF(BUFFSIZE, 0);
 
 	DBOUT << TURQ << "IN readSocket" << ENDL;
-	DBOUT << "client in readSocket "<< &client << ENDL;
+	// DBOUT << "client in readSocket "<< &client << ENDL;
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
-		DBOUT << RED << "bytes_read = 0" << ENDL;
-		client.allRead = true;
-		throw std::logic_error("JOPA CLIENTU");
-		return;
+		DBOUT << RED << "bytes_read 0" << ENDL;
+		client.done = true;
 	}
-	/* else if (bytes_read == -1) */
-	/* 	throw std::logic_error("JOPA CLIENTU"); */
-	// buf[bytes_read + 1] = '\0';
-	// DBOUT << stringBUF << ENDL;
-	stringBUF.erase(bytes_read, stringBUF.size());
-	/* DBOUT << "after erase" <<ENDL; */
-	/* DBOUT << stringBUF << ENDL; */
-	client.setRawData(stringBUF);
-	// client.setRawData(buf);
-	client.increaseRecvCounter(bytes_read);
-	status = client.parseRequest();
-	(void)status;
-	// client_map[fd].printClientInfo();
-
-	if (client.allRecved())
+	else if (bytes_read == -1)
 	{
+		DBOUT << RED << "bytes_read -1" << ENDL;
 		client.allRead = true;
 	}
+	else
+	{
+		stringBUF.erase(bytes_read, stringBUF.size());
+		client.setRawData(stringBUF);
+		client.increaseRecvCounter(bytes_read);
+		status = client.parseRequest();
+		// client.printClientInfo();
+		if (client.allRecved())
+			client.allRead = true;
 
-	DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
-	DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
-	DBOUT << GREEN << "allRead " << client.allRead << ENDL;
+		DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
+		DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
+		DBOUT << GREEN << "allRead " << client.allRead << ENDL;
 
-	DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
+		DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
+	}
 }
 
 int Server::delete_client(std::map<int, Client *> &client_map, int fd)
