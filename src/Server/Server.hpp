@@ -3,10 +3,7 @@
 
 #include "webserv.hpp"
 #include "Client.hpp"
-#include "ServerConfig.hpp"
 #include "Socket.hpp"
-#include "parse.hpp"
-
 
 class Client;
 

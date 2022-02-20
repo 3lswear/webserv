@@ -106,7 +106,7 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 	close(fd);
 	client_map[fd]->clear();
-	// delete (client_map[fd]);
+	delete (client_map[fd]);
 	client_map.erase(fd);
 	DBOUT << RED <<
 		"deleting client "
@@ -257,7 +257,6 @@ void	Server::run(void)
 		}
 
 	}
-	/* close(server_sock.getSocketFd()); */
 	DBOUT << RED << "end;" << ENDL;
 }
 

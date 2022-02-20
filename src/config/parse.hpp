@@ -7,6 +7,4 @@
 #include "TOMLNode.hpp"
 #include "TOMLParser.hpp"
 
-TOMLMap *parse(char *filename);
-
 #endif
