@@ -16,8 +16,15 @@ Response::Response()
 void		Response::freeData(void)
 {
 	if (_body != NULL)
+	{
 		delete _body;
-	delete _header;
+		_body = NULL;
+	}
+	else if (_header != NULL)
+	{
+		delete _header;
+		_header = NULL;
+	}
 }
 
 std::string     Response::getHeader(void)

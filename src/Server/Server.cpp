@@ -27,10 +27,13 @@ void	Server::readConfig(char *filename)
 
 	arr = parser.root->find("server")->second->getMapArray();
 	it = arr->begin();
+	ServerConfig	*tmp;
 
 	while (it != arr->end())
 	{
-		_configs.push_back(new ServerConfig(*it));
+		tmp = new ServerConfig(*it);
+		_configs.push_back(tmp);
+		tmp->fillFields();
 		++it;
 	}
 

@@ -14,7 +14,7 @@ ServerConfig::ServerConfig(TOMLMap *map)
 	_clientBodySize = -1;
 	_port = 0;
 
-	fillFields();
+	// fillFields();
 }
 
 //--------------------------------------------------GET/SET---------------------------------------
@@ -199,61 +199,91 @@ int	ServerConfig::putLocation(toml_node *node)
 			if (it1->first == "location")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("location", toml_node::STRING, it1->second->get_type()));
+				}
 				tmp->location = *it1->second->getString();
 			}
 			else if (it1->first == "root")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("root", toml_node::STRING, it1->second->get_type()));
+				}
 				tmp->root = *it1->second->getString();
 			}
 			else if (it1->first == "autoindex")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("autoindex", toml_node::BOOL, it1->second->get_type()));
+				}
 				tmp->autoindex = it1->second->getBool();
 			}
 			else if (it1->first == "upload_accept")
 			{
 				if (it1->second->get_type() != toml_node::BOOL)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("upload_accept", toml_node::BOOL, it1->second->get_type()));
+				}
 				tmp->uploadAccept = it1->second->getBool();
 			}
 			else if (it1->first == "upload_dir")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("upload_dir", toml_node::STRING, it1->second->get_type()));
+				}
 				tmp->uploadDir = *it1->second->getString();	
 			}
 			else if (it1->first == "cgi_pass")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("cgi_pass", toml_node::STRING, it1->second->get_type()));
+				}
 				tmp->cgi_pass = *it1->second->getString();	
 			}
 			else if (it1->first == "body_size_limit")
 			{
 				if (it1->second->get_type() != toml_node::NUM)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("body_size_limit", toml_node::NUM, it1->second->get_type()));
+				}
 				tmp->clientBodySize = it1->second->getNum();
 			}
 			else if (it1->first == "directory_file")
 			{
 				if (it1->second->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("directory_file", toml_node::STRING, it1->second->get_type()));
+				}
 				tmp->directoryFile = *it1->second->getString();	
 			}
 			else if (it1->first == "methods")
 			{
 				if (it1->second->get_type() != toml_node::ARRAY)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("methods", toml_node::ARRAY, it1->second->get_type()));
+				}
 				Array = *it1->second->getArray();
 				it2 = Array.begin();
 				while (it2 != Array.end())
 				{
 					if ((*it2)->get_type() != toml_node::STRING)
+					{
+						delete tmp;
 						throw ConfigException(getWrongTypeErrorMSG("methods elem", toml_node::STRING, (*it2)->get_type()));
+					}
 					tmp->methods.push_back(*((*it2)->getString()));
 					++it2;
 				}
@@ -261,17 +291,29 @@ int	ServerConfig::putLocation(toml_node *node)
 			else if (it1->first == "redirect")
 			{
 				if (it1->second->get_type() != toml_node::ARRAY)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("redirect", toml_node::ARRAY, it1->second->get_type()));
+				}
 				Array = *it1->second->getArray();
 				if (Array.size() != 2)
+				{
+					delete tmp;
 					throw ConfigException("The redirect field specified the wrong number of arguments!");
+				}
 				it2 = Array.begin();
 				if ((*it2)->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("redirect elem", toml_node::STRING, (*it2)->get_type()));
+				}
 				str = *(*it2)->getString();
 				++it2;
 				if ((*it2)->get_type() != toml_node::STRING)
+				{
+					delete tmp;
 					throw ConfigException(getWrongTypeErrorMSG("redirect elem", toml_node::STRING, (*it2)->get_type()));
+				}
 				tmp->redirect.insert(std::make_pair(atoi(str.c_str()), *(*it2)->getString()));
 			}
 			else
