@@ -75,3 +75,34 @@
 	[[server.location]]
 		location = "/script"
 		redirect = ["301", "http://localhost:8080/cgi-bin"]
+[[server]]
+	name = "pohek2.org"
+	host = "127.0.0.1"
+	port = 8081
+	body_size_limit = 100000000
+	[[server.location]]
+		location = "/"
+		root = "www/tester/"
+		methods = ["GET"]
+		autoindex = true
+		directory_file = "index.html"
+	[[server.location]]
+		location = "/put_test"
+		root = "www/tester/"
+		methods = ["PUT"]
+		autoindex = true
+		upload_accept = true
+		upload_dir = "www/tester/upload_here/"
+	[[server.location]]
+		location = "*.bla"
+		cgi_pass = "ubuntu_cgi_tester"
+	[[server.location]]
+		location = "/post_body"
+		root = "www/tester/"
+		methods = ["POST"]
+		body_size_limit = 100
+	[[server.location]]
+		location = "/directory"
+		methods = ["GET"]
+		root = "www/tester/YoupiBanane/"
+		directory_file = "youpi.bad_extension"

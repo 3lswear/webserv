@@ -9,7 +9,7 @@ int	main(int argc, char **argv)
 	(void)argv;
 
 	Server	server;
-	char 	*path = (char *)"config/real.toml";
+	char 	*path = (char *)"config/def.toml";
 
 	try
 	{
