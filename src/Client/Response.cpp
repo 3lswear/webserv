@@ -464,6 +464,12 @@ void	Response::methodPost(void)
 void	Response::methodPut(void)
 {
 	_code = 201;
+	if (!_location->uploadAccept)
+	{
+		_code = 403;
+		invalidClient();
+		return;
+	}
 	if (_request.isFile(_upload_dir) == 0)
 		_code = 204;
 	std::ofstream	file(_upload_dir.c_str(), std::ios::out | std::ios::binary);
