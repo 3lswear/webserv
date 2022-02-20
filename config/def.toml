@@ -1,0 +1,77 @@
+[[server]]
+	name = "localhost"
+	host = "127.0.0.1"
+	port = 8080
+	body_size_limit = 100
+	[server.error_page]
+		403 = "www/def/errorFolder/error_403.html"
+		404 = "www/def/errorFolder/error_404.html"
+		405 = "www/def/errorFolder/error_405.html"
+	[[server.location]]
+		location = "/"
+		root = "www/def/"
+		methods = ["GET"]
+		autoindex = true
+		directory_file = "index.html"
+	[[server.location]]
+		location = "/put_file"
+		root = "www/def/upload"
+		body_size_limit = 1000000000
+		methods = ["PUT", "GET"]
+		autoindex = true
+		upload_dir = "www/def/upload/"
+		upload_accept = true
+	[[server.location]]
+		location = "/delete_file"
+		root = "www/def/upload"
+		methods = ["DELETE"]
+	[[server.location]]
+		location = "/docs"
+		root = "www/def/docs"
+		methods = ["GET"]
+		autoindex = true
+	[[server.location]]
+		location = "/document"
+		redirect = ["301", "http://localhost:8080/docs/$request_file"]
+	[[server.location]]
+		location = "/cgi-bin"
+		root = "www/def/script"
+		methods = ["GET", "POST"]
+		directory_file = "cgi_default.html"
+	[[server.location]]
+		location = "*.php"
+		cgi_pass = "/bin/php-cgi"
+	[[server.location]]
+		location = "/script"
+		redirect = ["301", "http://localhost:8080/cgi-bin/$request_file"]
+	[[server.location]]
+		location = "*.jpeg"
+		root = "www/def/images/jpegImg"
+		methods = ["GET"]
+	[[server.location]]
+		location = "*.png"
+		root = "www/def/images/pngImg"
+		methods = ["GET"]
+[[server]]
+	name = "pohek1.org"
+	host = "127.0.0.1"
+	port = 8080
+	body_size_limit = 100
+	[server.error_page]
+		404 = "www/def/errorFolder/error_404.html"
+	[[server.location]]
+		location = "/"
+		root = "www/def/"
+		methods = ["GET"]
+		directory_file = "index.html"
+	[[server.location]]
+		location = "/cgi-bin"
+		root = "www/def/script"
+		methods = ["GET", "POST"]
+		directory_file = "cgi_default.html"
+	[[server.location]]
+		location = "*.php"
+		cgi_pass = "/bin/php-cgi"
+	[[server.location]]
+		location = "/script"
+		redirect = ["301", "http://localhost:8080/cgi-bin"]
