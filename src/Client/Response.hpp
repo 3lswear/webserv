@@ -22,6 +22,9 @@ private:
     serverListen                _hostPort;
     std::string                 _method;
 
+    std::string                  _request_file;
+    std::string                 _redirect_location;
+
 private:
     std::string     _contentType;
     ssize_t         _contentLength;

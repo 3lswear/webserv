@@ -4,18 +4,18 @@
 	port = 8080 	# check num, (0, 65536)
 	body_size_limit = 10000000 #(pofig and > 0)
 	[server.error_page]
-		"404" = "www/errorFolder/error_404.html" # throw exception if not string
+		"404" = "www/real/errorFolder/error_404.html" # throw exception if not string
 	[[server.location]]
 		location = "/" # mandatory
-		root = "www/"  # check valid
+		root = "www/real/"  # check valid
 		methods = ["GET", "POST", "DELETE"] 
 		autoindex = true #check if bool
 		directory_file = "index.html"
 		upload_accept = true #throw exception if not bool
-		upload_dir = "www/upload" # check valid
+		upload_dir = "www/real/upload" # check valid
 	[[server.location]]
 		location = "/images"
-		root = "www/images"
+		root = "www/real/images"
 		methods = ["GET"]
 		autoindex = true
 	[[server.location]]
@@ -26,20 +26,20 @@
 		redirect = ["301", "http://127.0.0.1:8080/168.png"]
 	[[server.location]]
 		location = "*.jpeg"
-		root = "www/images/jpegImg"
+		root = "www/real/images/jpegImg"
 		methods = ["GET", "PUT"]
 	[[server.location]]
 		location = "*.png"
-		root = "www/images/pngImg"
+		root = "www/real/images/pngImg"
 		methods = ["GET"]
 	[[server.location]]
 		location = "/errorFolder"
-		root = "www/errorFolder"
+		root = "www/real/errorFolder"
 		methods = ["GET", "POST"]
 		autoindex = true
 	[[server.location]]
 		location = "*.php"
-		root = "www/script"
+		root = "www/real/script"
 		autoindex = false
 		cgi_pass = "/usr/bin/php-cgi" #check valid
 [[server]]
@@ -59,7 +59,7 @@
 		autoindex = true
 		directory_file = "index.html"
 		upload_accept = false
-		upload_dir = "www/upload"
+		upload_dir = "www/real/upload"
 [[server]]
 	name = "localhost"
 	host = "127.0.0.1"
@@ -77,4 +77,4 @@
 		autoindex = true
 		directory_file = "index.html"
 		upload_accept = false
-		upload_dir = "www/upload"
+		upload_dir = "www/real/upload"
