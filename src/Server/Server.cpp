@@ -1,8 +1,6 @@
 #include "Server.hpp"
 #include <exception>
 #include <cassert>
-#include <cstdio>
-#include <map>
 
 #define THREAD_NUM 100
 #define MAX_EVENTS
@@ -10,7 +8,6 @@
 Server::Server()
 {
 	bzero(_events, sizeof(_events));
-
 }
 
 void	Server::readConfig(char *filename)
@@ -45,6 +42,7 @@ void Server::sendData(Client &client, int fd)
 	char *tmp = client.getStrToSend();
 	size_t size_diff = client.response_len - client.getCounter();
 	size_t send_len;
+	ssize_t sent;
 
 	if (size_diff < BUFFSIZE)
 		send_len = size_diff;
@@ -54,13 +52,15 @@ void Server::sendData(Client &client, int fd)
 	/* DBOUT << YELLO << tmp << ENDL; */
 	/* DBOUT << GREEN << client.getCounter() << ENDL; */
 	DBOUT << "sent " << send_len << " to client " << fd << ENDL;
-
-	if (send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL) < 0)
+	sent = send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL);
+	if (sent < 0)
 	{
 		DBOUT << RED << "SEND FAILED !@!!!" << ENDL;
 		client.done = true;
 	}
-	client.increaseCounter();
+	else if (sent > 0)
+		client.increaseCounter();
+
 }
 
 void Server::readSocket(Client &client, int fd)
