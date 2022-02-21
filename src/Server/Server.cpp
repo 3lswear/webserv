@@ -117,7 +117,7 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 
 void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 {
-	unsigned int server_events = EPOLLIN;
+	unsigned int server_events = EPOLLIN | EPOLLET;
 
 	for (std::vector<ServerConfig *>::iterator it = _configs.begin();
 			it != _configs.end(); ++it)
@@ -207,18 +207,21 @@ void	Server::run(void)
 			/* DBOUT << "FD is " << fd << ENDL; */
 			/* print_epoll_events(events); */
 
-			if ((events & EPOLLIN)
-					&& (sock_it = configurations_map.find(fd)) != configurations_map.end())
+			if ((sock_it = configurations_map.find(fd)) != configurations_map.end())
 			{
-				int client_sock = accept(fd,
-						(sock_it->second).getSockaddr(), (sock_it->second).getSocklen());
-				if (client_sock > 0)
+				while (1)
 				{
-					client_map[client_sock] = new Client((sock_it->second).min_config);
-					add_to_epoll_list(client_sock, client_events);
+					int client_sock = accept(fd,
+							(sock_it->second).getSockaddr(), (sock_it->second).getSocklen());
+					if (client_sock > 0)
+					{
+						client_map[client_sock] = new Client((sock_it->second).min_config);
+						add_to_epoll_list(client_sock, client_events);
+					}
+					else
+						break;
+						/* throw std::logic_error("accept didnt work"); */
 				}
-				else
-					throw std::logic_error("accept didnt work");
 			}
 			else
 			{
