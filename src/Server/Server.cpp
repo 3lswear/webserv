@@ -80,7 +80,8 @@ void Server::readSocket(Client &client, int fd)
 	else if (bytes_read == -1)
 	{
 		DBOUT << RED << "bytes_read -1" << ENDL;
-		client.allRead = true;
+		// client.allRead = true;
+		client.done = true;
 	}
 	else
 	{
