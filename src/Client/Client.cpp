@@ -250,6 +250,11 @@ bool	Client::TimeToDie(void)
 		return (false);
 }
 
+serverListen	Client::getIpPort()
+{
+	return (connected_to);
+}
+
 void	Client::updateTimeToDie(void)
 {
 	gettimeofday(&_time, NULL);

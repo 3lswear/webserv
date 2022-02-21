@@ -60,6 +60,7 @@ public:
 	bool						isEmpty(void);
 	bool						TimeToDie(void);
 	void						updateTimeToDie(void);
+	serverListen				getIpPort(void);
 public:
 	int							parseRequest(void);
 

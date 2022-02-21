@@ -48,6 +48,14 @@ class Server
 			size_t left;
 			enum e_req_status req_status;
 		} t_client_status;
+		typedef	struct s_tmp_fd
+		{
+			serverListen	ip_port;
+			struct timeval	last_modif;
+		}t_tmp_fd;
+		bool	TimeToDie(struct timeval &last_modif, int lifeTime);
+		int		delete_fd(std::map<int, t_tmp_fd *> &map, int fd);
+		std::map<int, t_tmp_fd *>	free_socket;
 
 	public:
 		Server();

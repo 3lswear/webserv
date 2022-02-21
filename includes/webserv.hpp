@@ -14,6 +14,7 @@
 
 #define	HOME		"www"
 #define BUFFSIZE	65536
+#define LIFE_TIME   5
 #define MAX_CLIENT	1000
 #define WHITESPACE " \n\r\t\f\v"
 

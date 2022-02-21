@@ -102,18 +102,61 @@ void Server::readSocket(Client &client, int fd)
 
 int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 {
+	if (client_map[fd]->getRequest().getConnection() == "close")
+	{
+		int ret;
+		ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+		close(fd);
+		client_map[fd]->clear();
+		delete (client_map[fd]);
+		client_map.erase(fd);
+		DBOUT << RED <<
+			"deleting client "
+			<< fd
+			<< ENDL;
+		return (ret);
+	}
+	else
+	{
+		int ret;
+		struct epoll_event ev;
+		t_tmp_fd *tmp_fd;
+
+		ev.events = EPOLLIN;
+		ev.data.fd = fd;
+		ret = epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev);
+
+		//Добавляю фд в список
+		tmp_fd = new t_tmp_fd;
+		tmp_fd->ip_port = client_map[fd]->getIpPort();
+		gettimeofday(&tmp_fd->last_modif, NULL);
+		free_socket[fd] = tmp_fd;
+
+		//Удаляю клиента
+		client_map[fd]->clear();
+		delete (client_map[fd]);
+		client_map.erase(fd);
+		DBOUT << RED <<
+			"deleting client "
+			<< ENDL;
+		return (ret);
+	}
+}
+int		Server::delete_fd(std::map<int, t_tmp_fd *> &map, int fd)
+{
 	int ret;
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+	delete map[fd];
 	close(fd);
-	client_map[fd]->clear();
-	delete (client_map[fd]);
-	client_map.erase(fd);
+	map.erase(fd);
 	DBOUT << RED <<
-		"deleting client "
-		<< fd
-		<< ENDL;
+	"deleting fd "
+	<< fd
+	<< ENDL;
+
 	return (ret);
 }
+
 
 void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 {
@@ -170,6 +213,17 @@ void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 		<< ENDL;
 }
 
+bool	Server::TimeToDie(struct timeval &last_modif, int lifeTime)
+{
+	struct timeval curTime;
+
+	gettimeofday(&curTime, NULL);
+	if ((curTime.tv_sec - last_modif.tv_sec) >= lifeTime)
+		return (true);
+	else
+		return (false);
+}
+
 void	sigHandler(int sig)
 {
 	if (sig == SIGINT)
@@ -180,6 +234,8 @@ void	Server::run(void)
 {
 	std::map<int, Client*> client_map;
 	std::map<int, Socket> configurations_map;
+
+	std::map<int, t_tmp_fd *>::iterator free_it;
 
 	unsigned int client_events = EPOLLIN;
 
@@ -194,10 +250,17 @@ void	Server::run(void)
 	{
 
 		int ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;
+		DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
+		free_it = free_socket.begin();
+		for (; free_it != free_socket.end(); free_it++)
+		{
+			if (TimeToDie(free_it->second->last_modif, LIFE_TIME))
+				delete_fd(free_socket, free_it->first);
+		}
+		
 		for (int i = 0; i < ready_num; i++)
 		{
 			int fd = _events[i].data.fd;
@@ -222,14 +285,20 @@ void	Server::run(void)
 			}
 			else
 			{
-				/* if (client_map.find(fd) == client_map.end()) */
-				/* 	client_map[fd] = new Client(); */
-				if (events & EPOLLIN)
+				free_it = free_socket.find(fd);
+				if (free_it != free_socket.end())
+				{
+					client_map[fd] = new Client(free_it->second->ip_port);
+					delete free_it->second;
+					free_socket.erase(fd);
+				}
+				else if (events & EPOLLIN)
 				{
 					readSocket(*client_map[fd], fd);
 					if (client_map[fd]->done)
 					{
 						delete_client(client_map, fd);
+						delete_fd(free_socket, fd);
 					}
 					else if (client_map[fd]->readyToSend())
 					{
