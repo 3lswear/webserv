@@ -84,6 +84,7 @@ public:
 	~ServerConfig();
 };
 
+std::string	getDebugTime();
 
 
 

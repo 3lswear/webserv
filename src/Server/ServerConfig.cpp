@@ -18,6 +18,25 @@ ServerConfig::ServerConfig(TOMLMap *map)
 }
 
 //--------------------------------------------------GET/SET---------------------------------------
+std::string     getDebugTime(void)
+{
+    time_t  rawtime;
+    struct tm *timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    std::string  ret = std::string(asctime(timeinfo));
+	for (size_t i = 0; i < 3; i++)
+	{
+		ret.erase(0, ret.find(" ") + 1);
+	}
+    ret.erase(ret.find(" "));
+
+	ret = "[ " + ret + " ]";
+    return (ret);
+}
+
 std::string					&ServerConfig::getServerName(void)
 {
 	return (_serverName);
@@ -317,7 +336,7 @@ int	ServerConfig::putLocation(toml_node *node)
 				tmp->redirect.insert(std::make_pair(atoi(str.c_str()), *(*it2)->getString()));
 			}
 			else
-				std::cerr << RED << "Warning: unknown parameter: "<< it1->first << ZERO_C << std::endl;
+				DBOUT << WARNING << getDebugTime() << FAIL << "Warning: unknown parameter: "<< it1->first << ENDL;
 		}
 		_locations.push_back(tmp);
 		it++;
