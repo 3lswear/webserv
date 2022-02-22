@@ -64,6 +64,7 @@ private:
     std::string                 getContentType(void);
 public:
     serverListen                getListen(void);
+    location *                  getLocation(void);
     std::string	                getCgiPass(void);
     std::string                 getHeader(void);
     std::string                 *getBody(void);
@@ -71,7 +72,10 @@ public:
 	static std::string			getReasonPhrase(int);
 	std::string					getErrorPage(int code);
     std::string                 getFullURI();
-    ssize_t             getMaxBodySize(void);
+    ssize_t                     getMaxBodySize(void);
+    ssize_t                     getBodySize();
+    std::string                 getRedirect();
+    int                         getCode();
     bool                        isRedirect(void);
     bool                        allowedMethod(std::string &);
     void                        setData(Request, ServerConfig *);

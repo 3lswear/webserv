@@ -27,6 +27,21 @@ void		Response::freeData(void)
 	}
 }
 
+int		Response::getCode()
+{
+	return (_code);
+}
+
+ssize_t Response::getBodySize()
+{
+	return _contentLength;
+}
+
+location *Response::getLocation(void)
+{
+	return (_location);
+}
+
 std::string     Response::getHeader(void)
 {
 	return (*_header);
@@ -80,6 +95,11 @@ void	Response::setContentType(void)
 		_contentType = "text/html";
 	else
 		_contentType = getContentType();
+}
+
+std::string	Response::getRedirect()
+{
+	return (_locationSTR);
 }
 
 void	Response::setContentLength()
@@ -272,9 +292,6 @@ std::string	Response::getFullURI(void)
 		ret = tmp;
 	if (_upload_dir.empty())
 		_upload_dir = ret;
-	DBOUT << PINK << "location " << _location->location << ENDL;
-	DBOUT << PINK << "fullURI " << ret << ENDL;
-	DBOUT << PINK << "upload dir " << _upload_dir << ENDL;
 	return (ret);
 }
 
@@ -413,7 +430,7 @@ void	Response::invalidClient(void)
 	setHeaderBlocks();
 	generateHeader();
 
-	DBOUT << RED << "Error Method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << FAIL << " Error Method called" << ENDL;
 }
 
 
@@ -443,7 +460,8 @@ void	Response::methodGet(void)
 		generateBody();
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << GREEN << "GET method called\n" << ZERO_C;
+	DBOUT << WARNING << getDebugTime() << GREEN << " GET Method called" << ENDL;
+
 }
 void	Response::methodPost(void)
 {
@@ -453,7 +471,6 @@ void	Response::methodPost(void)
 		CgiHandle cgi(_request, *this);
 
 		*_body = cgi.executeCgi();
-		DBOUT << "CGI SIZE BODY " << _body->size() << ENDL;
 		unsigned long	pos = _body->find("\r\n\r\n");
 		if (pos != std::string::npos)
 		{
@@ -471,7 +488,8 @@ void	Response::methodPost(void)
 		_code = 204;
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << GREEN << "POST method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << " POST Method called" << ENDL;
+\
 }
 
 void	Response::methodPut(void)
@@ -495,7 +513,7 @@ void	Response::methodPut(void)
 	}
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << GREEN << "PUT method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << " PUT Method called" << ENDL;
 }
 
 void	Response::methodDelete(void)
@@ -513,7 +531,7 @@ void	Response::methodDelete(void)
 		OpenErrorFile(_code);
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << GREEN << "Delete method called" <<  ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << " DELETE Method called" << ENDL;
 }
 
 
