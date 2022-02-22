@@ -57,7 +57,8 @@ void	CgiHandle::printSSmap(std::map<std::string, std::string> &m)
 {
 	std::map<std::string, std::string>::iterator it;
 
-	DBOUT << RED << "print MAP" << ENDL;
+	DBOUT << WARNING << getDebugTime() << FAIL << " Print MAP" << ENDL;
+
 	it = m.begin();
 	for (; it != m.end(); it++)
 	{
@@ -67,6 +68,7 @@ void	CgiHandle::printSSmap(std::map<std::string, std::string> &m)
 
 void	printenv(char **env)
 {
+	DBOUT << WARNING << getDebugTime() << FAIL << " Print env" << ENDL;
 	for(size_t i = 0; env[i]; i++)
 	{
 		DBOUT << RED << env[i] << ENDL;
@@ -88,9 +90,9 @@ std::string CgiHandle::executeCgi()
 	{
 		env = mapToCharPtr();
 	}
-	catch(const std::exception& e)
+	catch(const std::bad_alloc& e)
 	{
-		std::cerr << RED << e.what()  << RESET << '\n';
+		std::cerr << WARNING << getDebugTime()  << FAIL << " " <<  e.what()  << ENDL;
 	}
 	sI = dup(STDIN_FILENO);
 	sO = dup(STDOUT_FILENO);
@@ -106,14 +108,14 @@ std::string CgiHandle::executeCgi()
 	pid = fork();
 	if (pid == -1)
 	{
-		std::cerr << RED << "Pid = -1. Fork error." << ENDL;
+		std::cerr << WARNING << getDebugTime() <<  FAIL << " Pid = -1. Fork error."<< ENDL;
 	}
 	else if (pid == 0)
 	{
 		dup2(fdin, STDIN_FILENO);
 		dup2(fdOut, STDOUT_FILENO);
 		execve(_response.getCgiPass().c_str(), argv, env);
-		std::cerr << RED << "Execve error." << RESET << ENDL;
+		std::cerr << WARNING << getDebugTime() <<  FAIL << " Execve error." << ENDL;
 		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15); 	
 	}
 	else
