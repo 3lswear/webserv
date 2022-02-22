@@ -235,6 +235,9 @@ void	Request::splitData(std::string	&data)
 			_head = tmp;
 			_head_ok = true;
 			parseHeader();
+			if (_URI.size() > 100)
+				_ret = 414;
+			// else if (_row > 20)
 			if ((_contentLength == 0 && !_chunked) || (_method == "GET"
 				|| _method == "DELETE" || _method == "HEAD"))
 				_body_ok = true;
@@ -243,7 +246,10 @@ void	Request::splitData(std::string	&data)
 		}
 	}
 	if (badCode(_ret))
+	{
+		_body_ok = true;
 		return ;
+	}
 	else if (_chunked && !_body_ok)
 	{
 		_body->insert(_body->end(), str.begin(), str.end());
@@ -281,18 +287,23 @@ void	Request::splitData(std::string	&data)
 int	Request::parseClientfield(std::string str)
 {
 	int	distance;
+	int	sp;
 	std::string key;
 	std::string value;
 
 	distance = str.find(":");
+	sp = str.find(" ");
 	if (distance < 0 && str != "\r")
 		return 200;
+	if (sp < distance)
+		return 400;
 	key = str.substr(0, distance);
 	std::transform(key.begin(), key.end(), key.begin(), ::tolower);
 	value = str.erase(0, distance + 1);
 	if (_headerField.find(key) != _headerField.end())
 	{
-		std::cout << RED << "ERROR: double Client-field" << ZERO_C << std::endl;
+		DBOUT << WARNING << getDebugTime() << FAIL << " [Pars-error] : [double header-field: " << key <<  " ] [method: " 
+			<< _method << " ]" << " [target: " << _URI << " ]" << ENDL;
 	}
 	else
 	{
