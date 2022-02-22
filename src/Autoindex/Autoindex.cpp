@@ -23,7 +23,7 @@ std::string Autoindex::getPage(std::string path, std::string allpath, std::strin
     <p>\n";
     if (dir == NULL)
     {
-        std::cerr << RED << "AutoindexError: could not open \"" 
+        DBOUT << WARNING << getDebugTime() << FAIL << " AutoindexError: could not open \"" 
             << allpath << "\" directory." << ZERO_C << std::endl;
         return "";
     }

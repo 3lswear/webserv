@@ -2,6 +2,7 @@
 #define AUTOINDEX_HPP
 
 #include "webserv.hpp"
+#include "ServerConfig.hpp"
 
 class Autoindex
 {
