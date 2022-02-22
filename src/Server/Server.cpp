@@ -51,11 +51,11 @@ void Server::sendData(Client &client, int fd)
 
 	/* DBOUT << YELLO << tmp << ENDL; */
 	/* DBOUT << GREEN << client.getCounter() << ENDL; */
-	DBOUT << "sent " << send_len << " to client " << fd << ENDL;
+	DBOUT << WARNING << getDebugTime() << OKCYAN << " sent " << send_len << " to client " << fd << ENDL;
 	sent = send(fd, tmp + client.getCounter(), send_len, MSG_NOSIGNAL);
 	if (sent < 0)
 	{
-		DBOUT << RED << "SEND FAILED !@!!!" << ENDL;
+		DBOUT << WARNING << getDebugTime() << FAIL << " SEND FAILED !@!!!" << ENDL;
 		client.done = true;
 	}
 	else if (sent > 0)
@@ -69,17 +69,17 @@ void Server::readSocket(Client &client, int fd)
 	int bytes_read;
 	std::string	stringBUF(BUFFSIZE, 0);
 
-	DBOUT << TURQ << "IN readSocket" << ENDL;
+	// DBOUT << TURQ << "IN readSocket" << ENDL;
 	// DBOUT << "client in readSocket "<< &client << ENDL;
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
-		DBOUT << RED << "bytes_read 0" << ENDL;
+		DBOUT << WARNING << getDebugTime() << FAIL << " bytes_read 0" << ENDL;
 		client.done = true;
 	}
 	else if (bytes_read == -1)
 	{
-		DBOUT << RED << "bytes_read -1" << ENDL;
+		DBOUT << WARNING << getDebugTime() << FAIL << " bytes_read -1" << ENDL;
 		// client.allRead = true;
 		client.done = true;
 	}
@@ -93,12 +93,13 @@ void Server::readSocket(Client &client, int fd)
 		if (client.allRecved())
 			client.allRead = true;
 
-		DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
-		DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
-		DBOUT << GREEN << "allRead " << client.allRead << ENDL;
+		// DBOUT << GREEN << "recvCounter " << client.getRecvCounter() << ENDL;
+		// DBOUT << GREEN << "contentLength " << client.getRequest().getContentLength() << ENDL;
+		// DBOUT << GREEN << "allRead " << client.allRead << ENDL;
 
-		DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
+		// DBOUT << BLUE << "status is " << Response::getReasonPhrase(status) << ENDL;
 	}
+	(void)status;
 }
 
 int Server::delete_client(std::map<int, Client *> &client_map, int fd)
@@ -111,8 +112,8 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 		client_map[fd]->clear();
 		delete (client_map[fd]);
 		client_map.erase(fd);
-		DBOUT << RED <<
-			"deleting client "
+		DBOUT << WARNING << getDebugTime() << OKCYAN
+			<< " deleting client "
 			<< fd
 			<< ENDL;
 		return (ret);
@@ -137,8 +138,9 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 		client_map[fd]->clear();
 		delete (client_map[fd]);
 		client_map.erase(fd);
-		DBOUT << RED <<
-			"deleting client "
+		DBOUT << WARNING << getDebugTime() << OKCYAN
+			<< " deleting client "
+			<< fd
 			<< ENDL;
 		return (ret);
 	}
@@ -150,10 +152,10 @@ int		Server::delete_fd(std::map<int, t_tmp_fd *> &map, int fd)
 	delete map[fd];
 	close(fd);
 	map.erase(fd);
-	DBOUT << RED <<
-	"deleting fd "
-	<< fd
-	<< ENDL;
+	DBOUT << WARNING << getDebugTime() << OKCYAN
+		<< " deleting fd "
+		<< fd
+		<< ENDL;
 
 	return (ret);
 }
@@ -251,16 +253,10 @@ void	Server::run(void)
 	{
 
 		int ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		DBOUT << TURQ << "ready_num " << ready_num << ENDL;
+		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
-		free_it = free_socket.begin();
-		for (; free_it != free_socket.end(); free_it++)
-		{
-			if (TimeToDie(free_it->second->last_modif, LIFE_TIME))
-				delete_fd(free_socket, free_it->first);
-		}
 		
 		for (int i = 0; i < ready_num; i++)
 		{
@@ -310,7 +306,7 @@ void	Server::run(void)
 						ev.events = EPOLLOUT;
 						ev.data.fd = fd;
 						assert( epoll_ctl(_epoll_fd, EPOLL_CTL_MOD, fd, &ev) == 0);
-						DBOUT << GREEN << "rearmed to EPOLLOUT" << ENDL;
+						DBOUT << WARNING << getDebugTime() << OKCYAN << " rearmed to EPOLLOUT" << ENDL;
 					}
 				}
 				else if (events & EPOLLOUT)
@@ -325,7 +321,12 @@ void	Server::run(void)
 				}
 			}
 		}
-
+		free_it = free_socket.begin();
+		for (; free_it != free_socket.end(); free_it++)
+		{
+			if (TimeToDie(free_it->second->last_modif, LIFE_TIME))
+				delete_fd(free_socket, free_it->first);
+		}
 	}
 	DBOUT << RED << "end;" << ENDL;
 }
@@ -358,7 +359,7 @@ Server::~Server()
 	pri = _configs.begin();
 	while (pri != _configs.end())
 	{
-		(*pri)->printFields();
+		// (*pri)->printFields();
 		l = (*pri)->getLocations();
 		loc = l.begin();
 		while (loc != l.end())
