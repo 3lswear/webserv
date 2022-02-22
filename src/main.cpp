@@ -21,7 +21,8 @@ int	main(int argc, char **argv)
 	}
 	catch(const ConfigException& e)
 	{
-		std::cerr << RED << "\n" << e.getMessage() << '\n' << ENDL;
+		std::cerr << RED << "\n" << WARNING << getDebugTime()
+			<< FAIL <<  " " << e.getMessage() << ENDL;
 	}
 	catch (std::domain_error &e)
 	{
