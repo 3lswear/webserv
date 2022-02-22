@@ -40,8 +40,8 @@ namespace config
 	{
 		TOMLMap::iterator it;
 
-		DBOUT << ">>> cleaning up: <<<" << std::endl;
-		DBOUT << root << ENDL;
+		// DBOUT << ">>> cleaning up: <<<" << std::endl;
+		// DBOUT << root << ENDL;
 		if (!root)
 			return;
 		for (it = root->begin(); it != root->end(); ++it)
@@ -52,9 +52,9 @@ namespace config
 
 			clean_generic(it->second);
 			/* delete it->second; */
-			DBOUT << ", " << std::endl;
+			// DBOUT << ", " << std::endl;
 		}
-		DBOUT << YELLO << "end of clean" << ENDL;
+		// DBOUT << YELLO << "end of clean" << ENDL;
 		root->clear();
 		delete root;
 		root = NULL;
@@ -107,14 +107,14 @@ namespace config
 
 			case toml_node::ARRAY:
 			{
-				DBOUT << "cleaning ARRAY" << ENDL;
+				// DBOUT << "cleaning ARRAY" << ENDL;
 				TOMLArray *arr = node->getArray();
 				for (TOMLArray::iterator it = arr->begin();
 						it != arr->end(); ++it)
 					config::clean_generic(*it);
 				arr->clear();
 				delete arr;
-				DBOUT << "end cleaning MAP" << ENDL;
+				// DBOUT << "end cleaning MAP" << ENDL;
 			}
 			break;
 
