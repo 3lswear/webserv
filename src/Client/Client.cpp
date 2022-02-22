@@ -184,10 +184,31 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	_to_send_char = new char[len + 1];
 	std::memcpy(_to_send_char, _toSend->c_str(), len + 1);
 
-	std::cout << PINK << "\n[["<< YELLOW << "Request header\n{" << ENDL;
-	std::cout << BLUE << _request.getHeader() << YELLOW << "},\n" << ENDL;
-	std::cout << GREEN << "Response Header\n{" << ENDL;
-	std::cout << BLUE << _response.getHeader() <<  GREEN << "}" << PINK << "]]\n"<< ENDL;
+	//print request
+	std::cerr << WARNING << getDebugTime() << GREEN;
+	if (_request.getCode() != 200)
+		std::cerr  << FAIL ;
+	std::cerr << " [ request  ] : "
+		<<	"[method: " << _request.getMethod() << "] "
+		<<	"[URI: "  << _request.getURI() << " ]";
+	if (_response.getLocation() != NULL)
+		std::cerr << " [location: " << _response.getLocation()->location << " ]";
+	if (_config != NULL && !_config->getServerName().empty())
+		std::cerr << " [server: " << _config->getServerName() << " ]" << ENDL;
+	else
+		std::cerr << ENDL;
+	//print response
+	std::cerr << WARNING << getDebugTime() << GREEN;
+	if (_response.getCode() >= 400)
+		std::cerr << FAIL ;
+	std::cerr << " [ response ] : " << "[staus: " << _response.getCode() 
+		<< " " << _response.getReasonPhrase(_response.getCode())
+		<< " ] [Content-Length: " << _response.getBodySize() << " ]";
+	if (_response.isRedirect())
+		std::cerr << " [redirect: " << _response.getRedirect() << " ]" << ENDL;
+	else
+		std::cerr << ENDL;
+
 	delete _toSend;
 	_request.freeData();
 	_response.freeData();
@@ -281,5 +302,4 @@ void	Client::clear(void)
 
 Client::~Client()
 {
-	DBOUT << "client destructor called" << ENDL;
 }
