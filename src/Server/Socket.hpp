@@ -15,11 +15,11 @@ private:
     
 public:
     Socket(int domain, int type, int protocol, int port, std::string ip);
-    int getSocketFd(void);
+    int getFd(void);
     struct sockaddr_in getAddres(void);
     socklen_t getAddlen(void);
-    struct sockaddr *getSockaddr(void);
-    socklen_t *getSocklen(void);
+    struct sockaddr *getAddr(void);
+    socklen_t *getLen(void);
     void setSocketFd(int);
     void setAddres(struct sockaddr_in);
     int bindingSocket(void);

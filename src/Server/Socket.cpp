@@ -26,7 +26,7 @@ Socket::~Socket()
 }
 
 //-----------------------------------------------------------------GET/SET----------------------------
-int Socket::getSocketFd(void)
+int Socket::getFd(void)
 {
     return _socketFd;
 }
@@ -36,12 +36,12 @@ struct sockaddr_in Socket::getAddres(void)
     return _addres;
 }
 
-struct sockaddr *Socket::getSockaddr(void)
+struct sockaddr *Socket::getAddr(void)
 {
     return((struct sockaddr *)&_addres);
 }
 
-socklen_t   *Socket::getSocklen(void)
+socklen_t   *Socket::getLen(void)
 {
     return((socklen_t *)&_addrlen);
 }
