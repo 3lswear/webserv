@@ -173,11 +173,11 @@ void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 		Socket server_sock(AF_INET, SOCK_STREAM, 0, config->getPort(), config->getHost());
 		if (server_sock.init(MAX_CLIENT) >= 0)
 		{
-			setNonBlock(server_sock.getSocketFd());
+			setNonBlock(server_sock.getFd());
 			/* configurations_map[server_sock.getSocketFd()] = server_sock; */
-			configurations_map.insert(std::make_pair(server_sock.getSocketFd(), server_sock));
+			configurations_map.insert(std::make_pair(server_sock.getFd(), server_sock));
 			DBOUT << YELLO << "adding server_sock..." << ENDL;
-			add_to_epoll_list(server_sock.getSocketFd(), server_events);
+			add_to_epoll_list(server_sock.getFd(), server_events);
 
 			std::cerr << GREEN
 				<< config->getServerName()
@@ -272,7 +272,7 @@ void	Server::run(void)
 					&& (sock_it = configurations_map.find(fd)) != configurations_map.end())
 			{
 				int client_sock = accept(fd,
-						(sock_it->second).getSockaddr(), (sock_it->second).getSocklen());
+						(sock_it->second).getAddr(), (sock_it->second).getLen());
 				if (client_sock > 0)
 				{
 					client_map[client_sock] = new Client((sock_it->second).min_config);
