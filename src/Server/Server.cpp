@@ -231,7 +231,11 @@ bool	Server::TimeToDie(struct timeval &last_modif, int lifeTime)
 void	sigHandler(int sig)
 {
 	if (sig == SIGINT)
-		throw ConfigException("SIGINT called. Server shutdown!");
+	{
+		std::cerr << "\n";
+		std::cerr << getDebugTime() << FAIL << "SIGINT called. Server shutdown!" << std::endl;
+		exit(-1);
+	}
 }
 
 void	Server::run(void)
