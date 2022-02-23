@@ -145,16 +145,17 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 		return (ret);
 	}
 }
-int		Server::delete_fd(std::map<int, t_tmp_fd *> &map, int fd)
+int		Server::delete_fd(std::map<int, t_tmp_fd *> &map, std::map<int, t_tmp_fd *>::iterator &it)
 {
 	int ret;
-	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
-	delete map[fd];
-	close(fd);
-	map.erase(fd);
+	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
+	// delete map[fd];
+	delete it->second;
+	close(it->first);
+	map.erase(it++);
 	DBOUT << WARNING << getDebugTime() << OKCYAN
 		<< " deleting fd "
-		<< fd
+		<< it->first
 		<< ENDL;
 
 	return (ret);
@@ -295,7 +296,8 @@ void	Server::run(void)
 					if (client_map[fd]->done)
 					{
 						delete_client(client_map, fd);
-						delete_fd(free_socket, fd);
+						std::map<int, t_tmp_fd *>::iterator it = free_socket.find(fd);
+						delete_fd(free_socket, it);
 					}
 					else if (client_map[fd]->readyToSend())
 					{
@@ -322,10 +324,11 @@ void	Server::run(void)
 			}
 		}
 		free_it = free_socket.begin();
-		for (; free_it != free_socket.end(); free_it++)
+		while (free_it != free_socket.end())
 		{
 			if (TimeToDie(free_it->second->last_modif, LIFE_TIME))
-				delete_fd(free_socket, free_it->first);
+				delete_fd(free_socket, free_it);
+			++free_it;
 		}
 	}
 	DBOUT << RED << "end;" << ENDL;
