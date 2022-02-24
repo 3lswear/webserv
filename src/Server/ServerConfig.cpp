@@ -417,8 +417,8 @@ bool	ServerConfig::checkFileAndDir(location *loc)
 
 	if (!root.empty())
 	{
-		if (isDir(root) != 0)
-			throw ConfigException("Directory " + root + " not found!");
+		if (isDir(root) != 0 && isFile(root) != 0)
+			throw ConfigException("File or directory " + root + " not found!");
 	}
 	if (!upload_dir.empty())
 	{
