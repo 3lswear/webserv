@@ -102,7 +102,7 @@ void Server::readSocket(Client &client, int fd)
 	(void)status;
 }
 
-int Server::delete_client(std::map<int, Client *> &client_map, int fd)
+inline int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 {
 	if (client_map[fd]->getRequest().getConnection() == "close")
 	{
@@ -147,7 +147,7 @@ int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 	}
 }
 
-int		Server::delete_fd(std::map<int, t_tmp_fd *> &map,
+inline int		Server::delete_fd(std::map<int, t_tmp_fd *> &map,
 		std::map<int, t_tmp_fd *>::iterator &it,
 		std::map<int, Client *> &client_map)
 {
@@ -208,7 +208,7 @@ void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 		throw std::domain_error("No servers were set up. Exiting.");
 }
 
-void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
+inline void	Server::add_to_epoll_list(int fd, unsigned int ep_events)
 {
 	struct epoll_event	ev;
 	ev.events = ep_events;
