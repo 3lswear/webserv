@@ -160,7 +160,7 @@ int		Server::delete_fd(std::map<int, t_tmp_fd *> &map,
 		<< it->first
 		<< ENDL;
 	close(it->first);
-	// delete (client_map[it->first]);
+	delete client_map[it->first];
 	client_map.erase(it->first);
 	map.erase(it++);
 
