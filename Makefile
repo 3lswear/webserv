@@ -6,9 +6,9 @@ CXX = clang++
 
 SANFLAGS = -fsanitize=leak
 
-DEBUGFLAGS = -g -fno-limit-debug-info
+DEBUGFLAGS = -g -fno-limit-debug-info -DDEBUG
 
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(DEBUGFLAGS) $(SANFLAGS) -DDEBUG
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(DEBUGFLAGS) $(SANFLAGS)
 
 CPPFLAGS += -MMD -MP
 
