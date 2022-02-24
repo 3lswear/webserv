@@ -54,8 +54,11 @@ class Server
 			struct timeval	last_modif;
 		}t_tmp_fd;
 		bool	TimeToDie(struct timeval &last_modif, int lifeTime);
-		int		delete_fd(std::map<int, t_tmp_fd *> &map, std::map<int, t_tmp_fd *>::iterator &it);
-		std::map<int, t_tmp_fd *>	free_socket;
+int		delete_fd(std::map<int, t_tmp_fd *> &map,
+		std::map<int, t_tmp_fd *>::iterator &it,
+		std::map<int, Client *> &client_map);
+
+		std::map<int, t_tmp_fd *>	vacant_fds;
 
 	public:
 		Server();
