@@ -9,8 +9,7 @@ Socket::Socket(int domain, int type, int protocol, int port, std::string ip)
     int opt = 1;
     _socketFd = socket(domain, type, protocol);
     checkError(_socketFd, "Initialize Server socket");
-    checkError(setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR
-        | SO_REUSEPORT, &opt, sizeof(opt)), "Set socket options");
+    checkError(setsockopt(_socketFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)), "Set socket options");
     _addres.sin_family = domain;
     _addres.sin_port = htons(port);
     _addres.sin_addr.s_addr = inet_addr(ip.c_str());
