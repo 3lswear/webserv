@@ -69,7 +69,7 @@ void Server::readSocket(Client &client, int fd)
 	int bytes_read;
 	std::string	stringBUF(BUFFSIZE, 0);
 
-	// DBOUT << TURQ << "IN readSocket" << ENDL;
+	DBOUT << TURQ << "IN readSocket" << ENDL;
 	// DBOUT << "client in readSocket "<< &client << ENDL;
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
@@ -106,20 +106,26 @@ inline int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 {
 	if (client_map[fd]->getRequest().getConnection() == "close")
 	{
+		DBOUT << WARNING << getDebugTime() << OKCYAN
+			<< " completely deleting client "
+			<< fd
+			<< ENDL;
+
 		int ret;
 		ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
 		close(fd);
 		client_map[fd]->clear();
 		delete (client_map[fd]);
 		client_map.erase(fd);
-		DBOUT << WARNING << getDebugTime() << OKCYAN
-			<< " completely deleting client "
-			<< fd
-			<< ENDL;
 		return (ret);
 	}
 	else
 	{
+		DBOUT << WARNING << getDebugTime() << OKCYAN
+			<< " deleting only client "
+			<< fd
+			<< ENDL;
+
 		int ret;
 		struct epoll_event ev;
 		t_tmp_fd *tmp_fd;
@@ -134,15 +140,11 @@ inline int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 		gettimeofday(&tmp_fd->last_modif, NULL);
 		vacant_fds[fd] = tmp_fd;
 
-		//Удаляю клиента
+		//Очищаю клиента
 		client_map[fd]->clear();
 		// delete (client_map[fd]);
 		client_map[fd]->~Client();
 		// client_map.erase(fd);
-		DBOUT << WARNING << getDebugTime() << OKCYAN
-			<< " deleting only client "
-			<< fd
-			<< ENDL;
 		return (ret);
 	}
 }
@@ -262,7 +264,7 @@ void	Server::run(void)
 	{
 
 		int ready_num = epoll_wait(_epoll_fd, _events, MAX_CLIENT, 5000);
-		// DBOUT << TURQ << "ready_num " << ready_num << ENDL;
+		DBOUT << TURQ << "ready_num " << ready_num << ENDL;
 
 		if (ready_num < 0)
 			throw std::logic_error("epoll_ret");
@@ -273,7 +275,7 @@ void	Server::run(void)
 			unsigned int events = _events[i].events;
 			std::map<int, Socket>::iterator sock_it;
 
-			/* DBOUT << "FD is " << fd << ENDL; */
+			DBOUT << "FD is " << fd << ENDL;
 			/* print_epoll_events(events); */
 
 			if ((events & EPOLLIN)
@@ -303,6 +305,7 @@ void	Server::run(void)
 				else if (events & EPOLLIN)
 				{
 					readSocket(*client_map[fd], fd);
+					DBOUT << "left redsocket " << ENDL;
 					if (client_map[fd]->done)
 					{
 						delete_client(client_map, fd);
@@ -323,7 +326,7 @@ void	Server::run(void)
 				}
 				else if (events & EPOLLOUT)
 				{
-					/* DBOUT << GREEN << "doing sendData" << ENDL; */
+					DBOUT << GREEN << "doing sendData" << ENDL;
 					// client_map[fd]->printClientInfo();
 					sendData(*client_map[fd], fd);
 					if (client_map[fd]->allSended())
@@ -334,8 +337,10 @@ void	Server::run(void)
 			}
 		}
 		fd_it = vacant_fds.begin();
+		DBOUT << "entering cleaning fd loop" << ENDL;
 		while (fd_it != vacant_fds.end())
 		{
+			DBOUT << "loop iteration" <<ENDL;
 			if (TimeToDie(fd_it->second->last_modif, LIFE_TIME))
 			{
 				free(client_map[fd_it->first]);
