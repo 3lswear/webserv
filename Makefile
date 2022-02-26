@@ -40,7 +40,8 @@ re:
 	$(MAKE) all
 
 run: $(NAME)
-	ASAN_OPTIONS=detect_leaks=0 ./$(NAME) $(filter-out $@,$(MAKECMDGOALS))
+	# ASAN_OPTIONS=alloc_dealloc_mismatch=0 ASAN_OPTIONS=detect_leaks=0 ./$(NAME) $(filter-out $@,$(MAKECMDGOALS))
+	ASAN_OPTIONS=alloc_dealloc_mismatch=0 ./$(NAME) $(filter-out $@,$(MAKECMDGOALS))
 
 -include $(OBJ:%.o=%.d)
 	
