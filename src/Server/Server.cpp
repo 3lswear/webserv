@@ -153,14 +153,12 @@ inline int		Server::delete_fd(std::map<int, t_tmp_fd *> &map,
 {
 	int ret;
 	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, it->first, NULL);
-	// delete map[fd];
-	delete it->second;
 	DBOUT << WARNING << getDebugTime() << OKCYAN
 		<< " deleting fd "
 		<< it->first
 		<< ENDL;
+	delete it->second;
 	close(it->first);
-	delete client_map[it->first];
 	client_map.erase(it->first);
 	map.erase(it++);
 
@@ -339,7 +337,10 @@ void	Server::run(void)
 		while (fd_it != vacant_fds.end())
 		{
 			if (TimeToDie(fd_it->second->last_modif, LIFE_TIME))
+			{
+				free(client_map[fd_it->first]);
 				delete_fd(vacant_fds, fd_it, client_map);
+			}
 			else
 				++fd_it;
 		}
