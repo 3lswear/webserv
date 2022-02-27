@@ -44,14 +44,46 @@
 	[[server.location]]
 		location = "/script"
 		redirect = ["301", "http://localhost:8080/cgi-bin/$request_file"]
+	#start /tomato
 	[[server.location]]
-		location = "*.jpeg"
-		root = "www/def/images/jpegImg"
-		methods = ["GET"]
+		location = "/tomato/index.html"
+		root = "www/def/tomato/index.html"
+		methods = ["GET", "POST"]
 	[[server.location]]
-		location = "*.png"
-		root = "www/def/images/pngImg"
-		methods = ["GET"]
+		location = "/tomato/about.html"
+		root = "www/def/tomato/about.html"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/blog_post.html"
+		root = "www/def/tomato/blog_post.html"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/blog.html"
+		root = "www/def/tomato/blog.html"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/contact.html"
+		root = "www/def/tomato/contact.html"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/portfolio.html"
+		root = "www/def/tomato/portfolio.html"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/css"
+		root = "www/def/tomato/css"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/js"
+		root = "www/def/tomato/js"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato/images"
+		root = "www/def/tomato/images"
+		methods = ["GET", "POST"]
+	[[server.location]]
+		location = "/tomato"
+		redirect = ["301", "http://127.0.0.1:8080/tomato/index.html"]
 [[server]]
 	name = "pohek1.org"
 	host = "127.0.0.1"
@@ -64,6 +96,7 @@
 		root = "www/def/"
 		methods = ["GET"]
 		directory_file = "index.html"
+		# autoindex = true
 	[[server.location]]
 		location = "/cgi-bin"
 		root = "www/def/script"

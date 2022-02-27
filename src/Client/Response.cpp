@@ -279,7 +279,7 @@ std::string	Response::getFullURI(void)
 			_upload_dir = _location->uploadDir + tmp;
 		tmp = _location->root + tmp;
 	}
-	if (_request.isDir(tmp) ==  0)
+	if (_request.isDir(tmp) ==  0 && _request.getURI() == _location->location) 
 	{
 		if (_location->directoryFile.empty() || _Autoindex)
 			ret = tmp;
@@ -292,6 +292,7 @@ std::string	Response::getFullURI(void)
 		ret = tmp;
 	if (_upload_dir.empty())
 		_upload_dir = ret;
+	DBOUT << WARNING << getDebugTime() << OKCYAN << " [fullURI: " << ret << " ]" << ENDL;
 	return (ret);
 }
 
