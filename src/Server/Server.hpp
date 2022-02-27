@@ -19,6 +19,7 @@ class Server
 		std::string _ip;
 		std::vector<ServerConfig *>	_configs;
 		void add_to_epoll_list(int fd, unsigned int ep_events);
+		void epoll_handle(int op, int fd, int event);
 
 		static void print_epoll_events(unsigned int events);
 
@@ -31,6 +32,7 @@ class Server
 		void sendData(Client &client, int fd);
 		void readSocket(Client &client, int fd);
 		int delete_client(std::map<int,Client *> &map, int fd);
+		int delete_client_force(std::map<int,Client *> &map, int fd);
 
 
 		enum e_req_status
@@ -48,17 +50,17 @@ class Server
 			size_t left;
 			enum e_req_status req_status;
 		} t_client_status;
-		typedef	struct s_tmp_fd
+		typedef	struct s_fd_info
 		{
 			serverListen	ip_port;
 			struct timeval	last_modif;
-		}t_tmp_fd;
+		} t_fd_info;
 		bool	TimeToDie(struct timeval &last_modif, int lifeTime);
-int		delete_fd(std::map<int, t_tmp_fd *> &map,
-		std::map<int, t_tmp_fd *>::iterator &it,
+int		delete_fd(std::map<int, t_fd_info *> &map,
+		std::map<int, t_fd_info *>::iterator &it,
 		std::map<int, Client *> &client_map);
 
-		std::map<int, t_tmp_fd *>	vacant_fds;
+		std::map<int, t_fd_info *>	vacant_fds;
 
 	public:
 		Server();
