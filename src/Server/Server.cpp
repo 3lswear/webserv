@@ -194,18 +194,28 @@ void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 			it != _configs.end(); ++it)
 	{
 		ServerConfig *config = *it;
-		Socket server_sock(AF_INET, SOCK_STREAM, 0, config->getPort(), config->getHost());
+		std::map<int, Socket>::iterator sock_it;
+
+		for (sock_it = configurations_map.begin();
+				sock_it != configurations_map.end(); ++sock_it)
+		{
+			if ((config->getPort() == sock_it->second.port) && (config->getHost() == sock_it->second.ip))
+			{
+				break;
+			}
+		}
+		if (sock_it != configurations_map.end())
+			continue;
+		Socket server_sock(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0, config->getPort(), config->getHost());
 		if (server_sock.init(MAX_CLIENT) >= 0)
 		{
-			setNonBlock(server_sock.getFd());
 			/* configurations_map[server_sock.getSocketFd()] = server_sock; */
 			configurations_map.insert(std::make_pair(server_sock.getFd(), server_sock));
 			DBOUT << YELLO << "adding server_sock..." << ENDL;
 			add_to_epoll_list(server_sock.getFd(), server_events);
 
-			std::cerr << GREEN
-				<< config->getServerName()
-				<< " started on "
+			std::cerr << getDebugTime() << GREEN
+				<< " listening on "
 				<< config->getHost()
 				<< ":"
 				<< config->getPort()
@@ -213,7 +223,7 @@ void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 		}
 		else
 		{
-			std::cerr << RED
+			std::cerr << getDebugTime() << FAIL
 				<< config->getServerName()
 				<< " failed to bind to "
 				<< config->getHost()
