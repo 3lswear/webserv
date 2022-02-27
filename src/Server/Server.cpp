@@ -102,6 +102,24 @@ void Server::readSocket(Client &client, int fd)
 	(void)status;
 }
 
+inline int Server::delete_client_force(std::map<int, Client *> &client_map, int fd)
+{
+	DBOUT << WARNING << getDebugTime() << OKCYAN
+		<< " force deleting client "
+		<< fd
+		<< ENDL;
+
+	int ret;
+	ret = epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fd, NULL);
+	assert(ret == 0);
+	close(fd);
+	client_map[fd]->clear();
+	delete (client_map[fd]);
+	client_map.erase(fd);
+	return (ret);
+}
+
+
 inline int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 {
 	if (client_map[fd]->getRequest().getConnection() == "close")
