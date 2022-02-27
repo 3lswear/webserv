@@ -4,16 +4,29 @@ CXX = clang++
 
 # SANFLAGS = -fsanitize=address
 
-SANFLAGS = -fsanitize=leak
+# SANFLAGS = -fsanitize=leak
 
-DEBUGFLAGS = -g -fno-limit-debug-info -DDEBUG
+# DEBUGFLAGS = -g -fno-limit-debug-info -DDEBUG
 
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(DEBUGFLAGS) $(SANFLAGS)
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 $(DEBUGFLAGS) $(SANFLAGS) -O3
 
 CPPFLAGS += -MMD -MP
 
-SRC = $(wildcard ./src/*.cpp)
-SRC += $(wildcard ./src/*/*.cpp)
+SRC = ./src/Autoindex/Autoindex.cpp \
+./src/CGI/CgiHandle.cpp \
+./src/Client/Config.cpp \
+./src/Client/Request.cpp \
+./src/Client/Client.cpp \
+./src/Client/Response.cpp \
+./src/Server/ServerConfig.cpp \
+./src/Server/Socket.cpp \
+./src/Server/Server.cpp \
+./src/config/ConfigException.cpp \
+./src/config/parse.cpp \
+./src/config/TOMLNode.cpp \
+./src/config/TOMLParser.cpp \
+./src/config/Tokenizer.cpp \
+./src/main.cpp
 
 INCLUDES = ./includes/ -I src/Autoindex -I src/config -I src/Client -I src/Server -I src/CGI
 
