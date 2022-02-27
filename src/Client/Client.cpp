@@ -201,7 +201,7 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	std::cerr << WARNING << getDebugTime() << GREEN;
 	if (_response.getCode() >= 400)
 		std::cerr << FAIL ;
-	std::cerr << " [ response ] : " << "[staus: " << _response.getCode() 
+	std::cerr << " [ response ] : " << "[status: " << _response.getCode() 
 		<< " " << _response.getReasonPhrase(_response.getCode())
 		<< " ] [Content-Length: " << _response.getBodySize() << " ]";
 	if (_response.isRedirect())
