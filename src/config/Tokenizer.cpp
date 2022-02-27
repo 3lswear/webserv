@@ -1,26 +1,5 @@
 #include "Tokenizer.hpp"
 
-/* -Template::-Template(void) */
-/* { */
-/* 	return; */
-/* } */
-
-/* -Template::-Template(const -Template &src) */
-/* { */
-/* 	*this = src; */
-/* 	return; */
-/* } */
-
-/* -Template::~-Template(void) */
-/* { */
-/* 	return; */
-/* } */
-
-/* -Template &-Template::operator=(const -Template &rhs) */
-/* { */
-/* 	//code */
-/* 	return (*this); */
-/* } */
 namespace config
 {
 	bool isspace(char c)
@@ -71,7 +50,6 @@ namespace config
 
 		if (file.eof())
 		{
-			DBOUT << RED << "Tokens exhausted" << ENDL;
 			throw NoMoreTokens();
 		}
 		prev_pos = file.tellg();
@@ -222,19 +200,12 @@ namespace config
 			do
 				file.get(c);
 			while (c != '\n' || file.eof());
-			DBOUT << "getting comment token" << ENDL;
 			if (last_token == NO_TOK || last_token == NEWLINE)
 			{
-				DBOUT << "getting first token instead of comment" << ENDL;
 				struct s_token actual;
 				actual.type = NEWLINE;
 					while (actual.type == NEWLINE)
 						actual = getToken();
-					DBOUT
-						<< "actual token: '"
-						<< actual.value << "', type: "
-						<< actual.type
-						<< ENDL;
 				token = actual;
 			}
 			else
@@ -245,7 +216,6 @@ namespace config
 		{
 			while (!config::isspace(c) && (c != '\n'))
 			{
-				DBOUT << RED << "[" << c << "]" <<ENDL;
 				token.value += c;
 				file.get(c);
 			}

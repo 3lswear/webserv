@@ -1,27 +1,5 @@
 #include "TOMLParser.hpp"
 
-/* -Template::-Template(void) */
-/* { */
-/* 	return; */
-/* } */
-
-/* -Template::-Template(const -Template &src) */
-/* { */
-/* 	*this = src; */
-/* 	return; */
-/* } */
-
-/* -Template::~-Template(void) */
-/* { */
-/* 	return; */
-/* } */
-
-/* -Template &-Template::operator=(const -Template &rhs) */
-/* { */
-/* 	//code */
-/* 	return (*this); */
-/* } */
-
 namespace config
 {
 
@@ -32,7 +10,6 @@ namespace config
 
 	void TOMLParser::processMap(void)
 	{
-		/* std::cerr << "Processing map" << std::endl; */
 		toml_node *map_node;
 		s_token current;
 
@@ -50,8 +27,6 @@ namespace config
 		}
 		else
 			throw UnexpectedToken("", "near " + current.value);
-
-		/* std::cout << current.value << std::endl; */
 
 		std::vector<std::string> full_name;
 
@@ -72,7 +47,6 @@ namespace config
 
 	toml_node *TOMLParser::parseMap(void)
 	{
-		/* std::cerr << "Parsing map" << std::endl; */
 		toml_node *node = new toml_node;
 		TOMLMap *mapObject = new TOMLMap;
 		bool completed = false;
@@ -105,7 +79,6 @@ namespace config
 					}
 
 					std::string key = nextToken.value;
-					/* std::cerr << key << std::endl; */
 					if (tokenizer.getToken().type != ASSIGN)
 						throw ExpectedToken("assign", "after " + key);
 
@@ -137,7 +110,6 @@ namespace config
 						}
 						case MAPARRAY_DECL:
 						{
-							/* std::cerr << "reached MAPARRAY_DECL in parseMap" << std::endl; */
 							completed = true;
 							break;
 						}
@@ -170,7 +142,6 @@ namespace config
 	void TOMLParser::processMapArray(void)
 	{
 
-		/* std::cerr << "Parsing MapArray" << std::endl; */
 		toml_node *map_node;
 		s_token current;
 
@@ -188,8 +159,6 @@ namespace config
 		}
 		else
 			throw UnexpectedToken(current.value, "when expected array of map declaration");
-
-		/* std::cout << current.value << std::endl; */
 
 		std::vector<std::string> full_name;
 
@@ -211,7 +180,6 @@ namespace config
 	{
 		std::string *string;
 
-		/* std::cerr << "Parsing string" << std::endl; */
 		s_token token = tokenizer.getToken();
 		string = new std::string(token.value);
 
@@ -225,7 +193,6 @@ namespace config
 	{
 		int value;
 
-		/* std::cerr << "Parsing number" << std::endl; */
 		s_token token = tokenizer.getToken();
 		value = std::atoi(token.value.c_str());
 
@@ -237,7 +204,6 @@ namespace config
 
 	toml_node *TOMLParser::parseArray(void)
 	{
-		/* std::cerr << "Parsing array" << std::endl; */
 		toml_node *result = new toml_node;
 		TOMLArray *array = new TOMLArray;
 		toml_node *node;
@@ -305,7 +271,6 @@ namespace config
 	{
 		bool value;
 
-		/* std::cerr << "Parsing bool" << std::endl; */
 		s_token token = tokenizer.getToken();
 		if (token.value == "true")
 			value = true;
@@ -321,7 +286,6 @@ namespace config
 	toml_node *TOMLParser::parseNil(void)
 	{
 		toml_node *node = new toml_node;
-		/* std::cerr << "Parsing NIL" << std::endl; */
 		node->setNil();
 		return (node);
 	}
@@ -329,7 +293,6 @@ namespace config
 	/* parse tha root ! */
 	void TOMLParser::parse(void)
 	{
-		/* std::cerr << "Parsing ROOT" << std::endl; */
 		bool completed = false;
 		while (!completed)
 		{
@@ -350,7 +313,6 @@ namespace config
 				}
 				else if (current.type == MAP_DECL)
 				{
-					/* std::cerr << "MAP_DECL value: " << current.value << std::endl; */
 					tokenizer.set_last(NEWLINE);
 					tokenizer.rollBackToken();
 					processMap();

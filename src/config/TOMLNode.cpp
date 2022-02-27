@@ -1,27 +1,5 @@
 #include "TOMLNode.hpp"
 
-/* toml_node::toml_node(void) */
-/* { */
-/* 	return; */
-/* } */
-
-/* toml_node::toml_node(const toml_node &src) */
-/* { */
-/* 	*this = src; */
-/* 	return; */
-/* } */
-
-/* toml_node::~toml_node(void) */
-/* { */
-/* 	return; */
-/* } */
-
-/* toml_node &toml_node::operator=(const toml_node &rhs) */
-/* { */
-/* 	//code */
-/* 	return (*this); */
-/* } */
-
 toml_node::e_type toml_node::get_type(void)
 {
 	return (type);

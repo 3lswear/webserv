@@ -117,17 +117,6 @@ namespace config
 			};
 
 	};
-
-	/* struct s_token Tokenizer::getKey(void) */
-	/* { */
-	/* 	char c; */
-	/* 	struct s_token token; */
-	/* 	if (file.eof()) */
-	/* 	{ */
-	/* 		std::cout << "Tokens exhausted" << std::endl; */
-	/* 	} */
-	/* } */
-
 }
 
 #endif
