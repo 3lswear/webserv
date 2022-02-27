@@ -13,6 +13,8 @@ int	main(int argc, char **argv)
 
 	try
 	{
+		if (argc > 2)
+			throw std::domain_error("Invalid number of arguments");
 		if (argv[1] != NULL)
 			server.readConfig(argv[1]);
 		else
@@ -26,7 +28,7 @@ int	main(int argc, char **argv)
 	}
 	catch (std::domain_error &e)
 	{
-		std::cerr << RED << "FATAL: ";
+		std::cerr << FAIL << "FATAL: ";
 		std::cerr << e.what() << RESET << std::endl;
 	}
 
