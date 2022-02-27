@@ -117,6 +117,7 @@ std::string CgiHandle::executeCgi()
 		execve(_response.getCgiPass().c_str(), argv, env);
 		std::cerr << WARNING << getDebugTime() <<  FAIL << " Execve error." << ENDL;
 		write(STDOUT_FILENO, "Status: 500\r\n\r\n", 15); 	
+		exit(1);
 	}
 	else
 	{
