@@ -33,7 +33,9 @@ std::string     getDebugTime(void)
 	}
     ret.erase(ret.find(" "));
 
-	ret = std::string(WARNING) + "[ "  + ret + " ] " + std::string(RESET);
+	ret = std::string(WARNING) + "[ "  + ret + " ] "
+		+ std::string(RESET)
+		+ std::string(OKCYAN);
     return (ret);
 }
 
