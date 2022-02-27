@@ -17,6 +17,8 @@ Socket::Socket(int domain, int type, int protocol, int port, std::string ip)
 
 	min_config.ip = ip;
 	min_config.port = port;
+	this->port = port;
+	this->ip = ip;
 }
 
 Socket::~Socket()
@@ -83,7 +85,13 @@ int Socket::listeningSocket(int nbr)
 int Socket::init(int nbr)
 {
     if (bindingSocket() < 0)
-        return (-1);
+	{
+		std::cerr << getDebugTime() << FAIL;
+		perror("Bind");
+		std::cerr << RESET;
+		return (-1);
+	}
+
     if (listeningSocket(nbr) < 0)
         return (-1);
     return (0);
@@ -95,9 +103,7 @@ void	Socket::checkError(int fd, std::string str)
 {
 	if (fd < 0)
 	{
-		std::cout << RED << "Socket ERROR: " << str << ZERO_C << std::endl;
+		perror(str.c_str());
 		exit(1);
 	}
-	else
-		std::cout << GREEN << "Socket SUCCESS: " << str << ZERO_C << std::endl;
 }

@@ -28,6 +28,8 @@ public:
     void checkError(int fd, std::string str);
 
 	struct serverListen min_config;
+	int port;
+	std::string ip;
 
     ~Socket();
 };
