@@ -72,12 +72,12 @@ void Server::readSocket(Client &client, int fd)
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
-		DBOUT << WARNING << getDebugTime() << FAIL << " bytes_read 0" << ENDL;
+		DBOUT << getDebugTime() << FAIL << " bytes_read 0" << ENDL;
 		client.done = true;
 	}
 	else if (bytes_read == -1)
 	{
-		DBOUT << WARNING << getDebugTime() << FAIL << " bytes_read -1" << ENDL;
+		DBOUT << getDebugTime() << FAIL << " bytes_read -1" << ENDL;
 		client.done = true;
 	}
 	else
@@ -200,8 +200,7 @@ void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 		else
 		{
 			std::cerr << getDebugTime() << FAIL
-				<< config->getServerName()
-				<< " failed to bind to "
+				<< "failed to bind to "
 				<< config->getHost()
 				<< ":"
 				<< config->getPort()
@@ -324,7 +323,6 @@ void	Server::run(void)
 						vacant_fds.erase(fd);
 					}
 					readSocket(*client_map[fd], fd);
-					DBOUT << "left redsocket " << ENDL;
 					if (client_map[fd]->done)
 						delete_client_force(client_map, fd);
 					else if (client_map[fd]->readyToSend())
@@ -332,7 +330,7 @@ void	Server::run(void)
 						client_map[fd]->generateRespons(_configs);
 
 						epoll_handle(EPOLL_CTL_MOD, fd, EPOLLOUT);
-						DBOUT << WARNING << getDebugTime() << OKCYAN << " rearmed to EPOLLOUT" << ENDL;
+						DBOUT << getDebugTime() << " rearmed to EPOLLOUT" << ENDL;
 					}
 				}
 				else if (events & EPOLLOUT)
