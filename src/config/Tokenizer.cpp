@@ -53,8 +53,7 @@ namespace config
 		file.open(filename, std::ios::in);
 		if (!file.good())
 		{
-			std::cerr << "file didn't open" << std::endl;
-			throw std::logic_error("file didnt open");
+			throw std::domain_error("Invalid arguments");
 		}
 	}
 	bool Tokenizer::firstToken()
@@ -130,7 +129,6 @@ namespace config
 					file.get(c);
 				}
 				if (c != ']')
-					// throw std::logic_error("malformed MAP_DECL");
 					throw InvalidToken(token.value);
 			}
 		}
@@ -152,7 +150,6 @@ namespace config
 			if (file.eof())
 			{
 				file.clear();
-				DBOUT << "cleared" <<ENDL;
 			}
 			else if (c != '\n')
 				file.seekg(-1, std::ios_base::cur);
