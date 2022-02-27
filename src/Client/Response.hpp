@@ -49,6 +49,9 @@ private:
     void            setLocation(void);
     void            setLanguage(void);
     void            setTransferEncoding(void);
+
+    void	        directoryFile();
+
 private:
     static std::map<std::string, std::string> _errorCode;
 

@@ -137,7 +137,7 @@ void	Response::setCacheControl(void)
 
 void	Response::setLocation(void)
 {
-	if (_code == 301)
+	if (_code == 301 && _locationSTR.empty())
 	{
 		_redirect_location = _location->redirect[_code];
 		unsigned long  pos = _redirect_location.rfind("$request_file");
@@ -256,6 +256,16 @@ std::string		Response::getTime(void)
 	return (buff);
 }
 
+void	Response::directoryFile()
+{
+	std::string	req = _request.getURI();
+	if (req.rfind("/") != req.size() - 1)
+	{
+		_locationSTR = req + "/";
+		_code = 301;
+	}
+}
+
 std::string	Response::getFullURI(void)
 {
 	std::string	tmp;
@@ -279,12 +289,13 @@ std::string	Response::getFullURI(void)
 			_upload_dir = _location->uploadDir + tmp;
 		tmp = _location->root + tmp;
 	}
-	if (_request.isDir(tmp) ==  0 && _request.getURI() == _location->location) 
+	if (_request.isDir(tmp) ==  0) 
 	{
 		if (_location->directoryFile.empty() || _Autoindex)
 			ret = tmp;
 		else
 		{
+			directoryFile();
 			ret = tmp  + "/" + _location->directoryFile;
 		}
 	}
@@ -411,7 +422,7 @@ bool	Response::isRedirect()
 {
 	if (_location == NULL)
 		return (false);
-	if (!_location->redirect.empty())
+	if (!_location->redirect.empty() || _code == 301)
 	{
 		_code = 301;
 		return (true);
