@@ -239,7 +239,7 @@ std::string		Response::getContentType(void)
 	else if (type == "pdf")
 		return ("application/pdf");
 	else
-		return ("text/plain");
+		return ("application/octet-stream");
 
 }
 
