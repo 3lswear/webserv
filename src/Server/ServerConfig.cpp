@@ -22,14 +22,17 @@ std::string     getDebugTime(void)
 {
     time_t  rawtime;
     struct tm *timeinfo;
-	char buf[32];
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
 
-	int tmp = strftime(buf, 32, "%T", timeinfo);
-	buf[tmp] = '\0';
-    std::string  ret = std::string(buf);
+    std::string  ret = std::string(asctime(timeinfo));
+	for (size_t i = 0; i < 3; i++)
+	{
+		ret.erase(0, ret.find(" ") + 1);
+	}
+    ret.erase(ret.find(" "));
+
 	ret = std::string(WARNING) + "[ "  + ret + " ] "
 		+ std::string(RESET)
 		+ std::string(OKCYAN);
