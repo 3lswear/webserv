@@ -239,7 +239,7 @@ std::string		Response::getContentType(void)
 	else if (type == "pdf")
 		return ("application/pdf");
 	else
-		return ("application/octet-stream");
+		return ("text/plain");
 
 }
 
@@ -303,7 +303,7 @@ std::string	Response::getFullURI(void)
 		ret = tmp;
 	if (_upload_dir.empty())
 		_upload_dir = ret;
-	DBOUT << WARNING << getDebugTime() << OKCYAN << " [fullURI: " << ret << " ]" << ENDL;
+	DBOUT << WARNING << getDebugTime() << OKCYAN << "[fullURI: " << ret << " ]" << ENDL;
 	return (ret);
 }
 
@@ -442,7 +442,7 @@ void	Response::invalidClient(void)
 	setHeaderBlocks();
 	generateHeader();
 
-	DBOUT << WARNING << getDebugTime() << FAIL << " Error Method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << FAIL << "Error Method called" << ENDL;
 }
 
 
@@ -472,7 +472,7 @@ void	Response::methodGet(void)
 		generateBody();
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << WARNING << getDebugTime() << GREEN << " GET Method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << "GET Method called" << ENDL;
 
 }
 void	Response::methodPost(void)
@@ -500,7 +500,7 @@ void	Response::methodPost(void)
 		_code = 204;
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << WARNING << getDebugTime() << GREEN << " POST Method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << "POST Method called" << ENDL;
 \
 }
 
@@ -525,7 +525,7 @@ void	Response::methodPut(void)
 	}
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << WARNING << getDebugTime() << GREEN << " PUT Method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << "PUT Method called" << ENDL;
 }
 
 void	Response::methodDelete(void)
@@ -543,7 +543,7 @@ void	Response::methodDelete(void)
 		OpenErrorFile(_code);
 	setHeaderBlocks();
 	generateHeader();
-	DBOUT << WARNING << getDebugTime() << GREEN << " DELETE Method called" << ENDL;
+	DBOUT << WARNING << getDebugTime() << GREEN << "DELETE Method called" << ENDL;
 }
 
 

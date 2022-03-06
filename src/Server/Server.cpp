@@ -56,7 +56,7 @@ void Server::sendData(Client &client, int fd)
 		" to client " << fd << ENDL;
 	if (sent <= 0)
 	{
-		DBOUT << getDebugTime() << FAIL << " SEND FAILED" << ENDL;
+		DBOUT << getDebugTime() << FAIL << "SEND FAILED" << ENDL;
 		client.done = true;
 	}
 	else if (sent > 0)
@@ -72,12 +72,12 @@ void Server::readSocket(Client &client, int fd)
 	bytes_read = recv(fd, &stringBUF[0], BUFFSIZE, 0);
 	if (bytes_read == 0)
 	{
-		DBOUT << getDebugTime() << FAIL << " bytes_read 0" << ENDL;
+		DBOUT << getDebugTime() << FAIL << "bytes_read 0" << ENDL;
 		client.done = true;
 	}
 	else if (bytes_read == -1)
 	{
-		DBOUT << getDebugTime() << FAIL << " bytes_read -1" << ENDL;
+		DBOUT << getDebugTime() << FAIL << "bytes_read -1" << ENDL;
 		client.done = true;
 	}
 	else
@@ -94,7 +94,7 @@ void Server::readSocket(Client &client, int fd)
 inline int Server::delete_client_force(std::map<int, Client *> &client_map, int fd)
 {
 	DBOUT << WARNING << getDebugTime() << OKCYAN
-		<< " force deleting client "
+		<< "force deleting client "
 		<< fd
 		<< ENDL;
 
@@ -112,7 +112,7 @@ inline int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 	if (client_map[fd]->getRequest().getConnection() == "close")
 	{
 		DBOUT << WARNING << getDebugTime()
-			<< " completely deleting client "
+			<< "completely deleting client "
 			<< fd
 			<< ENDL;
 
@@ -125,7 +125,7 @@ inline int Server::delete_client(std::map<int, Client *> &client_map, int fd)
 	else
 	{
 		DBOUT << WARNING << getDebugTime()
-			<< " deleting only client "
+			<< "deleting only client "
 			<< fd
 			<< ENDL;
 
@@ -150,7 +150,7 @@ inline int		Server::delete_fd(std::map<int, t_fd_info *> &map,
 {
 	epoll_handle(EPOLL_CTL_DEL, it->first, 0);
 	DBOUT << WARNING << getDebugTime()
-		<< " deleting fd "
+		<< "deleting fd "
 		<< it->first
 		<< ENDL;
 	delete it->second;
@@ -191,7 +191,7 @@ void	Server::setup_server_socks(std::map<int, Socket> &configurations_map)
 			add_to_epoll_list(server_sock.getFd(), server_events);
 
 			std::cerr << getDebugTime() << GREEN
-				<< " listening on "
+				<< "listening on "
 				<< config->getHost()
 				<< ":"
 				<< config->getPort()
@@ -330,7 +330,7 @@ void	Server::run(void)
 						client_map[fd]->generateRespons(_configs);
 
 						epoll_handle(EPOLL_CTL_MOD, fd, EPOLLOUT);
-						DBOUT << getDebugTime() << " rearmed to EPOLLOUT" << ENDL;
+						DBOUT << getDebugTime() << "rearmed to EPOLLOUT" << ENDL;
 					}
 				}
 				else if (events & EPOLLOUT)

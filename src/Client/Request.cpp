@@ -302,7 +302,7 @@ int	Request::parseClientfield(std::string str)
 	value = str.erase(0, distance + 1);
 	if (_headerField.find(key) != _headerField.end())
 	{
-		DBOUT << WARNING << getDebugTime() << FAIL << " [Pars-error] : [double header-field: " << key <<  " ] [method: " 
+		DBOUT << WARNING << getDebugTime() << FAIL << "[Pars-error] : [double header-field: " << key <<  " ] [method: " 
 			<< _method << " ]" << " [target: " << _URI << " ]" << ENDL;
 	}
 	else

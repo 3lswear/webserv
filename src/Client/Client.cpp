@@ -185,10 +185,10 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	std::memcpy(_to_send_char, _toSend->c_str(), len + 1);
 
 	//print request
-	std::cerr << WARNING << getDebugTime() << GREEN;
+	std::cerr << WARNING << getDebugTime() << TURGUOISE;
 	if (_request.getCode() != 200)
 		std::cerr  << FAIL ;
-	std::cerr << " [ request  ] : "
+	std::cerr << "[ request  ] : "
 		<<	"[method: " << _request.getMethod() << "] "
 		<<	"[URI: "  << _request.getURI() << " ]";
 	if (_response.getLocation() != NULL)
@@ -201,7 +201,7 @@ std::string	Client::generateRespons(std::vector<ServerConfig *> &configs)
 	std::cerr << WARNING << getDebugTime() << GREEN;
 	if (_response.getCode() >= 400)
 		std::cerr << FAIL ;
-	std::cerr << " [ response ] : " << "[status: " << _response.getCode() 
+	std::cerr << "[ response ] : " << "[status: " << _response.getCode() 
 		<< " " << _response.getReasonPhrase(_response.getCode())
 		<< " ] [Content-Length: " << _response.getBodySize() << " ]";
 	if (_response.isRedirect())
