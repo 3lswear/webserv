@@ -1,6 +1,6 @@
 NAME = webserv
 
-CXX = clang++
+CXX = g++
 
 # SANFLAGS = -fsanitize=address
 
