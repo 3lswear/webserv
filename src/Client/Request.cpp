@@ -210,7 +210,7 @@ int								checkEnd(const std::string& str, const std::string& end)
 	{
 		i--;
 		j--;
-		if (i < 0 || str[i] != end[j])
+		if (str[i] != end[j])
 			return (1);
 	}
 	return (0);
