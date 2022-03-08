@@ -35,7 +35,7 @@ webserv your_config_file.toml
 - Non-blocking
 - Efficient resource usage (doesn't use CPU on idle)
 - Fair client handling (1 slow client won't slow down 50 fast clients)
-- Listen on multiple ports/interfaces
+- Can listen on multiple ports/interfaces
 - TOML config format
   - multiple servers, with unique` server_name`s
   - multiple location (route) blocks
@@ -58,12 +58,12 @@ A team project made by:
 
 #### Why epoll?
 
-Epoll is one of the modern event listeners/IO multiplexers out there (the other is kqueue). Epoll works on the assumption that set manipulation is not as frequent as event handling, and the performance trade-offs are made accordingly. [Although, it's not without it's problems.](https://idea.popcount.org/2017-02-20-epoll-is-fundamentally-broken-12/)
+Epoll is one of the modern event listeners/IO multiplexers out there (the other one is kqueue). Epoll works on the assumption that set manipulation is not as frequent as event handling, and the performance trade-offs are made accordingly. [Although, it's not without its problems.](https://idea.popcount.org/2017-02-20-epoll-is-fundamentally-broken-12/)
 
 #### Why `TOML` for a config file?
 
-TOML was our format of choice because it provides strict structure of document, around which we could model our internal data structures. With a set file type like TOML the syntax is clear and unambiguous, and the tools like syntax highlighting and validation are already available. Also it isn't as hard to parse as YAML, although admittedly being less pretty. Lastly, we didn't want to just copy nginx's config structure.
+TOML was our format of choice because it provides strict structure for a configuration, around which we could model our internal data structures. With a set file type like TOML the syntax is clear and unambiguous, and the tools like syntax highlighting and validation are already available. Also it isn't as hard to parse as YAML, although admittedly being less pretty. Lastly, we didn't just want to copy nginx's config structure.
 
 #### Why make this project in the first place?
 
-It was a great opportunity to learn writing bigger projects in C++, learn a little about network programming, how does OS handle socket IO, and to try tackling typical problems that come with socket IO and a need to serve a sizable amount of clients. Also, it was interesting to learn how software of similar purpose works (nginx uses `epoll` too!).
+It was a great opportunity to learn writing bigger projects in C++, learn a little about network programming, how does OS handle network interaction, and to try tackling typical problems that come with socket IO and a need to serve a sizable amount of clients. Also, it was interesting to learn how software of similar purpose works (nginx uses `epoll` too!).
