@@ -2,6 +2,8 @@
 
 A simple non-blocking web server written in C++98 using Linux's `epoll` facility .
 
+![Usage](https://raw.githubusercontent.com/3lswear/webserv/fb4e2853a84ef57d68beafb5a4e688188c8d030b/assets/usage.svg)
+
 ### Pre-requisites
 
 Linux > 2.5.44
@@ -24,10 +26,6 @@ cd webserv && make
 webserv your_config_file.toml
 ```
 
-![Usage](https://raw.githubusercontent.com/3lswear/webserv/fb4e2853a84ef57d68beafb5a4e688188c8d030b/assets/usage.svg)
-
-
-
 ### Features
 
 - HTTP 1.1 compliant
@@ -37,7 +35,7 @@ webserv your_config_file.toml
 - Fair client handling (1 slow client won't slow down 50 fast clients)
 - Can listen on multiple ports/interfaces
 - TOML config format
-  - multiple servers, with unique` server_name`s
+  - multiple servers, with unique `server_name`s
   - multiple location (route) blocks
     - location matching by path and wildcard
     - ability to limit allowed methods
@@ -66,4 +64,4 @@ TOML was our format of choice because it provides strict structure for a configu
 
 #### Why make this project in the first place?
 
-It was a great opportunity to learn writing bigger projects in C++, learn a little about network programming, how does OS handle network interaction, and to try tackling typical problems that come with socket IO and a need to serve a sizable amount of clients. Also, it was interesting to learn how software of similar purpose works (nginx uses `epoll` too!).
+It was a great opportunity to learn writing bigger projects in C++, learn a little about network programming, how does OS handle network interaction, and to try tackling typical problems that come with socket IO and a need to serve a sizable amount of clients. Also, it was interesting to learn how software of similar purpose works (nginx uses epoll too!).
